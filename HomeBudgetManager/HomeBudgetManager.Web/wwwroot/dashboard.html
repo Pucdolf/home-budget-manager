@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Finansowy</title>
+    <!-- Linkujemy nasz własny styl CSS zamiast Tailwinda -->
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <h1 class="navbar-brand">HomeBudgetManager</h1>
+        <div class="navbar-user">
+            <!-- Tutaj C# wstawi nazwę użytkownika zamiast {username} -->
+            <span class="user-name">Zalogowany jako: <b>{username}</b></span>
+            
+            <!-- Przycisk wylogowania -->
+            <a href="/" onclick="document.cookie='logged_user=; Max-Age=0'" class="btn-logout">Wyloguj</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h2>Twoje Finanse</h2>
+            <p class="card-desc">Witaj w panelu głównym. Tutaj będziesz zarządzać budżetem.</p>
+            
+            <div class="balance-box">
+                <div class="balance-highlight">
+                    Przykładowe saldo: <strong>12 450,00 PLN</strong>
+                </div>
+            </div>
+            
+            <!-- Miejsce na przyszłe funkcje htmx -->
+            <div id="transactions-container">
+                <!-- Tu w przyszłości załadujemy tabelę wydatków -->
+            </div>
+        </div>
+    </div>
+</body>
+</html>
