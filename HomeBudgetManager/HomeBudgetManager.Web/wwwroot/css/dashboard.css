@@ -1,0 +1,83 @@
+cobody {
+    background-color: #f8fafc;
+    font-family: sans-serif;
+    margin: 0;
+}
+
+/* Pasek nawigacji */
+.navbar {
+    background-color: white;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.navbar-brand {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #2563eb;
+    margin: 0;
+}
+
+.navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-name {
+    color: #475569;
+}
+
+.btn-logout {
+    color: #ef4444;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.btn-logout:hover {
+    text-decoration: underline;
+}
+
+/* Główna treść */
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+.card h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.card-desc {
+    color: #64748b;
+    margin-bottom: 1rem;
+}
+
+.balance-box {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.balance-highlight {
+    background-color: #eff6ff;
+    color: #1e40af;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    display: block;
+}
