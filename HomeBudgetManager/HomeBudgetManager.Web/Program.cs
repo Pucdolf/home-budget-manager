@@ -56,4 +56,24 @@ app.MapPost("/login", (HttpContext httpContext, AuthService authService) => {
     }
 });
 
+
+app.MapGet("/registration", (HttpContext context, IWebHostEnvironment env) => {
+
+    var filePath = Path.Combine(env.WebRootPath, "registration.html");
+
+    var html = File.ReadAllText(filePath);
+
+    return Results.Content(html, "text/html");
+});
+
+
+
+app.MapGet("/register-form", (HttpContext httpContext, AuthService authService) => {
+
+    httpContext.Response.Headers.Append("HX-Redirect", "/registration");
+    return Results.Ok();
+    
+});
+
+
 app.Run();
