@@ -31,14 +31,13 @@
                 <label for="password">Hasło</label>
                 <input id="password" name="password" type="password" placeholder="1234" class="form-input" />
             </div>
-            <div class="btn-group">
-                <button hx-get="/login" hx-target="#auth-container" hx-swap="innerHTML" class="btn-loginPage">
-                    Powrót do logowania
-                </button>
-                <button type="submit" class="btn-register">
-                    Zarejestruj się
-                </button>
-            </div>
+
+            <button hx-get="/login" hx-target="#auth-container" hx-swap="innerHTML" class="btn-loginPage">
+                Powrót do logowania
+            </button>
+            <button type="submit" class="btn-register">
+                Zarejestruj się
+            </button>
         </form>
 
         <div id="result-area"></div>
