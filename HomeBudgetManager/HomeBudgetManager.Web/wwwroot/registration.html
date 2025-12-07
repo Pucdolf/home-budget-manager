@@ -10,8 +10,8 @@
 </head>
 <body>
 
-    <div class="register-card">
-        <div class="register-header">
+    <div class="registration-card" id="auth-container">
+        <div class="registration-header">
             <h1>Home Budget Manager</h1>
             <p>Utwórz konto</p>
         </div>
@@ -31,13 +31,14 @@
                 <label for="password">Hasło</label>
                 <input id="password" name="password" type="password" placeholder="1234" class="form-input" />
             </div>
-
-            <button hx-get="/login" hx-target="#auth-container" hx-swap="innerHTML" class="btn-loginPage">
-                Powrót do logowania
-            </button>
-            <button type="submit" class="btn-register">
-                Zarejestruj się
-            </button>
+            <div class="btn-group">
+                <button hx-get="/login" hx-target="#auth-container" hx-swap="innerHTML" class="btn-loginPage">
+                    Powrót do logowania
+                </button>
+                <button type="submit" class="btn-register">
+                    Zarejestruj się
+                </button>
+            </div>
         </form>
 
         <div id="result-area"></div>
