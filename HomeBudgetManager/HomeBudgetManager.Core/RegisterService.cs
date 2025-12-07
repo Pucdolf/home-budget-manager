@@ -31,7 +31,7 @@ public class RegisterService
 
     public void registerUser(string email, string username, string password)
     {
-        File.AppendAllText(path, email + ";" + username + ";" + password + ";");
+        File.AppendAllText(path, email + ";" + username + ";" + password + ";" + Environment.NewLine);
     }
 
 }
