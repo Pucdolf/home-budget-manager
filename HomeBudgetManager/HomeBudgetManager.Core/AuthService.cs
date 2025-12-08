@@ -2,6 +2,7 @@ namespace HomeBudgetManager.Core;
 
 public class AuthService
 {
+    private HashPassword _hasher = new HashPassword();
     // Prosta metoda weryfikująca użytkownika
     public bool ValidateUser(string username, string password)
     {

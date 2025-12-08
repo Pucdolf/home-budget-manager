@@ -1,11 +1,10 @@
 ﻿namespace HomeBudgetManager.Core;
 
 
-
 // Simple register class containing creating new user and checking whether username is taken
 public class RegisterService
 {
-
+    private HashPassword _hasher = new HashPassword();
     private string path = Path.Combine(Directory.GetCurrentDirectory(), "registerData.txt");
 
     public bool isRegistered(string username)
@@ -31,7 +30,7 @@ public class RegisterService
 
     public void registerUser(string email, string username, string password)
     {
-        File.AppendAllText(path, email + ";" + username + ";" + password + ";" + Environment.NewLine);
+        File.AppendAllText(path, email + ";" + username + ";" + _hasher.hash(password) + ";" + Environment.NewLine);
     }
 
 }
