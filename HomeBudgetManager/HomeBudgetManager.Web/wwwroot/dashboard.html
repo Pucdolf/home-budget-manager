@@ -2,39 +2,81 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Panel Finansowy</title>
-    <!-- Linkujemy nasz własny styl CSS zamiast Tailwinda -->
+    <title>Panel finansowy</title>
     <link rel="stylesheet" href="/css/dashboard.css">
-    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 </head>
 <body>
     <nav class="navbar">
-        <h1 class="navbar-brand">HomeBudgetManager</h1>
+        <p class="navbar-brand">Mój budżet</p>
         <div class="navbar-user">
-            <!-- Tutaj C# wstawi nazwę użytkownika zamiast {username} -->
-            <span class="user-name">Zalogowany jako: <b>{username}</b></span>
-            
-            <!-- Przycisk wylogowania -->
-            <a href="/" onclick="document.cookie='logged_user=; Max-Age=0'" class="btn-logout">Wyloguj</a>
+            <span class="user-name">Zalogowano jako: Jan Kowalski</span>
+            <!-- tylko wygląd, brak akcji -->
+            <span class="btn-logout">Wyloguj</span>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="card">
-            <h2>Twoje Finanse</h2>
-            <p class="card-desc">Witaj w panelu głównym. Tutaj będziesz zarządzać budżetem.</p>
-            
+    <main class="container">
+        <section class="card">
+            <h2>Przegląd finansów</h2>
+            <p class="card-desc">
+                Prototyp panelu do podglądu stanu finansów. Widok jest tylko do odczytu.
+            </p>
+
             <div class="balance-box">
-                <div class="balance-highlight">
-                    Przykładowe saldo: <strong>12 450,00 PLN</strong>
+                <p class="balance-label">Saldo konta</p>
+                <span class="balance-highlight">12 345,67 zł</span>
+            </div>
+
+            <div class="charts-box">
+                <h3>Wykresy kołowe</h3>
+                <div class="charts-placeholder">
+                    Wykresy kołowe
                 </div>
             </div>
-            
-            <!-- Miejsce na przyszłe funkcje htmx -->
-            <div id="transactions-container">
-                <!-- Tu w przyszłości załadujemy tabelę wydatków -->
+
+            <div class="actions-box">
+                <!-- wizualny przycisk, brak akcji -->
+                <span class="btn-primary disabled-btn">Dodaj transakcję</span>
             </div>
-        </div>
-    </div>
+
+            <div class="transactions-box">
+                <h3>Ostatnie transakcje</h3>
+                <ul class="transactions-list">
+                    <li class="transaction-item">
+                        <div class="transaction-main">
+                            <span class="transaction-amount">- 120,00 zł</span>
+                            <span class="transaction-category">Zakupy spożywcze</span>
+                            <span class="transaction-date">2025-12-01</span>
+                        </div>
+                        <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
+                    </li>
+                    <li class="transaction-item">
+                        <div class="transaction-main">
+                            <span class="transaction-amount">- 250,00 zł</span>
+                            <span class="transaction-category">Transport</span>
+                            <span class="transaction-date">2025-11-29</span>
+                        </div>
+                        <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
+                    </li>
+                    <li class="transaction-item">
+                        <div class="transaction-main">
+                            <span class="transaction-amount">+ 4 000,00 zł</span>
+                            <span class="transaction-category">Wynagrodzenie</span>
+                            <span class="transaction-date">2025-11-28</span>
+                        </div>
+                        <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
+                    </li>
+                    <li class="transaction-item">
+                        <div class="transaction-main">
+                            <span class="transaction-amount">- 89,99 zł</span>
+                            <span class="transaction-category">Rozrywka</span>
+                            <span class="transaction-date">2025-11-26</span>
+                        </div>
+                        <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </main>
 </body>
 </html>

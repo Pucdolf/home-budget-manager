@@ -36,13 +36,13 @@ body {
     text-align: left;
 }
 
-    .form-group label {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #334155;
-        margin-bottom: 0.25rem;
-    }
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 0.25rem;
+}
 
 .form-input {
     width: 100%;
