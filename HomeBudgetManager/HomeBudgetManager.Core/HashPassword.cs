@@ -16,4 +16,20 @@ public class HashPassword
     public string hash(string password){
         return _hasher.HashPassword("", password);
     }
+    public bool verifyPassword(string hash1, string provided_password)
+    {
+        var result = _hasher.VerifyHashedPassword("", hash1, provided_password);
+        if (result == PasswordVerificationResult.Success)
+        {
+            return true;
+        }
+
+        if (result == PasswordVerificationResult.SuccessRehashNeeded)
+        {
+            return true;
+        }
+
+        return false;
+
+    }
 }
