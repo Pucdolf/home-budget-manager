@@ -1,10 +1,10 @@
-cobody {
+body {
     background-color: #f8fafc;
     font-family: sans-serif;
     margin: 0;
 }
 
-/* Pasek nawigacji */
+/* Pasek nawigacji – bez zmian, prawy górny róg zostaje */
 .navbar {
     background-color: white;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
@@ -38,11 +38,7 @@ cobody {
     font-weight: 500;
 }
 
-.btn-logout:hover {
-    text-decoration: underline;
-}
-
-/* Główna treść */
+/* Główna treść – karta i jej zawartość wycentrowane */
 .container {
     max-width: 900px;
     margin: 0 auto;
@@ -54,24 +50,32 @@ cobody {
     border-radius: 0.5rem;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
+    text-align: center; /* klucz do centrowania treści */
 }
 
-.card h2 {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-top: 0;
-    margin-bottom: 1rem;
-}
+    .card h2 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
 
 .card-desc {
     color: #64748b;
     margin-bottom: 1rem;
 }
 
+/* Saldo */
 .balance-box {
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid #e2e8f0;
+}
+
+.balance-label {
+    margin: 0 0 0.25rem 0;
+    color: #475569;
+    font-weight: 500;
 }
 
 .balance-highlight {
@@ -79,5 +83,63 @@ cobody {
     color: #1e40af;
     padding: 1rem;
     border-radius: 0.25rem;
-    display: block;
+    display: inline-block; /* pozwala się ładnie centrować w .card */
 }
+
+/* Wykresy kołowe */
+.charts-box {
+    margin-top: 1.5rem;
+}
+
+.charts-placeholder {
+    border: 1px dashed #cbd5f5;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    display: inline-block; /* również centrowane w .card */
+}
+
+/* Przycisk dodania transakcji */
+.actions-box {
+    margin: 1.5rem 0;
+}
+
+.btn-primary {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    background-color: #2563eb;
+    color: white;
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+/* Lista transakcji – wyśrodkowanie listy jako bloku */
+.transactions-box {
+    margin-top: 1.5rem;
+}
+
+    .transactions-box h3 {
+        margin: 0 0 0.75rem 0;
+        font-size: 1rem;
+        color: #0f172a;
+    }
+
+.transactions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    display: inline-block; /* cała lista centrowana w .card */
+    text-align: left; /* ale same wiersze pozostają wyrównane do lewej dla czytelności */
+}
+
+.transaction-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-top: 1px solid #e2e8f0;
+}
+
+    .transaction-item:last-child {
+        border-bottom: 1px solid #e2e8f0;
+    }

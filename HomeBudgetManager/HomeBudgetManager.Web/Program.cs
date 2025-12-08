@@ -68,8 +68,6 @@ app.MapGet("/registration", (HttpContext context, IWebHostEnvironment env) => {
     return Results.Content(html, "text/html");
 });
 
-
-
 app.MapGet("/register-form", (HttpContext httpContext) => {
 
     httpContext.Response.Headers.Append("HX-Redirect", "/registration");
@@ -121,9 +119,5 @@ app.MapPost("/register", (HttpContext httpContext, RegisterService registerServi
         return Results.Content(htmlResponse, "text/html");
     }
 });
-
-
-
-
 
 app.Run();
