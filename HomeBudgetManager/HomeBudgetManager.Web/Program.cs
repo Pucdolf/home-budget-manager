@@ -19,7 +19,7 @@ var connectionStringAzure = builder.Configuration.GetConnectionString("AzureConn
 var connectionStringLocal = builder.Configuration.GetConnectionString("HbmDatabase");
 
 
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionStringLocal, b => b.MigrationsAssembly("HomeBudgetManager.Core")));
+// builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionStringLocal, b => b.MigrationsAssembly("HomeBudgetManager.Core")));
 
 
 
