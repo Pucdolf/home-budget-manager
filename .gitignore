@@ -126,3 +126,7 @@ secrets.json
 # macOS .Trash
 **/.Trash/
 
+# Ignore SQLite database files
+*.db
+*.db-shm
+*.db-wal
