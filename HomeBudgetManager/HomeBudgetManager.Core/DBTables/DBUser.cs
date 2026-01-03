@@ -26,7 +26,7 @@ namespace HomeBudgetManager.Core.DBTables
         [Required]
         public string user_password { get; set; }
         
-        public SystemRole Role { get; set; } = SystemRole.Guest;
+        public SystemRole user_role { get; set; } = SystemRole.Guest;
 
         [Column("user_house_id")]
         public int? DBHouseId { get; set; } 

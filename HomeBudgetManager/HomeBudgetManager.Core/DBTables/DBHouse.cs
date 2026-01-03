@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 namespace HomeBudgetManager.Core.DBTables
 {
+    [Index(nameof(Name), IsUnique = true)] //unikalna nazwa domu
     [Table("houses")]
     public class DBHouse
     {
@@ -22,6 +23,9 @@ namespace HomeBudgetManager.Core.DBTables
         [Required]
         [Column("name")]
         public string Name { get; set; }
+
+        [Column("description")]
+        public string? Description { get; set; }  // opis (opcjonalny)
 
         public ICollection<DBUser> Members { get; set; } = new List<DBUser>();
     }
