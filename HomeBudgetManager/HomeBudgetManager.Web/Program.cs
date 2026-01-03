@@ -8,11 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RegisterService>();
 
-var app = builder.Build();
-
-app.UseDefaultFiles();
-app.UseStaticFiles();
-
 
 // DB fragment
 var connectionStringAzure = builder.Configuration.GetConnectionString("AzureConnection");
@@ -20,12 +15,19 @@ var connectionStringLocal = builder.Configuration.GetConnectionString("HbmDataba
 
 
 // builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionStringLocal, b => b.MigrationsAssembly("HomeBudgetManager.Core")));
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(connectionStringLocal, b =>
+        b.MigrationsAssembly("HomeBudgetManager.Core")));
 
 
+var app = builder.Build();
 
-    // *** ENDPOINT: PANEL GŁÓWNY (DASHBOARD) ***
-    // Wstrzykujemy IWebHostEnvironment (env), aby wiedzieć, gdzie jest folder wwwroot
-    app.MapGet("/dashboard", (HttpContext context, IWebHostEnvironment env) =>
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+// *** ENDPOINT: PANEL GŁÓWNY (DASHBOARD) ***
+// Wstrzykujemy IWebHostEnvironment (env), aby wiedzieć, gdzie jest folder wwwroot
+app.MapGet("/dashboard", (HttpContext context, IWebHostEnvironment env) =>
     {
         // Sprawdzamy autoryzację
         if (!context.Request.Cookies.ContainsKey("logged_user"))
