@@ -1,4 +1,5 @@
 using HomeBudgetManager.Core;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives; // Importujemy naszą logikę z Core
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,29 +13,40 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
-// *** ENDPOINT: PANEL GŁÓWNY (DASHBOARD) ***
-// Wstrzykujemy IWebHostEnvironment (env), aby wiedzieć, gdzie jest folder wwwroot
-app.MapGet("/dashboard", (HttpContext context, IWebHostEnvironment env) => {
-    // Sprawdzamy autoryzację
-    if (!context.Request.Cookies.ContainsKey("logged_user"))
+
+// DB fragment
+var connectionStringAzure = builder.Configuration.GetConnectionString("AzureConnection");
+var connectionStringLocal = builder.Configuration.GetConnectionString("HbmDatabase");
+
+
+// builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionStringLocal, b => b.MigrationsAssembly("HomeBudgetManager.Core")));
+
+
+
+    // *** ENDPOINT: PANEL GŁÓWNY (DASHBOARD) ***
+    // Wstrzykujemy IWebHostEnvironment (env), aby wiedzieć, gdzie jest folder wwwroot
+    app.MapGet("/dashboard", (HttpContext context, IWebHostEnvironment env) =>
     {
-        return Results.Redirect("/");
-    }
+        // Sprawdzamy autoryzację
+        if (!context.Request.Cookies.ContainsKey("logged_user"))
+        {
+            return Results.Redirect("/");
+        }
 
-    var username = context.Request.Cookies["logged_user"];
+        var username = context.Request.Cookies["logged_user"];
 
-    // 1. Ścieżka do pliku HTML
-    var filePath = Path.Combine(env.WebRootPath, "dashboard.html");
+        // 1. Ścieżka do pliku HTML
+        var filePath = Path.Combine(env.WebRootPath, "dashboard.html");
 
-    // 2. Wczytujemy treść pliku do zmiennej
-    // W prawdziwej produkcji warto by to cache'ować, ale dla prostego appa jest ok
-    var html = File.ReadAllText(filePath);
+        // 2. Wczytujemy treść pliku do zmiennej
+        // W prawdziwej produkcji warto by to cache'ować, ale dla prostego appa jest ok
+        var html = File.ReadAllText(filePath);
 
-    // 3. Podmieniamy nasz placeholder {username} na prawdziwą nazwę
-    html = html.Replace("{username}", username);
+        // 3. Podmieniamy nasz placeholder {username} na prawdziwą nazwę
+        html = html.Replace("{username}", username);
 
-    return Results.Content(html, "text/html");
-});
+        return Results.Content(html, "text/html");
+    });
 
 // *** ENDPOINT LOGOWANIA ***
 app.MapPost("/login", (HttpContext httpContext, AuthService authService) => {

@@ -77,9 +77,9 @@ publish/
 out/
 
 # Database / EF Core
-migrations/obj/
-**/Migrations/*Designer.cs
-**/Migrations/*Snapshot.cs
+# migrations/obj/
+# **/Migrations/*Designer.cs
+# **/Migrations/*Snapshot.cs
 
 # Backup / temp files
 *.tmp
@@ -126,3 +126,7 @@ secrets.json
 # macOS .Trash
 **/.Trash/
 
+# Ignore SQLite database files
+*.db
+*.db-shm
+*.db-wal
