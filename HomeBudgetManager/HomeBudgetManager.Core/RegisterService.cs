@@ -1,36 +1,39 @@
-﻿namespace HomeBudgetManager.Core;
+﻿using HomeBudgetManager.Core.DBTables;
+using Microsoft.EntityFrameworkCore;
 
+namespace HomeBudgetManager.Core;
 
-// Simple register class containing creating new user and checking whether username is taken
 public class RegisterService
 {
-    private HashPassword _hasher = new HashPassword();
-    private string _path = Path.Combine(Directory.GetCurrentDirectory(), "registerData.txt");
+    private readonly AppDbContext _context;
+    private readonly HashPassword _hasher = new();
 
-    public bool isRegistered(string username)
+    public RegisterService(AppDbContext context)
     {
-        if (File.Exists(_path))
+        _context = context;
+    }
+
+    public bool IsUsernameTaken(string username)
+    {
+        return _context.Users.Any(u => u.user_login == username);
+    }
+
+    public bool IsEmailTaken(string email)
+    {
+        return _context.Users.Any(u => u.user_email == email);
+    }
+
+    public void RegisterUser(string email, string username, string password)
+    {
+        var user = new DBUser
         {
-            using (StreamReader sr = new StreamReader(_path))
-            {
-                string? line;
-                while ((line = sr.ReadLine()) != null)
-                {
-                    
-                    if (line.Contains(username))
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+            user_email = email,
+            user_login = username,
+            user_password = _hasher.hash(password),
+            user_role = SystemRole.Guest
+        };
+
+        _context.Users.Add(user);
+        _context.SaveChanges();
     }
-
-
-    public void registerUser(string email, string username, string password)
-    {
-        File.AppendAllText(_path, email + ";" + username + ";" + _hasher.hash(password) + ";" + Environment.NewLine);
-    }
-
 }
