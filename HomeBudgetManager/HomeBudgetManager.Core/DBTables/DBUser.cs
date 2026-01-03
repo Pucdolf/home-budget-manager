@@ -24,6 +24,11 @@ namespace HomeBudgetManager.Core.DBTables
         public string user_email { get; set; }
 
         [Required]
+        [Column("user_login")]
+        public string user_login { get; set; }
+
+
+        [Required]
         public string user_password { get; set; }
         
         public SystemRole user_role { get; set; } = SystemRole.Guest;
