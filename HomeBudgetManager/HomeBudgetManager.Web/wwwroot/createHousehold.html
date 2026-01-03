@@ -1,0 +1,29 @@
+﻿﻿
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Stwórz domostwo</title>
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+    <main class="container">
+        <section class="card">
+            <h2>Utwórz swoją grupę domową</h2>
+
+            <form hx-post="/create-household" hx-target="#result" class="space-y-4">
+                <input type="text" name="name" placeholder="Nazwa grupy" required class="border p-2 w-full" />
+                <input type="text" name="description" placeholder="Opis (opcjonalnie)" class="border p-2 w-full" />
+                <button type="submit" class="btn-primary">Utwórz</button>
+            </form>
+
+            <div id="result" class="mt-4"></div>
+
+            <div class="mt-4">
+                <a href="dashboard.html" class="btn-secondary">← Powrót</a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
