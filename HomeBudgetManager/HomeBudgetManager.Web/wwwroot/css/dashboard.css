@@ -111,6 +111,7 @@ body {
     color: white;
     font-weight: 500;
     font-size: 0.875rem;
+    text-decoration: none;
 }
 
 /* Lista transakcji – wyśrodkowanie listy jako bloku */
