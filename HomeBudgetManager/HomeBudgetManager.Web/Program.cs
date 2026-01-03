@@ -106,32 +106,36 @@ app.MapGet("/login", (HttpContext httpContext) => {
     return Results.Ok();
 
 });
-
 app.MapPost("/register", (HttpContext httpContext, RegisterService registerService) => {
 
     var username = httpContext.Request.Form["username"];
     var password = httpContext.Request.Form["password"];
     var email = httpContext.Request.Form["email"];
-    
 
-    if(StringValues.IsNullOrEmpty(username) || StringValues.IsNullOrEmpty(password) || StringValues.IsNullOrEmpty(email))
+    if (StringValues.IsNullOrEmpty(username) || StringValues.IsNullOrEmpty(password) || StringValues.IsNullOrEmpty(email))
     {
         var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Nie podano wszystkich danych!</div>";
-        return Results.Content(htmlResponse, "text/html"); 
+        return Results.Content(htmlResponse, "text/html");
     }
-    bool isRegistered = registerService.isRegistered(username);
 
-    if (!isRegistered)
+    // Sprawdź, czy login lub email są już zajęte
+    if (registerService.IsUsernameTaken(username))
     {
-        registerService.registerUser(email, username, password);
-        var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Rejestracja powiodła się</div>";
+        var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Ten login jest już zajęty!</div>";
         return Results.Content(htmlResponse, "text/html");
     }
-    else
+
+    if (registerService.IsEmailTaken(email))
     {
-        var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Już istnieje taki login!</div>";
+        var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Ten adres e-mail jest już zajęty!</div>";
         return Results.Content(htmlResponse, "text/html");
     }
+
+    // Zarejestruj użytkownika
+    registerService.RegisterUser(email, username, password);
+    var successResponse = "<div class='p-4 bg-green-100 border border-green-400 text-green-700 rounded'>Rejestracja powiodła się!</div>";
+    return Results.Content(successResponse, "text/html");
 });
+
 
 app.Run();
