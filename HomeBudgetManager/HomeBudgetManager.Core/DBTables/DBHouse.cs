@@ -5,27 +5,27 @@ using System.Collections.Generic;
 
 namespace HomeBudgetManager.Core.DBTables
 {
-    [Index(nameof(Name), IsUnique = true)] //unikalna nazwa domu
+    [Index(nameof(house_name), IsUnique = true)] //unikalna nazwa domu
     [Table("houses")]
     public class DBHouse
     {
         [Key]
         [Column("house_id")]
-        public int HouseId { get; set; }
+        public int house_id { get; set; }
 
         [Required]
         [Column("house_admin_id")]
-        public int DBUserId { get; set; }
+        public int house_admin_id { get; set; }
 
-        [ForeignKey("DBUserId")]
-        public DBUser DBUser { get; set; }
+        [ForeignKey("house_admin_id")]
+        public DBUser admin { get; set; }
 
         [Required]
-        [Column("name")]
-        public string Name { get; set; }
+        [Column("house_name")]
+        public string house_name { get; set; }
 
-        [Column("description")]
-        public string? Description { get; set; }  // opis (opcjonalny)
+        [Column("house_description")]
+        public string? house_description { get; set; }  // opis (opcjonalny)
 
         public ICollection<DBUser> Members { get; set; } = new List<DBUser>();
     }

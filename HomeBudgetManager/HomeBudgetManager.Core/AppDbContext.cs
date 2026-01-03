@@ -20,11 +20,12 @@ namespace HomeBudgetManager.Core
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<DBHouse>()
-                .HasOne(h => h.DBUser)
-                .WithMany()
-                .HasForeignKey(h => h.DBUserId)
+            modelBuilder.Entity<DBUser>()
+                .HasOne(u => u.house)
+                .WithMany(h => h.Members)
+                .HasForeignKey(u => u.user_house_id)
                 .OnDelete(DeleteBehavior.Restrict);
         }
+
     }
 }
