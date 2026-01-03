@@ -144,14 +144,14 @@ app.MapPost("/create-household", async (HttpContext context, AppDbContext db) =>
     var form = context.Request.Form;
     var name = form["name"];
     var description = form["description"];
-    var userEmail = context.Request.Cookies["logged_user"];
+    var userLogin = context.Request.Cookies["logged_user"]; 
 
     if (string.IsNullOrWhiteSpace(name))
     {
         return Results.Content("<div class='error'>Błąd: nazwa grupy jest wymagana.</div>", "text/html");
     }
 
-    var user = await db.Users.FirstOrDefaultAsync(u => u.user_email == userEmail);
+    var user = await db.Users.FirstOrDefaultAsync(u => u.user_login == userLogin);
     if (user == null)
     {
         return Results.Content("<div class='error'>Błąd: użytkownik niezalogowany.</div>", "text/html");
@@ -167,7 +167,9 @@ app.MapPost("/create-household", async (HttpContext context, AppDbContext db) =>
     db.Houses.Add(house);
     await db.SaveChangesAsync();
 
-    return Results.Content("<div class='success'> Domostwo utworzone!</div>", "text/html");
+    return Results.Content("<div class='success'>Domostwo utworzone!</div>", "text/html");
+
 });
+
 
 app.Run();
