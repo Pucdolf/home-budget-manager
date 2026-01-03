@@ -15,6 +15,7 @@ namespace HomeBudgetManager.Core
         public DbSet<DBHouse> Houses { get; set; }
 
         public DbSet<DBTransaction> Transactions { get; set; }
+
         public DbSet<DBUser> Users { get; set; }
 
     }

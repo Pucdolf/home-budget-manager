@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
-// TODO: finish all tables
+using System.Collections.Generic;
 
 namespace HomeBudgetManager.Core.DBTables
 {
@@ -10,16 +9,20 @@ namespace HomeBudgetManager.Core.DBTables
     public class DBHouse
     {
         [Key]
-        public int house_id { get; set; }
+        [Column("house_id")]
+        public int HouseId { get; set; }
 
         [Required]
         [Column("house_admin_id")]
         public int DBUserId { get; set; }
+
         [ForeignKey("DBUserId")]
         public DBUser DBUser { get; set; }
 
+        [Required]
+        [Column("name")]
+        public string Name { get; set; }
 
+        public ICollection<DBUser> Members { get; set; } = new List<DBUser>();
     }
-
-
 }

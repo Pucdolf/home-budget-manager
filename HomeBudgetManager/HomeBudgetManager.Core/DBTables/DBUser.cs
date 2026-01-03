@@ -2,8 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-// TODO: finish all tables
-
 namespace HomeBudgetManager.Core.DBTables
 {
     [Index(nameof(user_email), IsUnique = true)]
@@ -20,11 +18,13 @@ namespace HomeBudgetManager.Core.DBTables
         public string user_password { get; set; }
 
         [Column("user_house_id")]
-        public int DBHouseId { get; set; }
+        public int? DBHouseId { get; set; } 
+
         [ForeignKey("DBHouseId")]
-        public DBHouse DBHouse { get; set; }
+        public DBHouse? DBHouse { get; set; } 
+
 
     }
 
-    
+
 }
