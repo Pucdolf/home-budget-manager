@@ -159,9 +159,9 @@ app.MapPost("/create-household", async (HttpContext context, AppDbContext db) =>
 
     var house = new DBHouse
     {
-        Name = name,
-        Description = description,
-        DBUserId = user.user_id
+        house_name = name,
+        house_description = description,
+        house_admin_id = user.user_id
     };
 
     db.Houses.Add(house);
