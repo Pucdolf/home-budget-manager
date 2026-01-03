@@ -18,28 +18,29 @@ namespace HomeBudgetManager.Core.DBTables
     public class DBUser
     {
         [Key]
+        [Column("user_id")]
         public int user_id { get; set; }
 
         [Required]
+        [Column("user_email")]
         public string user_email { get; set; }
 
         [Required]
         [Column("user_login")]
         public string user_login { get; set; }
 
-
         [Required]
+        [Column("user_password")]
         public string user_password { get; set; }
-        
+
+        [Column("user_role")]
         public SystemRole user_role { get; set; } = SystemRole.Guest;
 
         [Column("user_house_id")]
-        public int? DBHouseId { get; set; } 
+        public int? user_house_id { get; set; }
 
-        [ForeignKey("DBHouseId")]
-        public DBHouse? DBHouse { get; set; } 
-
-
+        [ForeignKey("user_house_id")]
+        public DBHouse? house { get; set; }
     }
 
 
