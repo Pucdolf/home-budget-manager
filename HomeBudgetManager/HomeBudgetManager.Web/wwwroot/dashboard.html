@@ -4,84 +4,159 @@
     <meta charset="UTF-8">
     <title>Panel finansowy</title>
     <link rel="stylesheet" href="/css/dashboard.css">
+    <style>
+        .layout {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #f1f5f9;
+            padding: 1rem;
+            box-shadow: 1px 0 3px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-link {
+            background: none;
+            border: none;
+            color: #2563eb;
+            cursor: pointer;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 1rem;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .btn-logout {
+            color: #ef4444;
+            cursor: pointer;
+            border: 1px solid #ef4444;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+            background: none;
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar">
-        <p class="navbar-brand">Mój budżet</p>
-        <div class="navbar-user">
-            <span class="user-name">Zalogowano jako: {username}</span>
-            <!-- tylko wygląd, brak akcji -->
-            <form method="post" action="/logout" style="display:inline;">
-                <button type="submit" class="btn-logout">Wyloguj</button>
-            </form>
+    <div class="layout">
+        <!-- Pasek boczny -->
+        <aside class="sidebar">
+            <p class="sidebar-title">Mój budżet</p>
+            <button class="sidebar-link" onclick="loadDashboard()">Pulpit</button>
+            <button class="sidebar-link" onclick="loadHousehold()">Domostwo</button>
+        </aside>
+
+        <!-- Główna zawartość -->
+        <div class="main-content">
+            <nav class="navbar">
+                <span class="user-name">Zalogowano jako: {username}</span>
+                <form method="post" action="/logout" style="display:inline;">
+                    <button type="submit" class="btn-logout">Wyloguj</button>
+                </form>
+            </nav>
+
+            <main id="dashboard-main">
+                <!-- Domyślny widok pulpitu -->
+                <section class="card">
+                    <h2>Przegląd finansów</h2>
+                    <p class="card-desc">
+                        Prototyp panelu do podglądu stanu finansów. Widok jest tylko do odczytu.
+                    </p>
+
+                    <div class="balance-box">
+                        <p class="balance-label">Saldo konta</p>
+                        <span class="balance-highlight">12 345,67 zł</span>
+                    </div>
+
+                    <div class="charts-box">
+                        <h3>Wykresy kołowe</h3>
+                        <div class="charts-placeholder">
+                            Wykresy kołowe
+                        </div>
+                    </div>
+
+                    <div class="actions-box">
+                        <span class="btn-primary disabled-btn">Dodaj transakcję</span>
+                    </div>
+
+                    <div class="transactions-box">
+                        <h3>Ostatnie transakcje</h3>
+                        <ul class="transactions-list">
+                            <li class="transaction-item">
+                                <div class="transaction-main">
+                                    <span class="transaction-amount">- 120,00 zł</span>
+                                    <span class="transaction-category">Zakupy spożywcze</span>
+                                    <span class="transaction-date">2025-12-01</span>
+                                </div>
+                                <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
+                            </li>
+                            <li class="transaction-item">
+                                <div class="transaction-main">
+                                    <span class="transaction-amount">- 250,00 zł</span>
+                                    <span class="transaction-category">Transport</span>
+                                    <span class="transaction-date">2025-11-29</span>
+                                </div>
+                                <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
+                            </li>
+                            <li class="transaction-item">
+                                <div class="transaction-main">
+                                    <span class="transaction-amount">+ 4 000,00 zł</span>
+                                    <span class="transaction-category">Wynagrodzenie</span>
+                                    <span class="transaction-date">2025-11-28</span>
+                                </div>
+                                <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
+                            </li>
+                            <li class="transaction-item">
+                                <div class="transaction-main">
+                                    <span class="transaction-amount">- 89,99 zł</span>
+                                    <span class="transaction-category">Rozrywka</span>
+                                    <span class="transaction-date">2025-11-26</span>
+                                </div>
+                                <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
+                            </li>
+                        </ul>
+                    </div>
+                </section>
+            </main>
         </div>
-    </nav>
+    </div>
 
-    <main class="container">
-        <section class="card">
-            <h2>Przegląd finansów</h2>
-            <p class="card-desc">
-                Prototyp panelu do podglądu stanu finansów. Widok jest tylko do odczytu.
-            </p>
+    <script>
+        function loadHousehold() {
+            fetch("/dashboard-household")
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById("dashboard-main").innerHTML = html;
+                })
+                .catch(err => {
+                    document.getElementById("dashboard-main").innerHTML = "<p>Błąd ładowania domostwa.</p>";
+                });
+        }
 
-            <div class="balance-box">
-                <p class="balance-label">Saldo konta</p>
-                <span class="balance-highlight">12 345,67 zł</span>
-            </div>
 
-            <div class="charts-box">
-                <h3>Wykresy kołowe</h3>
-                <div class="charts-placeholder">
-                    Wykresy kołowe
-                </div>
-            </div>
-
-            <div class="actions-box">
-                <!-- wizualny przycisk, brak akcji -->
-                <span class="btn-primary disabled-btn">Dodaj transakcję</span>
-            </div>
-
-            <div class="transactions-box">
-                <h3>Ostatnie transakcje</h3>
-                <ul class="transactions-list">
-                    <li class="transaction-item">
-                        <div class="transaction-main">
-                            <span class="transaction-amount">- 120,00 zł</span>
-                            <span class="transaction-category">Zakupy spożywcze</span>
-                            <span class="transaction-date">2025-12-01</span>
-                        </div>
-                        <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
-                    </li>
-                    <li class="transaction-item">
-                        <div class="transaction-main">
-                            <span class="transaction-amount">- 250,00 zł</span>
-                            <span class="transaction-category">Transport</span>
-                            <span class="transaction-date">2025-11-29</span>
-                        </div>
-                        <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
-                    </li>
-                    <li class="transaction-item">
-                        <div class="transaction-main">
-                            <span class="transaction-amount">+ 4 000,00 zł</span>
-                            <span class="transaction-category">Wynagrodzenie</span>
-                            <span class="transaction-date">2025-11-28</span>
-                        </div>
-                        <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
-                    </li>
-                    <li class="transaction-item">
-                        <div class="transaction-main">
-                            <span class="transaction-amount">- 89,99 zł</span>
-                            <span class="transaction-category">Rozrywka</span>
-                            <span class="transaction-date">2025-11-26</span>
-                        </div>
-                        <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
-                    </li>
-                </ul>
-            </div>
-            <div class="actions-box">
-                <a href="createHousehold.html" class="btn-primary">Utwórz domostwo</a>
-            </div>
-        </section>
-    </main>
+        function loadDashboard() {
+            location.reload(); 
+        }
+    </script>
 </body>
 </html>

@@ -40,7 +40,7 @@ namespace HomeBudgetManager.Core.DBTables
         public int? user_house_id { get; set; }
 
         [ForeignKey("user_house_id")]
-        public DBHouse? house { get; set; }
+        public DBHouse? user_house { get; set; }
     }
 
 
