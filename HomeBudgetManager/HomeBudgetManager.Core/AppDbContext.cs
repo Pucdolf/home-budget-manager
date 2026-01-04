@@ -22,7 +22,7 @@ namespace HomeBudgetManager.Core
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<DBUser>()
-                .HasOne(u => u.house)
+                .HasOne(u => u.user_house)
                 .WithMany(h => h.Members)
                 .HasForeignKey(u => u.user_house_id)
                 .OnDelete(DeleteBehavior.Restrict);
