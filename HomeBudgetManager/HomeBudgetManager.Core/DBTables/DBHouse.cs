@@ -27,6 +27,10 @@ namespace HomeBudgetManager.Core.DBTables
         [Column("house_description")]
         public string? house_description { get; set; }  // opis (opcjonalny)
 
+        [Required]
+        [Column("house_join_code")]
+        public string house_join_code { get; set; }
+
         public ICollection<DBUser> Members { get; set; } = new List<DBUser>();
     }
 }

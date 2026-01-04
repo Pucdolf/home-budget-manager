@@ -173,7 +173,8 @@ app.MapPost("/create-household", async (HttpContext context, AppDbContext db) =>
     {
         house_name = name,
         house_description = description,
-        house_admin_id = user.user_id
+        house_admin_id = user.user_id,
+        house_join_code = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper() // np. "A1B2C3"
     };
     db.Houses.Add(house);
     await db.SaveChangesAsync();
@@ -186,6 +187,32 @@ app.MapPost("/create-household", async (HttpContext context, AppDbContext db) =>
 
     return Results.Content("<div class='success'>Domostwo utworzone!</div>", "text/html");
 });
+
+app.MapPost("/join-household", async (HttpContext context, AppDbContext db) =>
+{
+    var code = context.Request.Form["code"].ToString().ToUpper();
+    var login = context.Request.Cookies["logged_user"];
+
+    var user = await db.Users.FirstOrDefaultAsync(u => u.user_login == login);
+    if (user == null || user.user_house_id != null)
+    {
+        return Results.Content("<div class='error'>Nie możesz dołączyć do nowego domostwa.</div>", "text/html");
+    }
+
+    var house = await db.Houses.FirstOrDefaultAsync(h => h.house_join_code == code);
+    if (house == null)
+    {
+        return Results.Content("<div class='error'>Nie znaleziono domostwa o takim kodzie.</div>", "text/html");
+    }
+
+    user.user_house_id = house.house_id;
+    user.user_role = SystemRole.HouseholdMember;
+
+    await db.SaveChangesAsync();
+
+    return Results.Content("<div class='success'>Dołączono do domostwa!</div>", "text/html");
+});
+
 
 app.MapGet("/dashboard-household", async (HttpContext context, AppDbContext db) =>
 {
@@ -224,6 +251,7 @@ app.MapGet("/dashboard-household", async (HttpContext context, AppDbContext db) 
                 <p><strong>Nazwa:</strong> {house.house_name}</p>
                 <p><strong>Opis:</strong> {house.house_description}</p>
                 <p><strong>Admin ID:</strong> {house.house_admin_id}</p>
+                <p><strong>Kod zaproszenia:</strong> {house.house_join_code}</p>
                 <!-- Tu później dodasz np. listę członków -->
             </section>";
         return Results.Content(html, "text/html");
