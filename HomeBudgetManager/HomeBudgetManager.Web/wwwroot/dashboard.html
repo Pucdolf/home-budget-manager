@@ -9,9 +9,11 @@
     <nav class="navbar">
         <p class="navbar-brand">Mój budżet</p>
         <div class="navbar-user">
-            <span class="user-name">Zalogowano jako: Jan Kowalski</span>
+            <span class="user-name">Zalogowano jako: {username}</span>
             <!-- tylko wygląd, brak akcji -->
-            <span class="btn-logout">Wyloguj</span>
+            <form method="post" action="/logout" style="display:inline;">
+                <button type="submit" class="btn-logout">Wyloguj</button>
+            </form>
         </div>
     </nav>
 
