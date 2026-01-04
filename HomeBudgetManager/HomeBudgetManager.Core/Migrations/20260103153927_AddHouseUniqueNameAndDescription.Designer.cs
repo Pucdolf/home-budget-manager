@@ -3,6 +3,7 @@ using System;
 using HomeBudgetManager.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,58 +11,40 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HomeBudgetManager.Core.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260103153927_AddHouseUniqueNameAndDescription")]
+    partial class AddHouseUniqueNameAndDescription
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
 
-            modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBCategory", b =>
-                {
-                    b.Property<int>("categoryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("categoryDescription")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("category_description");
-
-                    b.Property<string>("categoryName")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("category_name");
-
-                    b.HasKey("categoryId");
-
-                    b.ToTable("categories");
-                });
-
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBHouse", b =>
                 {
-                    b.Property<int>("house_id")
+                    b.Property<int>("HouseId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("house_id");
 
-                    b.Property<int>("house_admin_id")
+                    b.Property<int>("DBUserId")
                         .HasColumnType("INTEGER")
                         .HasColumnName("house_admin_id");
 
-                    b.Property<string>("house_description")
+                    b.Property<string>("Description")
                         .HasColumnType("TEXT")
-                        .HasColumnName("house_description");
+                        .HasColumnName("description");
 
-                    b.Property<string>("house_name")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasColumnName("house_name");
+                        .HasColumnName("name");
 
-                    b.HasKey("house_id");
+                    b.HasKey("HouseId");
 
-                    b.HasIndex("house_admin_id");
+                    b.HasIndex("DBUserId");
 
-                    b.HasIndex("house_name")
+                    b.HasIndex("Name")
                         .IsUnique();
 
                     b.ToTable("houses");
@@ -111,51 +94,42 @@ namespace HomeBudgetManager.Core.Migrations
                 {
                     b.Property<int>("user_id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("user_id");
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("user_email")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("user_email");
-
-                    b.Property<int?>("user_house_id")
+                    b.Property<int?>("DBHouseId")
                         .HasColumnType("INTEGER")
                         .HasColumnName("user_house_id");
 
-                    b.Property<string>("user_login")
+                    b.Property<int>("Role")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("user_email")
                         .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("user_login");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("user_password")
                         .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("user_password");
-
-                    b.Property<int>("user_role")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("user_role");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("user_id");
 
+                    b.HasIndex("DBHouseId");
+
                     b.HasIndex("user_email")
                         .IsUnique();
-
-                    b.HasIndex("user_house_id");
 
                     b.ToTable("users");
                 });
 
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBHouse", b =>
                 {
-                    b.HasOne("HomeBudgetManager.Core.DBTables.DBUser", "admin")
+                    b.HasOne("HomeBudgetManager.Core.DBTables.DBUser", "DBUser")
                         .WithMany()
-                        .HasForeignKey("house_admin_id")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("DBUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("admin");
+                    b.Navigation("DBUser");
                 });
 
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBTransaction", b =>
@@ -179,12 +153,11 @@ namespace HomeBudgetManager.Core.Migrations
 
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBUser", b =>
                 {
-                    b.HasOne("HomeBudgetManager.Core.DBTables.DBHouse", "house")
+                    b.HasOne("HomeBudgetManager.Core.DBTables.DBHouse", "DBHouse")
                         .WithMany("Members")
-                        .HasForeignKey("user_house_id")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("DBHouseId");
 
-                    b.Navigation("house");
+                    b.Navigation("DBHouse");
                 });
 
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBHouse", b =>

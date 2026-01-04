@@ -15,7 +15,7 @@ namespace HomeBudgetManager.Core.DBTables
 
         public string transaction_category { get; set; }
 
-        public string transaction_description { get; set; } 
+        public string transaction_description { get; set; }
 
         [Required]
         public decimal transaction_value { get; set; }

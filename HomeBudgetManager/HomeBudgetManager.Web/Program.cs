@@ -1,4 +1,5 @@
 using HomeBudgetManager.Core;
+using HomeBudgetManager.Core.DBTables;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives; // Importujemy naszą logikę z Core
 
@@ -8,11 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RegisterService>();
 
-var app = builder.Build();
-
-app.UseDefaultFiles();
-app.UseStaticFiles();
-
 
 // DB fragment
 var connectionStringAzure = builder.Configuration.GetConnectionString("AzureConnection");
@@ -20,12 +16,19 @@ var connectionStringLocal = builder.Configuration.GetConnectionString("HbmDataba
 
 
 // builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionStringLocal, b => b.MigrationsAssembly("HomeBudgetManager.Core")));
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(connectionStringLocal, b =>
+        b.MigrationsAssembly("HomeBudgetManager.Core")));
 
 
+var app = builder.Build();
 
-    // *** ENDPOINT: PANEL GŁÓWNY (DASHBOARD) ***
-    // Wstrzykujemy IWebHostEnvironment (env), aby wiedzieć, gdzie jest folder wwwroot
-    app.MapGet("/dashboard", (HttpContext context, IWebHostEnvironment env) =>
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+// *** ENDPOINT: PANEL GŁÓWNY (DASHBOARD) ***
+// Wstrzykujemy IWebHostEnvironment (env), aby wiedzieć, gdzie jest folder wwwroot
+app.MapGet("/dashboard", (HttpContext context, IWebHostEnvironment env) =>
     {
         // Sprawdzamy autoryzację
         if (!context.Request.Cookies.ContainsKey("logged_user"))
@@ -104,32 +107,80 @@ app.MapGet("/login", (HttpContext httpContext) => {
     return Results.Ok();
 
 });
-
 app.MapPost("/register", (HttpContext httpContext, RegisterService registerService) => {
 
     var username = httpContext.Request.Form["username"];
     var password = httpContext.Request.Form["password"];
     var email = httpContext.Request.Form["email"];
-    
 
-    if(StringValues.IsNullOrEmpty(username) || StringValues.IsNullOrEmpty(password) || StringValues.IsNullOrEmpty(email))
+    if (StringValues.IsNullOrEmpty(username) || StringValues.IsNullOrEmpty(password) || StringValues.IsNullOrEmpty(email))
     {
         var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Nie podano wszystkich danych!</div>";
-        return Results.Content(htmlResponse, "text/html"); 
+        return Results.Content(htmlResponse, "text/html");
     }
-    bool isRegistered = registerService.isRegistered(username);
 
-    if (!isRegistered)
+    // Sprawdź, czy login lub email są już zajęte
+    if (registerService.IsUsernameTaken(username))
     {
-        registerService.registerUser(email, username, password);
-        var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Rejestracja powiodła się</div>";
+        var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Ten login jest już zajęty!</div>";
         return Results.Content(htmlResponse, "text/html");
     }
-    else
+
+    if (registerService.IsEmailTaken(email))
     {
-        var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Już istnieje taki login!</div>";
+        var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Ten adres e-mail jest już zajęty!</div>";
         return Results.Content(htmlResponse, "text/html");
     }
+
+    // Zarejestruj użytkownika
+    registerService.RegisterUser(email, username, password);
+    var successResponse = "<div class='p-4 bg-green-100 border border-green-400 text-green-700 rounded'>Rejestracja powiodła się!</div>";
+    return Results.Content(successResponse, "text/html");
 });
+
+
+app.MapPost("/create-household", async (HttpContext context, AppDbContext db) =>
+{
+    var form = context.Request.Form;
+    var name = form["name"];
+    var description = form["description"];
+    var userLogin = context.Request.Cookies["logged_user"];
+
+    if (string.IsNullOrWhiteSpace(name))
+    {
+        return Results.Content("<div class='error'>Błąd: nazwa grupy jest wymagana.</div>", "text/html");
+    }
+
+    var user = await db.Users.FirstOrDefaultAsync(u => u.user_login == userLogin);
+    if (user == null)
+    {
+        return Results.Content("<div class='error'>Błąd: użytkownik niezalogowany.</div>", "text/html");
+    }
+
+    if (user.user_house_id != null)
+    {
+        return Results.Content("<div class='error'>Błąd: użytkownik należy już do domostwa.</div>", "text/html");
+    }
+
+    // 1. Stwórz domostwo
+    var house = new DBHouse
+    {
+        house_name = name,
+        house_description = description,
+        house_admin_id = user.user_id
+    };
+    db.Houses.Add(house);
+    await db.SaveChangesAsync();
+
+    // 2. Przypisz użytkownika do domu i ustaw jako admin
+    user.user_house_id = house.house_id;
+    user.user_role = SystemRole.HouseholdAdmin;
+
+    await db.SaveChangesAsync();
+
+    return Results.Content("<div class='success'>Domostwo utworzone!</div>", "text/html");
+});
+
+
 
 app.Run();
