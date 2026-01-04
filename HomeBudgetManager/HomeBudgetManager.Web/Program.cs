@@ -73,6 +73,12 @@ app.MapPost("/login", (HttpContext httpContext, AuthService authService) => {
     }
 });
 
+app.MapPost("/logout", (HttpContext context) =>
+ {
+     context.Response.Cookies.Delete("logged_user");
+     return Results.Redirect("/index.html");
+ });
+
 
 app.MapGet("/registration", (HttpContext context, IWebHostEnvironment env) => {
 
