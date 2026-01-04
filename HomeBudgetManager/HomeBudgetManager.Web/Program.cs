@@ -144,7 +144,7 @@ app.MapPost("/create-household", async (HttpContext context, AppDbContext db) =>
     var form = context.Request.Form;
     var name = form["name"];
     var description = form["description"];
-    var userLogin = context.Request.Cookies["logged_user"]; 
+    var userLogin = context.Request.Cookies["logged_user"];
 
     if (string.IsNullOrWhiteSpace(name))
     {
@@ -157,19 +157,30 @@ app.MapPost("/create-household", async (HttpContext context, AppDbContext db) =>
         return Results.Content("<div class='error'>Błąd: użytkownik niezalogowany.</div>", "text/html");
     }
 
+    if (user.user_house_id != null)
+    {
+        return Results.Content("<div class='error'>Błąd: użytkownik należy już do domostwa.</div>", "text/html");
+    }
+
+    // 1. Stwórz domostwo
     var house = new DBHouse
     {
         house_name = name,
         house_description = description,
         house_admin_id = user.user_id
     };
-
     db.Houses.Add(house);
     await db.SaveChangesAsync();
 
-    return Results.Content("<div class='success'>Domostwo utworzone!</div>", "text/html");
+    // 2. Przypisz użytkownika do domu i ustaw jako admin
+    user.user_house_id = house.house_id;
+    user.user_role = SystemRole.HouseholdAdmin;
 
+    await db.SaveChangesAsync();
+
+    return Results.Content("<div class='success'>Domostwo utworzone!</div>", "text/html");
 });
+
 
 
 app.Run();
