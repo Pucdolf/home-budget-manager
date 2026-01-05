@@ -3,6 +3,7 @@ using System;
 using HomeBudgetManager.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HomeBudgetManager.Core.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260104203637_AddHouseJoinCode")]
+    partial class AddHouseJoinCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
@@ -78,7 +81,7 @@ namespace HomeBudgetManager.Core.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("DBHouseId")
+                    b.Property<int>("DBHouseId")
                         .HasColumnType("INTEGER")
                         .HasColumnName("transaction_for_house_id");
 
@@ -167,7 +170,9 @@ namespace HomeBudgetManager.Core.Migrations
                 {
                     b.HasOne("HomeBudgetManager.Core.DBTables.DBHouse", "DBHouse")
                         .WithMany()
-                        .HasForeignKey("DBHouseId");
+                        .HasForeignKey("DBHouseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("HomeBudgetManager.Core.DBTables.DBUser", "DBUser")
                         .WithMany()
