@@ -24,4 +24,9 @@ public class AuthService
     {
         return $"Witaj w HomeBudgetManager, {username}! Twoje finanse są pod kontrolą.";
     }
+
+    public DBUser? GetUserByUsername(string username)
+    {
+        return _context.Users.FirstOrDefault(u => u.user_login == username);
+    }
 }

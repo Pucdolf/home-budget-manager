@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Panel finansowy</title>
     <link rel="stylesheet" href="/css/dashboard.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <style>
         .layout {
             display: flex;
@@ -66,28 +67,63 @@
             <button class="sidebar-link" onclick="loadHousehold()">Domostwo</button>
         </aside>
 
-        <!-- Główna zawartość -->
-        <div class="main-content">
-            <nav class="navbar">
-                <span class="user-name">Zalogowano jako: {username}</span>
-                <form method="post" action="/logout" style="display:inline;">
-                    <button type="submit" class="btn-logout">Wyloguj</button>
-                </form>
-            </nav>
+    <main class="container">
+        <section class="card">
+            <h2>Przegląd finansów</h2>
+            <p class="card-desc">
+                Prototyp panelu do podglądu stanu finansów.
+            </p>
 
-            <main id="dashboard-main">
-                <!-- Domyślny widok pulpitu -->
-                <section class="card">
-                    <h2>Przegląd finansów</h2>
-                    <p class="card-desc">
-                        Prototyp panelu do podglądu stanu finansów. Widok jest tylko do odczytu.
-                    </p>
+            <div class="balance-box">
+                <p class="balance-label">Saldo konta</p>
+                <span class="balance-highlight">{balance} zł</span>
+            </div>
 
-                    <div class="balance-box">
-                        <p class="balance-label">Saldo konta</p>
-                        <span class="balance-highlight">12 345,67 zł</span>
-                    </div>
+            <div class="actions-box">
+                <!-- wizualny przycisk, brak akcji -->
+                <a href="/add-transaction" class="btn-primary">Dodaj transakcję</a>
+            </div>
 
+            <div class="transactions-box">
+                <h3>Ostatnie transakcje</h3>
+                <ul class="transactions-list"
+                    id="transactions-list"
+                    hx-get="/dashboard/transactions"
+                    hx-trigger="load"
+                    hx-swap="innerHTML">
+                    <li class='transaction-item'>
+                        <div class='transaction-main'>
+                            <span>Brak transakcji</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="actions-box">
+                <a href="createHousehold.html" class="btn-primary">Utwórz domostwo</a>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        document.body.addEventListener('htmx:afterSwap', function (event) {
+            if (event.detail.target.id === 'form-response') {
+                const response = event.detail.target.innerHTML;
+                if (response.includes('success')) {
+                    // Odśwież listę transakcji
+                    htmx.trigger('#transactions-list', 'load');
+                    // Odśwież saldo
+                    htmx.trigger('#balance-container', 'load');
+
+                    setTimeout(() => {
+                        document.getElementById('transaction-modal').style.display = 'none';
+                        document.querySelector('form').reset();
+                        document.getElementById('form-response').innerHTML = '';
+                    }, 1500);
+                }
+            }
+        });
                     <div class="charts-box">
                         <h3>Wykresy kołowe</h3>
                         <div class="charts-placeholder">
@@ -95,51 +131,7 @@
                         </div>
                     </div>
 
-                    <div class="actions-box">
-                        <span class="btn-primary disabled-btn">Dodaj transakcję</span>
-                    </div>
-
-                    <div class="transactions-box">
-                        <h3>Ostatnie transakcje</h3>
-                        <ul class="transactions-list">
-                            <li class="transaction-item">
-                                <div class="transaction-main">
-                                    <span class="transaction-amount">- 120,00 zł</span>
-                                    <span class="transaction-category">Zakupy spożywcze</span>
-                                    <span class="transaction-date">2025-12-01</span>
-                                </div>
-                                <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
-                            </li>
-                            <li class="transaction-item">
-                                <div class="transaction-main">
-                                    <span class="transaction-amount">- 250,00 zł</span>
-                                    <span class="transaction-category">Transport</span>
-                                    <span class="transaction-date">2025-11-29</span>
-                                </div>
-                                <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
-                            </li>
-                            <li class="transaction-item">
-                                <div class="transaction-main">
-                                    <span class="transaction-amount">+ 4 000,00 zł</span>
-                                    <span class="transaction-category">Wynagrodzenie</span>
-                                    <span class="transaction-date">2025-11-28</span>
-                                </div>
-                                <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
-                            </li>
-                            <li class="transaction-item">
-                                <div class="transaction-main">
-                                    <span class="transaction-amount">- 89,99 zł</span>
-                                    <span class="transaction-category">Rozrywka</span>
-                                    <span class="transaction-date">2025-11-26</span>
-                                </div>
-                                <span class="btn-secondary disabled-btn"><a href="editTransaction.html">Edytuj</a></span>
-                            </li>
-                        </ul>
-                    </div>
-                </section>
-            </main>
-        </div>
-    </div>
+     </script>
 
     <script>
         function loadHousehold() {

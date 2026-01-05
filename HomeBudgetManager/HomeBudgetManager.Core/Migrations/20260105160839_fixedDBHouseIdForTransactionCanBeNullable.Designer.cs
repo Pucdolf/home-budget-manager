@@ -3,6 +3,7 @@ using System;
 using HomeBudgetManager.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HomeBudgetManager.Core.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260105160839_fixedDBHouseIdForTransactionCanBeNullable")]
+    partial class fixedDBHouseIdForTransactionCanBeNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
@@ -51,11 +54,6 @@ namespace HomeBudgetManager.Core.Migrations
                     b.Property<string>("house_description")
                         .HasColumnType("TEXT")
                         .HasColumnName("house_description");
-
-                    b.Property<string>("house_join_code")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("house_join_code");
 
                     b.Property<string>("house_name")
                         .IsRequired()
@@ -182,12 +180,12 @@ namespace HomeBudgetManager.Core.Migrations
 
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBUser", b =>
                 {
-                    b.HasOne("HomeBudgetManager.Core.DBTables.DBHouse", "user_house")
+                    b.HasOne("HomeBudgetManager.Core.DBTables.DBHouse", "house")
                         .WithMany("Members")
                         .HasForeignKey("user_house_id")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("user_house");
+                    b.Navigation("house");
                 });
 
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBHouse", b =>

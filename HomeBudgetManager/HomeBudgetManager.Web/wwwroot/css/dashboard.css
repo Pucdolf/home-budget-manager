@@ -133,16 +133,72 @@ body {
     text-align: left; /* ale same wiersze pozostają wyrównane do lewej dla czytelności */
 }
 
+/* Styl transakcji */
 .transaction-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 0;
-    border-top: 1px solid #e2e8f0;
+    padding: 20px 10px; 
+    border-bottom: 1px solid #eee;
+    font-family: sans-serif;
+    gap: 30px;
 }
 
-    .transaction-item:last-child {
-        border-bottom: 1px solid #e2e8f0;
+.transaction-amount {
+    flex: 1;
+    text-align: left;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.amount-income {
+    color: #28a745; /* Zielony */
+}
+
+.amount-expense {
+    color: #dc3545; /* Czerwony */
+}
+
+.transaction-info {
+    flex: 2; 
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.transaction-category {
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+    gap: 15px
+}
+
+.transaction-desc {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: normal;
+}
+
+.transaction-date {
+    flex: 1;
+    text-align: right;
+    color: #666;
+    font-size: 0.9rem;
+}
+/* Koniec stylu transakcji */
+
+.btn-danger {
+    background-color: #ef4444;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    border: none;
+    cursor: pointer;
+}
+
+    .btn-danger:hover {
+        background-color: #dc2626;
     }
 .layout {
     display: flex;
