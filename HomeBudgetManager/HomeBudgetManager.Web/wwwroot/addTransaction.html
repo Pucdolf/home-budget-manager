@@ -1,0 +1,97 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Dodaj transakcję</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/addTransaction.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <main class="container">
+        <section class="card">
+            <h2>Dodaj nową transakcję</h2>
+
+            <!-- Formularz dodawania transakcji -->
+            <form hx-post="/dashboard/transactions"
+                  hx-target="#form-response"
+                  hx-swap="innerHTML"
+                  class="transaction-form">
+
+                <!-- Pole kwota -->
+                <div class="form-group">
+                    <label for="amount">Kwota (zł)</label>
+                    <input type="number"
+                           step="0.01"
+                           id="amount"
+                           name="amount"
+                           required
+                           placeholder="np. -100.00 (wydatek) lub 500.00 (przychód)"
+                           class="form-input">
+                </div>
+
+                <!-- Pole kategoria -->
+                <div class="form-group">
+                    <label for="category">Kategoria</label>
+                    <select id="category"
+                            name="category"
+                            required
+                            class="form-input">
+                        <!-- Dodać potem predefiniowane kategorie -->
+                        <option value="">Wybierz kategorię</option>
+                        <option value="Zakupy spożywcze">Zakupy spożywcze</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Rozrywka">Rozrywka</option>
+                        <option value="Rachunki">Rachunki</option>
+                        <option value="Wynagrodzenie">Wynagrodzenie</option>
+                        <option value="Zdrowie">Zdrowie</option>
+                        <option value="Edukacja">Edukacja</option>
+                        <option value="Inne">Inne</option>
+                    </select>
+                </div>
+
+                <!-- Pole opis -->
+                <div class="form-group">
+                    <label for="description">Opis</label>
+                    <input type="text"
+                           id="description"
+                           name="description"
+                           required
+                           placeholder="np. Zakupy w Biedronce"
+                           class="form-input">
+                </div>
+
+                <!-- Miejsce na komunikaty z serwera -->
+                <div id="form-response" class="form-response">
+
+                </div>
+
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary">
+                        Dodaj transakcję
+                    </button>
+                    <a href="/dashboard" class="btn-secondary">
+                        Anuluj
+                    </a>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <!-- Wróć do dashboard po dodaniu transakcji -->
+    <script>
+        document.body.addEventListener('htmx:afterSwap', function(event) {
+            if (event.detail.target.id === 'form-response') {
+                const response = event.detail.target.innerHTML;
+
+                if (response.includes('success')) {
+                    // Przekieruj do dashboardu
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 1000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
