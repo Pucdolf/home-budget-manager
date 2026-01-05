@@ -5,106 +5,72 @@
     <title>Panel finansowy</title>
     <link rel="stylesheet" href="/css/dashboard.css">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <style>
-        .layout {
-            display: flex;
-            height: 100vh;
-        }
-
-        .sidebar {
-            width: 200px;
-            background-color: #f1f5f9;
-            padding: 1rem;
-            box-shadow: 1px 0 3px rgba(0,0,0,0.1);
-        }
-
-        .sidebar-title {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: #2563eb;
-            margin-bottom: 2rem;
-        }
-
-        .sidebar-link {
-            background: none;
-            border: none;
-            color: #2563eb;
-            cursor: pointer;
-            font-weight: 500;
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        .main-content {
-            flex-grow: 1;
-            padding: 1rem;
-        }
-
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .btn-logout {
-            color: #ef4444;
-            cursor: pointer;
-            border: 1px solid #ef4444;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-weight: 500;
-            background: none;
-        }
-    </style>
 </head>
 <body>
+
     <div class="layout">
         <!-- Pasek boczny -->
         <aside class="sidebar">
             <p class="sidebar-title">Mój budżet</p>
+            <span class="user-name">Zalogowano jako: {username}</span>
             <button class="sidebar-link" onclick="loadDashboard()">Pulpit</button>
             <button class="sidebar-link" onclick="loadHousehold()">Domostwo</button>
+            <form method="post" action="/logout" style="display:inline;">
+                <button type="submit" class="btn-logout">Wyloguj</button>
+            </form>
         </aside>
 
-    <main class="container">
-        <section class="card">
-            <h2>Przegląd finansów</h2>
-            <p class="card-desc">
-                Prototyp panelu do podglądu stanu finansów.
-            </p>
+        <main class="container" id="dashboard-main">
+            <section class="card">
+                <h2>Przegląd finansów</h2>
+                <p class="card-desc">
+                    Prototyp panelu do podglądu stanu finansów.
+                </p>
 
-            <div class="balance-box">
-                <p class="balance-label">Saldo konta</p>
-                <span class="balance-highlight">{balance} zł</span>
-            </div>
+                <div class="balance-box">
+                    <p class="balance-label">Saldo konta</p>
+                    <span class="balance-highlight">{balance} zł</span>
+                </div>
 
-            <div class="actions-box">
-                <!-- wizualny przycisk, brak akcji -->
-                <a href="/add-transaction" class="btn-primary">Dodaj transakcję</a>
-            </div>
+                <div class="actions-box">
+                    <!-- wizualny przycisk, brak akcji -->
+                    <a href="/add-transaction" class="btn-primary">Dodaj transakcję</a>
+                </div>
 
-            <div class="transactions-box">
-                <h3>Ostatnie transakcje</h3>
-                <ul class="transactions-list"
-                    id="transactions-list"
-                    hx-get="/dashboard/transactions"
-                    hx-trigger="load"
-                    hx-swap="innerHTML">
-                    <li class='transaction-item'>
-                        <div class='transaction-main'>
-                            <span>Brak transakcji</span>
-                        </div>
-                    </li>
-                </ul>
-            </div>
+                <div class="transactions-box">
+                    <h3>Ostatnie transakcje</h3>
+                    <ul class="transactions-list"
+                        id="transactions-list"
+                        hx-get="/dashboard/transactions"
+                        hx-trigger="load"
+                        hx-swap="innerHTML">
+                        <li class='transaction-item'>
+                            <div class='transaction-main'>
+                                <span>Brak transakcji</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
 
-            <div class="actions-box">
-                <a href="createHousehold.html" class="btn-primary">Utwórz domostwo</a>
-            </div>
+    <script>
+        function loadHousehold() {
+            fetch("/dashboard-household")
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById("dashboard-main").innerHTML = html;
+                })
+                .catch(err => {
+                    document.getElementById("dashboard-main").innerHTML = "<p>Błąd ładowania domostwa.</p>";
+                });
+        }
 
-        </section>
-    </main>
+        function loadDashboard() {
+            location.reload();
+        }
+    </script>
 
     <script>
         document.body.addEventListener('htmx:afterSwap', function (event) {
@@ -124,31 +90,7 @@
                 }
             }
         });
-                    <div class="charts-box">
-                        <h3>Wykresy kołowe</h3>
-                        <div class="charts-placeholder">
-                            Wykresy kołowe
-                        </div>
-                    </div>
-
-     </script>
-
-    <script>
-        function loadHousehold() {
-            fetch("/dashboard-household")
-                .then(res => res.text())
-                .then(html => {
-                    document.getElementById("dashboard-main").innerHTML = html;
-                })
-                .catch(err => {
-                    document.getElementById("dashboard-main").innerHTML = "<p>Błąd ładowania domostwa.</p>";
-                });
-        }
-
-
-        function loadDashboard() {
-            location.reload(); 
-        }
     </script>
+
 </body>
 </html>

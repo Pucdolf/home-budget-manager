@@ -29,6 +29,8 @@ body {
 }
 
 .user-name {
+    column-gap: 30px;
+    row-gap: 30px;
     color: #475569;
 }
 

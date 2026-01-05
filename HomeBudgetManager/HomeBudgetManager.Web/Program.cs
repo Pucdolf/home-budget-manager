@@ -287,10 +287,12 @@ app.MapGet("/dashboard-household", async (HttpContext context, AppDbContext db) 
     if (user == null)
         return Results.Text("Błąd: użytkownik nie istnieje", "text/plain");
 
-    if (user.user_house_id is null)
+    try
     {
-        // użytkownik nie należy do domostwa
-        var html = $@"
+        if (user.user_house_id is null)
+        {
+            // użytkownik nie należy do domostwa
+            var html = $@"
             <section class='card'>
                 <h2>Twoje domostwo</h2>
                 <p>Nie jesteś jeszcze członkiem żadnego domostwa.</p>
@@ -299,13 +301,13 @@ app.MapGet("/dashboard-household", async (HttpContext context, AppDbContext db) 
                     <a href='joinHousehold.html' class='btn-primary'>Dołącz do domostwa</a>
                 </div>
             </section>";
-        return Results.Content(html, "text/html");
-    }
-    else
-    {
-        // użytkownik ma domostwo
-        var house = user.user_house!;
-        var html = $@"
+            return Results.Content(html, "text/html");
+        }
+        else
+        {
+            // użytkownik ma domostwo
+            var house = user.user_house!;
+            var html = $@"
             <section class='card'>
                 <h2>Twoje domostwo</h2>
                 <p><strong>Nazwa:</strong> {house.house_name}</p>
@@ -314,7 +316,16 @@ app.MapGet("/dashboard-household", async (HttpContext context, AppDbContext db) 
                 <p><strong>Kod zaproszenia:</strong> {house.house_join_code}</p>
                 <!-- Tu później dodasz np. listę członków -->
             </section>";
-        return Results.Content(html, "text/html");
+            return Results.Content(html, "text/html");
+        }
+    } catch (Exception ex)
+    {
+        Console.WriteLine($"Błąd wczytania strony: {ex.Message}");
+        if (ex.InnerException != null)
+        {
+            Console.WriteLine($"Inner: {ex.InnerException.Message}");
+        }
+        return Results.Content($"<div class='error'>Błąd serwera: nie udało się wczytać strony.</div>", "text/html");
     }
 });
 
