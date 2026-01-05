@@ -1,5 +1,6 @@
 using HomeBudgetManager.Core;
 using HomeBudgetManager.Core.DBTables;
+using HomeBudgetManager.Web.Endpoints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives; // Importujemy naszą logikę z Core
 
@@ -9,11 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RegisterService>();
 
-
 // DB fragment
 var connectionStringAzure = builder.Configuration.GetConnectionString("AzureConnection");
 var connectionStringLocal = builder.Configuration.GetConnectionString("HbmDatabase");
-
 
 // builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionStringLocal, b => b.MigrationsAssembly("HomeBudgetManager.Core")));
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -26,9 +25,12 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+// Dodawanie grupy endpointów dashboardu z prefiksem /dashboard
+var DashboardGroup =app.MapGroup("/dashboard").MapDashboardEndpoints();
+
 // *** ENDPOINT: PANEL GŁÓWNY (DASHBOARD) ***
 // Wstrzykujemy IWebHostEnvironment (env), aby wiedzieć, gdzie jest folder wwwroot
-app.MapGet("/dashboard", (HttpContext context, IWebHostEnvironment env) =>
+app.MapGet("/dashboard", async (HttpContext context, IWebHostEnvironment env, AppDbContext db) =>
     {
         // Sprawdzamy autoryzację
         if (!context.Request.Cookies.ContainsKey("logged_user"))
@@ -37,6 +39,40 @@ app.MapGet("/dashboard", (HttpContext context, IWebHostEnvironment env) =>
         }
 
         var username = context.Request.Cookies["logged_user"];
+
+        var user = await db.Users.FirstOrDefaultAsync(u => u.user_login == username);
+
+        if (user == null)
+        {
+            return Results.Redirect("/");
+        }
+
+        // Pobierz ostatnie transakcje. W take() decydujemy ile transakcji wyświetlić
+        var transactions = await db.Transactions
+            .Where(t => t.DBUserId == user.user_id)
+            .OrderByDescending(t => t.transaction_date)
+            .Take(10)
+            .ToListAsync();
+
+        var balance = await db.Transactions
+                            .Where(t => t.DBUserId == user.user_id)
+                            .SumAsync(t => t.transaction_value);
+
+        // Generuj HTML dla transakcji
+        var transactionsHtml = string.Join("", transactions.Select(t => 
+        $@"
+            <li class='transaction-item'>
+                <div class='transaction-main'>
+                    <span class='transaction-amount'>{(t.transaction_value >= 0 ? "+ " : "- ")}{Math.Abs(t.transaction_value):N2} zł</span>
+                    <span class='transaction-category'>{t.transaction_category}</span>
+                    <span class='transaction-date'>{t.transaction_date:yyyy-MM-dd}</span>
+                </div>
+                <div class='transaction-actions'>
+                    <button class='btn-secondary' onclick='editTransaction({t.transaction_id})'>Edytuj</button>
+                    <button class='btn-danger' hx-delete='/dashboard/transactions/{t.transaction_id}' hx-confirm='Czy na pewno chcesz usunąć tę transakcję?'>Usuń</button>
+                </div>
+            </li>
+        "));
 
         // 1. Ścieżka do pliku HTML
         var filePath = Path.Combine(env.WebRootPath, "dashboard.html");
@@ -47,9 +83,32 @@ app.MapGet("/dashboard", (HttpContext context, IWebHostEnvironment env) =>
 
         // 3. Podmieniamy nasz placeholder {username} na prawdziwą nazwę
         html = html.Replace("{username}", username);
+        html = html.Replace("{balance}", balance.ToString("N2"));
+        html = html.Replace("{transactions}", transactionsHtml);
 
         return Results.Content(html, "text/html");
     });
+
+app.MapGet("/add-transaction", async (HttpContext context, IWebHostEnvironment env, AppDbContext db) =>
+{
+    if (!context.Request.Cookies.ContainsKey("logged_user"))
+    {
+        return Results.Redirect("/");
+    }
+
+    var userId = int.Parse(context.Request.Cookies["user_id"]);
+    var user = await db.Users.FirstOrDefaultAsync(u => u.user_id == userId);
+    var username = context.Request.Cookies["logged_user"];
+    
+    // Wczytaj plik HTML z kodowaniem UTF-8
+    var filePath = Path.Combine(env.WebRootPath, "addTransaction.html");
+    var html = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
+
+    html = html.Replace("{username}", user.user_login);
+
+    return Results.Content(html, "text/html; charset=utf-8"); 
+});
+
 
 // *** ENDPOINT LOGOWANIA ***
 app.MapPost("/login", (HttpContext httpContext, AuthService authService) => {
@@ -61,7 +120,9 @@ app.MapPost("/login", (HttpContext httpContext, AuthService authService) => {
 
     if (isValid)
     {
+        var user = authService.GetUserByUsername(username);
         httpContext.Response.Cookies.Append("logged_user", username);
+        httpContext.Response.Cookies.Append("user_id", user.user_id.ToString());
         // Przekierowanie htmx po udanym logowaniu
         httpContext.Response.Headers.Append("HX-Redirect", "/dashboard");
         return Results.Ok();
@@ -74,11 +135,10 @@ app.MapPost("/login", (HttpContext httpContext, AuthService authService) => {
 });
 
 app.MapPost("/logout", (HttpContext context) =>
- {
-     context.Response.Cookies.Delete("logged_user");
-     return Results.Redirect("/index.html");
- });
-
+{
+    context.Response.Cookies.Delete("logged_user");
+    return Results.Redirect("/index.html");
+});
 
 app.MapGet("/registration", (HttpContext context, IWebHostEnvironment env) => {
 

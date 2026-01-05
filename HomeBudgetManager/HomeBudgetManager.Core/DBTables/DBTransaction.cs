@@ -25,8 +25,8 @@ namespace HomeBudgetManager.Core.DBTables
         public DBUser DBUser { get; set; }
 
         [Column("transaction_for_house_id")]
-        public int DBHouseId { get; set; }
-        public DBHouse DBHouse { get; set; }
+        public int? DBHouseId { get; set; }
+        public DBHouse? DBHouse { get; set; }
 
         [Required]
         [DataType(DataType.DateTime)]       
