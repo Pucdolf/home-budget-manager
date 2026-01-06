@@ -43,7 +43,15 @@ namespace HomeBudgetManager.Web.appMaps
 
                 // Zarejestruj uzytkownika
                 registerService.RegisterUser(email, username, password);
-                var successResponse = "<div class='p-4 bg-green-100 border border-green-400 text-green-700 rounded'>Rejestracja powiodła się!</div>";
+                var successResponse = @"
+                    <div class='p-4 bg-green-100 border border-green-400 text-green-700 rounded'>
+                        Rejestracja powiodła się!
+                    </div>
+                    <script>
+                        setTimeout(function() {
+                            window.location.href = '/index.html';
+                        }, 1000);
+                    </script>";
                 return Results.Content(successResponse, "text/html");
             });
 
