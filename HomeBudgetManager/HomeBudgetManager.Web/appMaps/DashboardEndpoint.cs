@@ -16,6 +16,9 @@ namespace HomeBudgetManager.Web.appMaps
     {
         public void Map(IEndpointRouteBuilder app)
         {
+
+            // wyswietl 10 pierwszych transakcji
+
             app.MapGet("/dashboard", async (HttpContext context, IWebHostEnvironment env, AppDbContext db) =>
             {
                 // Sprawdzamy autoryzację
@@ -26,7 +29,7 @@ namespace HomeBudgetManager.Web.appMaps
 
                 var username = context.Request.Cookies["logged_user"];
 
-                var user = await db.Users.FirstOrDefaultAsync(u => u.user_login == username);
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Login == username);
 
                 if (user == null)
                 {
@@ -35,27 +38,27 @@ namespace HomeBudgetManager.Web.appMaps
 
                 // Pobierz ostatnie transakcje. W take() decydujemy ile transakcji wyświetlić
                 var transactions = await db.Transactions
-                    .Where(t => t.DBUserId == user.user_id)
-                    .OrderByDescending(t => t.transaction_date)
+                    .Where(t => t.UserId == user.Id)
+                    .OrderByDescending(t => t.Date)
                     .Take(10)
                     .ToListAsync();
 
                 var balance = await db.Transactions
-                                    .Where(t => t.DBUserId == user.user_id)
-                                    .SumAsync(t => t.transaction_value);
+                                    .Where(t => t.UserId == user.Id)
+                                    .SumAsync(t => t.Value);
 
                 // Generuj HTML dla transakcji
                 var transactionsHtml = string.Join("", transactions.Select(t =>
                 $@"
             <li class='transaction-item'>
                 <div class='transaction-main'>
-                    <span class='transaction-amount'>{(t.transaction_value >= 0 ? "+ " : "- ")}{Math.Abs(t.transaction_value):N2} zł</span>
-                    <span class='transaction-category'>{t.transaction_category}</span>
-                    <span class='transaction-date'>{t.transaction_date:yyyy-MM-dd}</span>
+                    <span class='transaction-amount'>{(t.Value >= 0 ? "+ " : "- ")}{Math.Abs(t.Value):N2} zł</span>
+                    <span class='transaction-category'>{t.Category}</span>
+                    <span class='transaction-date'>{t.Date:yyyy-MM-dd}</span>
                 </div>
                 <div class='transaction-actions'>
-                    <button class='btn-secondary' onclick='editTransaction({t.transaction_id})'>Edytuj</button>
-                    <button class='btn-danger' hx-delete='/dashboard/transactions/{t.transaction_id}' hx-confirm='Czy na pewno chcesz usunąć tę transakcję?'>Usuń</button>
+                    <button class='btn-secondary' onclick='editTransaction({t.Id})'>Edytuj</button>
+                    <button class='btn-danger' hx-delete='/dashboard/transactions/{t.Id}' hx-confirm='Czy na pewno chcesz usunąć tę transakcję?'>Usuń</button>
                 </div>
             </li>
         "));

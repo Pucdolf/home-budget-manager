@@ -15,22 +15,22 @@ public class RegisterService
 
     public bool IsUsernameTaken(string username)
     {
-        return _context.Users.Any(u => u.user_login == username);
+        return _context.Users.Any(u => u.Login == username);
     }
 
     public bool IsEmailTaken(string email)
     {
-        return _context.Users.Any(u => u.user_email == email);
+        return _context.Users.Any(u => u.Email == email);
     }
 
     public void RegisterUser(string email, string username, string password)
     {
         var user = new DBUser
         {
-            user_email = email,
-            user_login = username,
-            user_password = _hasher.hash(password),
-            user_role = SystemRole.Guest
+            Email = email,
+            Login = username,
+            Password = _hasher.hash(password),
+            Role = SystemRole.Guest
         };
 
         _context.Users.Add(user);

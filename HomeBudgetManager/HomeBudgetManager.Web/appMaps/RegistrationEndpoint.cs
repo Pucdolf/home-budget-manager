@@ -24,7 +24,6 @@ namespace HomeBudgetManager.Web.appMaps
 
                 return Results.Content(html, "text/html");
             });
-
         }
     }
 }

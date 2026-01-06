@@ -28,7 +28,7 @@ namespace HomeBudgetManager.Web.appMaps
                     return Results.Content(htmlResponse, "text/html");
                 }
 
-                // Sprawd?, czy login lub email s? ju? zaj?te
+                // Sprawdz, czy login lub email sa juz zajete
                 if (registerService.IsUsernameTaken(username))
                 {
                     var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Ten login jest już zajęty!</div>";
@@ -41,7 +41,7 @@ namespace HomeBudgetManager.Web.appMaps
                     return Results.Content(htmlResponse, "text/html");
                 }
 
-                // Zarejestruj u?ytkownika
+                // Zarejestruj uzytkownika
                 registerService.RegisterUser(email, username, password);
                 var successResponse = "<div class='p-4 bg-green-100 border border-green-400 text-green-700 rounded'>Rejestracja powiodła się!</div>";
                 return Results.Content(successResponse, "text/html");
