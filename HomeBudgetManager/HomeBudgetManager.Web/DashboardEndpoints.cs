@@ -1,4 +1,4 @@
-using HomeBudgetManager.Core;
+ï»¿using HomeBudgetManager.Core;
 using HomeBudgetManager.Core.DBTables;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +22,7 @@ public static class DashboardEndpoints
 
             if (user == null)
             {
-                return Results.Content("<div class='error'>B³¹d: U¿ytkownik nieznaleziony.</div>", "text/html");
+                return Results.Content("<div class='error'>BÅ‚Ä…d: UÅ¼ytkownik nieznaleziony.</div>", "text/html");
             }
 
             var transactions = await db.Transactions
@@ -67,7 +67,7 @@ public static class DashboardEndpoints
 
             if (user == null)
             {
-                return Results.Content("<div class='error'>B³¹d: U¿ytkownik nieznaleziony.</div>", "text/html");
+                return Results.Content("<div class='error'>BÅ‚Ä…d: UÅ¼ytkownik nieznaleziony.</div>", "text/html");
             }
 
             var form = context.Request.Form;
@@ -77,7 +77,8 @@ public static class DashboardEndpoints
 
             var transaction = new DBTransaction
             {
-                Category = category,
+                // TODO: FIX
+                Category = null, //category,
                 CategoryId = 0,
                 Date = DateTime.Now,
                 Description = description,
@@ -96,12 +97,12 @@ public static class DashboardEndpoints
 
             } catch (Exception ex)
             {
-                Console.WriteLine($"B³¹d zapisu: {ex.Message}");
+                Console.WriteLine($"BÂ³Â¹d zapisu: {ex.Message}");
                 if (ex.InnerException != null)
                 {
                     Console.WriteLine($"Inner: {ex.InnerException.Message}");
                 }
-                return Results.Content($"<div class='error'>B³¹d serwera: nie uda³o siê zapisaæ transakcji.</div>", "text/html");
+                return Results.Content($"<div class='error'>BÅ‚Ä…d serwera: nie udaÅ‚o siÄ™ zapisaÄ‡ transakcji.</div>", "text/html");
             }
         });
 
@@ -113,7 +114,7 @@ public static class DashboardEndpoints
             var user = await db.Users.FirstOrDefaultAsync(u => u.Login == userLogin);
             if (user == null)
             {
-                return Results.Content("<div class='error'>B³¹d: U¿ytkownik nieznaleziony.</div>", "text/html");
+                return Results.Content("<div class='error'>BÅ‚Ä…d: UÅ¼ytkownik nieznaleziony.</div>", "text/html");
             }
 
             var transaction = await db.Transactions
@@ -121,13 +122,13 @@ public static class DashboardEndpoints
 
             if (transaction == null)
             {
-                return Results.Content("<div class='error'>B³¹d: Transakcja nieznaleziona.</div>", "text/html");
+                return Results.Content("<div class='error'>BÅ‚Ä…d: Transakcja nieznaleziona.</div>", "text/html");
             }
 
             db.Transactions.Remove(transaction);
             await db.SaveChangesAsync();
 
-            return Results.Content("<div class='success'>Transakcja usuniêta</div>", "text/html");
+            return Results.Content("<div class='success'>Transakcja usuniÄ™ta</div>", "text/html");
         });
 
         // PUT - edycja transakcji
@@ -138,7 +139,7 @@ public static class DashboardEndpoints
             var user = await db.Users.FirstOrDefaultAsync(u => u.Login == userLogin);
             if (user == null)
             {
-                return Results.Content("<div class='error'>B³¹d: U¿ytkownik nieznaleziony.</div>", "text/html");
+                return Results.Content("<div class='error'>BÅ‚Ä…d: UÅ¼ytkownik nieznaleziony.</div>", "text/html");
             }
 
             var transaction = await db.Transactions
@@ -147,7 +148,8 @@ public static class DashboardEndpoints
             var form = context.Request.Form;
             transaction.Value = decimal.Parse(form["amount"]);
             transaction.Description = form["description"].ToString();
-            transaction.Category = form["category"].ToString();
+            // TODO: FIX
+            //transaction.Category = form["category"].ToString();
 
             await db.SaveChangesAsync();
 
