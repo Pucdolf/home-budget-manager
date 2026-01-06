@@ -23,15 +23,15 @@ namespace HomeBudgetManager.Web.appMaps
                     return Results.Text("Błąd: użytkownik niezalogowany", "text/plain");
 
                 var user = await db.Users
-                    .Include(u => u.user_house) // załaduj domostwo
-                    .FirstOrDefaultAsync(u => u.user_login == login);
+                    .Include(u => u.House) // załaduj domostwo
+                    .FirstOrDefaultAsync(u => u.Login == login);
 
                 if (user == null)
                     return Results.Text("Błąd: użytkownik nie istnieje", "text/plain");
 
                 try
                 {
-                    if (user.user_house_id is null)
+                    if (user.HouseId is null)
                     {
                         // użytkownik nie należy do domostwa
                         var html = $@"
@@ -48,14 +48,14 @@ namespace HomeBudgetManager.Web.appMaps
                     else
                     {
                         // użytkownik ma domostwo
-                        var house = user.user_house!;
+                        var house = user.House!;
                         var html = $@"
             <section class='card'>
                 <h2>Twoje domostwo</h2>
-                <p><strong>Nazwa:</strong> {house.house_name}</p>
-                <p><strong>Opis:</strong> {house.house_description}</p>
-                <p><strong>Admin ID:</strong> {house.house_admin_id}</p>
-                <p><strong>Kod zaproszenia:</strong> {house.house_join_code}</p>
+                <p><strong>Nazwa:</strong> {house.Name}</p>
+                <p><strong>Opis:</strong> {house.Description}</p>
+                <p><strong>Admin ID:</strong> {house.AdminId}</p>
+                <p><strong>Kod zaproszenia:</strong> {house.JoinCode}</p>
                 <!-- Tu później dodasz np. listę członków -->
             </section>";
                         return Results.Content(html, "text/html");

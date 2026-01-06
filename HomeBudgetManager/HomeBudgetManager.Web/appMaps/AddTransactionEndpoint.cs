@@ -24,14 +24,20 @@ namespace HomeBudgetManager.Web.appMaps
                 }
 
                 var userId = int.Parse(context.Request.Cookies["user_id"]);
-                var user = await db.Users.FirstOrDefaultAsync(u => u.user_id == userId);
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                if (user == null)
+                {
+                    return Results.Content("nie ma uzytkownika");
+                }
+
                 var username = context.Request.Cookies["logged_user"];
 
                 // Wczytaj plik HTML z kodowaniem UTF-8
                 var filePath = Path.Combine(env.WebRootPath, "addTransaction.html");
                 var html = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
 
-                html = html.Replace("{username}", user.user_login);
+                html = html.Replace("{username}", user.Login);
 
                 return Results.Content(html, "text/html; charset=utf-8");
             });

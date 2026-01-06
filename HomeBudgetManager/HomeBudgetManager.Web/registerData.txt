@@ -1,0 +1,1 @@
+Update-Database -Project HomeBudgetManager.Core -StartupProject HomeBudgetManager.Web
