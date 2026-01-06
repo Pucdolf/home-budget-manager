@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Dodaj transakcję</title>
     <link rel="stylesheet" href="/css/dashboard.css">
-    <link rel="stylesheet" href="/css/addTransaction.css">
+    <link rel="stylesheet" href="/css/newTransaction.css">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 <body>
@@ -13,7 +13,7 @@
             <h2>Dodaj nową transakcję</h2>
 
             <!-- Formularz dodawania transakcji -->
-            <form hx-post="/dashboard/transactions"
+            <form hx-post="/transactions"
                   hx-target="#form-response"
                   hx-swap="innerHTML"
                   class="transaction-form">

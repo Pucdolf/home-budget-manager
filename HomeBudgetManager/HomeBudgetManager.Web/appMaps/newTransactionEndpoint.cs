@@ -6,17 +6,16 @@ using System.Text;
 using System.Threading.Tasks;
 using HomeBudgetManager.Core;
 using HomeBudgetManager.Core.DBTables;
-using HomeBudgetManager.Web.Endpoints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 
 namespace HomeBudgetManager.Web.appMaps
 {
-    public class AddTransactionEndpoint : IEndpoint
+    public class newTransactionEndpoint : IEndpoint
     {
         public void Map(IEndpointRouteBuilder app)
         {
-            app.MapGet("/add-transaction", async (HttpContext context, IWebHostEnvironment env, AppDbContext db) =>
+            app.MapGet("/new-transaction", async (HttpContext context, IWebHostEnvironment env, AppDbContext db) =>
             {
                 if (!context.Request.Cookies.ContainsKey("logged_user"))
                 {
@@ -28,13 +27,13 @@ namespace HomeBudgetManager.Web.appMaps
 
                 if (user == null)
                 {
-                    return Results.Content("nie ma uzytkownika");
+                    return Results.Content("brak uzytkownika o takiej nazwie");
                 }
 
                 var username = context.Request.Cookies["logged_user"];
 
                 // Wczytaj plik HTML z kodowaniem UTF-8
-                var filePath = Path.Combine(env.WebRootPath, "addTransaction.html");
+                var filePath = Path.Combine(env.WebRootPath, "newTransaction.html");
                 var html = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
 
                 html = html.Replace("{username}", user.Login);
