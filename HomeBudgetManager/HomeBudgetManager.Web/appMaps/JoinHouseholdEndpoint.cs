@@ -21,20 +21,20 @@ namespace HomeBudgetManager.Web.appMaps
                 var code = context.Request.Form["code"].ToString().ToUpper();
                 var login = context.Request.Cookies["logged_user"];
 
-                var user = await db.Users.FirstOrDefaultAsync(u => u.user_login == login);
-                if (user == null || user.user_house_id != null)
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Login == login);
+                if (user == null || user.HouseId != null)
                 {
                     return Results.Content("<div class='error'>Nie możesz dołączyć do nowego domostwa.</div>", "text/html");
                 }
 
-                var house = await db.Houses.FirstOrDefaultAsync(h => h.house_join_code == code);
+                var house = await db.Houses.FirstOrDefaultAsync(h => h.JoinCode == code);
                 if (house == null)
                 {
                     return Results.Content("<div class='error'>Nie znaleziono domostwa o takim kodzie.</div>", "text/html");
                 }
 
-                user.user_house_id = house.house_id;
-                user.user_role = SystemRole.HouseholdMember;
+                user.HouseId = house.Id;
+                user.Role = SystemRole.HouseholdMember;
 
                 await db.SaveChangesAsync();
 

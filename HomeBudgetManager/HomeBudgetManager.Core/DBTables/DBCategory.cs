@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -13,14 +14,15 @@ namespace HomeBudgetManager.Core.DBTables
     public class DBCategory
     {
         [Key]
-        public int categoryId { get; set; }
+        [Column("category_id")]
+        public int Id { get; set; }
 
         [Required]
         [Column("category_name")]
-        public string categoryName { get; set; }
+        public required string Name { get; set; }
 
         [Column("category_description")]
-        public string? categoryDescription { get; set; }
+        public string? Description { get; set; }
     }
 
 }

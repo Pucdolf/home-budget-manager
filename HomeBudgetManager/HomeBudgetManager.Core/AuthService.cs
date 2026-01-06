@@ -14,10 +14,10 @@ public class AuthService
 
     public bool ValidateUser(string username, string password)
     {
-        var user = _context.Users.FirstOrDefault(u => u.user_login == username);
+        var user = _context.Users.FirstOrDefault(u => u.Login == username);
         if (user == null) return false;
 
-        return _hasher.verifyPassword(user.user_password, password);
+        return _hasher.verifyPassword(user.Password, password);
     }
 
     public string GetWelcomeMessage(string username)
@@ -27,6 +27,6 @@ public class AuthService
 
     public DBUser? GetUserByUsername(string username)
     {
-        return _context.Users.FirstOrDefault(u => u.user_login == username);
+        return _context.Users.FirstOrDefault(u => u.Login == username);
     }
 }

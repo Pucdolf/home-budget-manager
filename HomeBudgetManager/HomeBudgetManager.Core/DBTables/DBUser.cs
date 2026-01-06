@@ -13,35 +13,33 @@ namespace HomeBudgetManager.Core.DBTables
         SystemAdmin = 4       // Globalny administrator systemu (zarządza aplikacją)
     }
 
-    [Index(nameof(user_email), IsUnique = true)]
+    [Index(nameof(Email), IsUnique = true)]
     [Table("users")]
     public class DBUser
     {
         [Key]
         [Column("user_id")]
-        public int user_id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         [Column("user_email")]
-        public string user_email { get; set; }
+        public required string Email { get; set; }
 
         [Required]
         [Column("user_login")]
-        public string user_login { get; set; }
+        public required string Login { get; set; }
 
         [Required]
         [Column("user_password")]
-        public string user_password { get; set; }
+        public required string Password { get; set; }
 
         [Column("user_role")]
-        public SystemRole user_role { get; set; } = SystemRole.Guest;
+        public SystemRole Role { get; set; } = SystemRole.Guest;
 
         [Column("user_house_id")]
-        public int? user_house_id { get; set; }
+        public int? HouseId { get; set; }
 
         [ForeignKey("user_house_id")]
-        public DBHouse? user_house { get; set; }
+        public DBHouse? House { get; set; }
     }
-
-
 }

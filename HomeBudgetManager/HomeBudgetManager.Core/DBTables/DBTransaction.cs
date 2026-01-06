@@ -11,31 +11,36 @@ namespace HomeBudgetManager.Core.DBTables
     public class DBTransaction
     {
         [Key]
-        public int transaction_id { get; set; }
+        [Column("transaction_id")]
+        public int Id { get; set; }
 
-        public string transaction_category { get; set; }
-
-        public string transaction_description { get; set; }
+        [ForeignKey("CategoryId")]
+        public required int CategoryId { get; set; }
 
         [Required]
-        public decimal transaction_value { get; set; }
+        [Column("transaction_value")]
+        public decimal Value { get; set; }
 
         [Column("transaction_from_user_id")]
-        public int DBUserId { get; set; }
-        public DBUser DBUser { get; set; }
+        public required int UserId { get; set; }
 
-        [Column("transaction_for_house_id")]
-        public int? DBHouseId { get; set; }
-        public DBHouse? DBHouse { get; set; }
+        [Column("transaction_description")]
+        public string? Description { get; set; }
+
+        [Column("transaction_for_house_id")] // Czy potrzebne? można to pobrać od użytkownika
+        public int? HouseId { get; set; }
+        public DBHouse? House { get; set; } // potrzebne do foreign key
 
         [Required]
-        [DataType(DataType.DateTime)]       
+        [DataType(DataType.DateTime)]
+        [Column("transaction_date")]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd HH:mm}", ApplyFormatInEditMode = true)]
-        public DateTime transaction_date { get; set; } = DateTime.Now;
+        public DateTime Date { get; set; } = DateTime.Now;
 
-        public bool transaction_is_repetable { get; set; }
+        [Column("transaction_is_repeatable")]
+        public bool IsRepeatable { get; set; }
 
+        [Column("description_category")]
+        public required string Category { get; set; }
     }
-
-
 }

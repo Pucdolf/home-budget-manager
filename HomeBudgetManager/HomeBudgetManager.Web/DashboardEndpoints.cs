@@ -18,7 +18,7 @@ public static class DashboardEndpoints
 
             Console.WriteLine($"DEBUG: Cookie logged_user = '{userLogin}'");
 
-            var user = await db.Users.FirstOrDefaultAsync(u => u.user_login == userLogin);
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Login == userLogin);
 
             if (user == null)
             {
@@ -26,17 +26,17 @@ public static class DashboardEndpoints
             }
 
             var transactions = await db.Transactions
-                                .Where(t => t.DBUserId == user.user_id)
-                                .OrderByDescending(t => t.transaction_date)
+                                .Where(t => t.UserId == user.Id)
+                                .OrderByDescending(t => t.Date)
                                 .ToListAsync();
 
             var sb = new System.Text.StringBuilder();
 
             foreach (var t in transactions)
             {
-                string date = t.transaction_date.ToString("dd.MM.yyyy");
-                string amount = t.transaction_value.ToString("C2", new System.Globalization.CultureInfo("pl-PL"));
-                string colorClass = t.transaction_value < 0 ? "amount-expense" : "amount-income";
+                string date = t.Date.ToString("dd.MM.yyyy");
+                string amount = t.Value.ToString("C2", new System.Globalization.CultureInfo("pl-PL"));
+                string colorClass = t.Value < 0 ? "amount-expense" : "amount-income";
 
                 sb.Append($"""
 
@@ -45,7 +45,7 @@ public static class DashboardEndpoints
                             {amount}
                         </div>
                         <div class="transaction-details">
-                            <span class="category-badge">{t.transaction_category}</span>
+                            <span class="category-badge">{t.Category}</span>
                             <span class="transaction-date">{date}</span>
                         </div>
                     </li>
@@ -63,7 +63,7 @@ public static class DashboardEndpoints
 
             Console.WriteLine($"DEBUG: Cookie logged_user = '{userLogin}'");
 
-            var user = await db.Users.FirstOrDefaultAsync(u => u.user_login == userLogin);
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Login == userLogin);
 
             if (user == null)
             {
@@ -77,13 +77,14 @@ public static class DashboardEndpoints
 
             var transaction = new DBTransaction
             {
-                transaction_category = category,
-                transaction_date = DateTime.Now,
-                transaction_description = description,
-                transaction_is_repetable = false,
-                transaction_value = amount,
-                DBUserId = user.user_id,
-                DBHouseId = user.user_house_id
+                Category = category,
+                CategoryId = 0,
+                Date = DateTime.Now,
+                Description = description,
+                IsRepeatable = false,
+                Value = amount,
+                UserId = user.Id,
+                HouseId = user.HouseId
             };
 
 
@@ -109,14 +110,14 @@ public static class DashboardEndpoints
 
             var userLogin = context.Request.Cookies["logged_user"];
 
-            var user = await db.Users.FirstOrDefaultAsync(u => u.user_login == userLogin);
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Login == userLogin);
             if (user == null)
             {
                 return Results.Content("<div class='error'>B³¹d: U¿ytkownik nieznaleziony.</div>", "text/html");
             }
 
             var transaction = await db.Transactions
-                        .FirstOrDefaultAsync(t => t.transaction_id == id && t.DBUserId == user.user_id);
+                        .FirstOrDefaultAsync(t => t.Id == id && t.UserId == user.Id);
 
             if (transaction == null)
             {
@@ -134,19 +135,19 @@ public static class DashboardEndpoints
 
             var userLogin = context.Request.Cookies["logged_user"];
 
-            var user = await db.Users.FirstOrDefaultAsync(u => u.user_login == userLogin);
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Login == userLogin);
             if (user == null)
             {
                 return Results.Content("<div class='error'>B³¹d: U¿ytkownik nieznaleziony.</div>", "text/html");
             }
 
             var transaction = await db.Transactions
-                            .FirstOrDefaultAsync(t => t.transaction_id == id && t.DBUserId==user.user_id);
+                            .FirstOrDefaultAsync(t => t.Id == id && t.UserId==user.Id);
 
             var form = context.Request.Form;
-            transaction.transaction_value = decimal.Parse(form["amount"]);
-            transaction.transaction_description = form["description"].ToString();
-            transaction.transaction_category = form["category"].ToString();
+            transaction.Value = decimal.Parse(form["amount"]);
+            transaction.Description = form["description"].ToString();
+            transaction.Category = form["category"].ToString();
 
             await db.SaveChangesAsync();
 

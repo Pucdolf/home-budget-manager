@@ -3,6 +3,7 @@ using System;
 using HomeBudgetManager.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,30 +11,31 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HomeBudgetManager.Core.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260106124610_fixedAdminId")]
+    partial class fixedAdminId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
 
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBCategory", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("categoryId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("category_id");
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("categoryDescription")
                         .HasColumnType("TEXT")
                         .HasColumnName("category_description");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("categoryName")
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("category_name");
 
-                    b.HasKey("Id");
+                    b.HasKey("categoryId");
 
                     b.ToTable("categories");
                 });
@@ -77,8 +79,7 @@ namespace HomeBudgetManager.Core.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("transaction_id");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Category")
                         .IsRequired()
@@ -89,8 +90,7 @@ namespace HomeBudgetManager.Core.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("transaction_date");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .HasColumnType("TEXT")
@@ -109,8 +109,7 @@ namespace HomeBudgetManager.Core.Migrations
                         .HasColumnName("transaction_from_user_id");
 
                     b.Property<decimal>("Value")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("transaction_value");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
