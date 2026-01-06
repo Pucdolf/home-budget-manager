@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using HomeBudgetManager.Core;
 using HomeBudgetManager.Core.DBTables;
-using HomeBudgetManager.Web.Endpoints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 

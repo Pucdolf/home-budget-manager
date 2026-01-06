@@ -14,10 +14,5 @@ namespace HomeBudgetManager.Web
 
             return new AppDbContext(optionsBuilder.Options);
         }
-
     }
-
-
-
-
 }

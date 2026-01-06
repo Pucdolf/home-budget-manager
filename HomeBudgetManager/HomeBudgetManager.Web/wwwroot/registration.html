@@ -16,7 +16,7 @@
             <p>Utwórz konto</p>
         </div>
 
-        <form hx-post="/register" hx-target="#result-area" hx-swap="innerHTML">
+        <form hx-post="/registration" hx-target="#result-area" hx-swap="innerHTML">
             <div class="form-group">
                 <label for="username">Użytkownik</label>
                 <input id="username" name="username" type="text" placeholder="admin" class="form-input" />
@@ -24,22 +24,21 @@
 
             <div class="form-group">
                 <label for="email">Adres email</label>
-                <input id="email" name="email" type="email" placeholder="Megawonsz67@gmail.com" class=" = form-input" />
+                <input id="email" name="email" type="email" placeholder="Megawonsz67@gmail.com" class="form-input" />
             </div>
 
             <div class="form-group">
                 <label for="password">Hasło</label>
-                <input id="password" name="password" type="password" placeholder="1234" class="form-input" />
+                <input id="password" name="password" type="password" placeholder="" class="form-input" />
             </div>
 
-            <button hx-get="/login" hx-target="#auth-container" hx-swap="innerHTML" class="btn-loginPage">
-                Powrót do logowania
-            </button>
             <button type="submit" class="btn-register">
                 Zarejestruj się
             </button>
+            <button hx-get="/login" hx-target="#auth-container" hx-swap="innerHTML" class="btn-loginPage">
+                Powrót do logowania
+            </button>
         </form>
-
 
         <div id="result-area"></div>
     </div>

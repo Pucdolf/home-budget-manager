@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using HomeBudgetManager.Core;
 using HomeBudgetManager.Core.DBTables;
-using HomeBudgetManager.Web.Endpoints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 
@@ -20,11 +19,8 @@ namespace HomeBudgetManager.Web.appMaps
 
                 var filePath = Path.Combine(env.WebRootPath, "index.html");
 
-                var html = File.ReadAllText(filePath);
-
-                return Results.Content(html, "text/html");
+                return Results.Content(File.ReadAllText(filePath), "text/html");
             });
-
         }
     }
 }
