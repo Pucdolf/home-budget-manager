@@ -4,15 +4,15 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using System.Transactions;
 
-namespace HomeBudgetManager.Web.Endpoints;
+namespace HomeBudgetManager.Web.appMaps;
 
-public static class DashboardEndpoints
+public class TransactionsEndpoints : IEndpoint
 {
-    public static RouteGroupBuilder MapDashboardEndpoints(this RouteGroupBuilder group)
+    public void Map(IEndpointRouteBuilder app)
     {
-
         // GET - lista wszystkich transakcji
-        group.MapGet("/transactions", async (HttpContext context, AppDbContext db) => {
+
+        app.MapGet("/transactions", async (HttpContext context, AppDbContext db) => {
 
             var userLogin = context.Request.Cookies["logged_user"];
 
@@ -56,8 +56,58 @@ public static class DashboardEndpoints
             return Results.Content(sb.ToString(), "text/html");
         });
 
+
+        // GET - lista x transakcji
+
+        app.MapGet("/transactions/listSome", async (HttpContext context, AppDbContext db) =>
+        {
+
+            var userLogin = context.Request.Cookies["logged_user"];
+
+            Console.WriteLine($"DEBUG: Cookie logged_user = '{userLogin}'");
+
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Login == userLogin);
+
+            if (user == null)
+            {
+                return Results.Content("<div class='error'>B³¹d: U¿ytkownik nieznaleziony.</div>", "text/html");
+            }
+
+            var transactions = await db.Transactions
+                                .Where(t => t.UserId == user.Id)
+                                .OrderByDescending(t => t.Date)
+                                .Take(5)
+                                .ToListAsync();
+
+            var sb = new System.Text.StringBuilder();
+
+            foreach (var t in transactions)
+            {
+                string date = t.Date.ToString("dd.MM.yyyy");
+                string amount = t.Value.ToString("C2", new System.Globalization.CultureInfo("pl-PL"));
+                string colorClass = t.Value < 0 ? "amount-expense" : "amount-income";
+
+                sb.Append($"""
+
+                    <li class="transaction-item">
+                        <div class="transaction-amount {colorClass}">
+                            {amount}
+                        </div>
+                        <div class="transaction-details">
+                            <span class="category-badge">{t.Category}</span>
+                            <span class="transaction-date">{date}</span>
+                        </div>
+                    </li>
+
+                 """);
+            }
+
+            return Results.Content(sb.ToString(), "text/html");
+        });
+
         // POST - dodawanie nowej transakcji
-        group.MapPost("/transactions", async (HttpContext context, AppDbContext db) => {
+
+        app.MapPost("/transactions", async (HttpContext context, AppDbContext db) => {
             
             var userLogin = context.Request.Cookies["logged_user"];
 
@@ -87,7 +137,6 @@ public static class DashboardEndpoints
                 HouseId = user.HouseId
             };
 
-
             try
             {
                 db.Transactions.Add(transaction);
@@ -106,7 +155,7 @@ public static class DashboardEndpoints
         });
 
         // DELETE - usuwanie transakcji
-        group.MapDelete("/transactions", async (int id, HttpContext context, AppDbContext db) => {
+        app.MapDelete("/transactions", async (int id, HttpContext context, AppDbContext db) => {
 
             var userLogin = context.Request.Cookies["logged_user"];
 
@@ -131,7 +180,7 @@ public static class DashboardEndpoints
         });
 
         // PUT - edycja transakcji
-        group.MapPut("/transactions", async (int id, HttpContext context, AppDbContext db) => {
+        app.MapPut("/transactions", async (int id, HttpContext context, AppDbContext db) => {
 
             var userLogin = context.Request.Cookies["logged_user"];
 
@@ -153,8 +202,5 @@ public static class DashboardEndpoints
 
             return Results.Content("<div class='success'>Transakcja zaktualizowana!</div>", "text/html");
         });
-
-
-        return group;
     }
 }

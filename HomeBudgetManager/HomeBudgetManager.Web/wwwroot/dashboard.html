@@ -33,20 +33,19 @@
                 </div>
 
                 <div class="actions-box">
-                    <!-- wizualny przycisk, brak akcji -->
-                    <a href="/add-transaction" class="btn-primary">Dodaj transakcję</a>
+                    <a href="/new-transaction" class="btn-primary">Dodaj transakcję</a>
                 </div>
 
                 <div class="transactions-box">
                     <h3>Ostatnie transakcje</h3>
                     <ul class="transactions-list"
                         id="transactions-list"
-                        hx-get="/dashboard/transactions"
+                        hx-get="/transactions/listsome"
                         hx-trigger="load"
                         hx-swap="innerHTML">
                         <li class='transaction-item'>
                             <div class='transaction-main'>
-                                <span>Brak transakcji</span>
+                                <span>Ładowanie transakcji...</span>
                             </div>
                         </li>
                     </ul>

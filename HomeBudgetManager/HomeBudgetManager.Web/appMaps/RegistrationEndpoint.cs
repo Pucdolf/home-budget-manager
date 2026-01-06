@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using HomeBudgetManager.Core;
 using HomeBudgetManager.Core.DBTables;
-using HomeBudgetManager.Web.Endpoints;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 
@@ -20,9 +19,47 @@ namespace HomeBudgetManager.Web.appMaps
 
                 var filePath = Path.Combine(env.WebRootPath, "registration.html");
 
-                var html = File.ReadAllText(filePath);
+                return Results.Content(File.ReadAllText(filePath), "text/html");
+            });
 
-                return Results.Content(html, "text/html");
+            app.MapPost("/registration", (HttpContext httpContext, RegisterService registerService) => {
+
+                var username = httpContext.Request.Form["username"];
+                var password = httpContext.Request.Form["password"];
+                var email = httpContext.Request.Form["email"];
+
+                if (StringValues.IsNullOrEmpty(username) || StringValues.IsNullOrEmpty(password) || StringValues.IsNullOrEmpty(email))
+                {
+                    var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>B³¹d: Nie podano wszystkich danych!</div>";
+                    return Results.Content(htmlResponse, "text/html");
+                }
+
+                // sprawdz czy nazwa uzytkownika jest zajeta
+                if (registerService.IsUsernameTaken(username))
+                {
+                    var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>B³¹d: Ten login jest ju¿ zajêty!</div>";
+                    return Results.Content(htmlResponse, "text/html");
+                }
+
+                // Sprawdz, czy email jest zajety
+                if (registerService.IsEmailTaken(email))
+                {
+                    var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>B³¹d: Ten adres e-mail jest ju¿ zajêty!</div>";
+                    return Results.Content(htmlResponse, "text/html");
+                }
+
+                // Zarejestruj uzytkownika
+                registerService.RegisterUser(email, username, password);
+                var successResponse = @"
+                    <div class='p-4 bg-green-100 border border-green-400 text-green-700 rounded'>
+                        Rejestracja powiod³a siê!
+                    </div>
+                    <script>
+                        setTimeout(function() {
+                            window.location.href = '/index.html';
+                        }, 1000);
+                    </script>";
+                return Results.Content(successResponse, "text/html");
             });
         }
     }
