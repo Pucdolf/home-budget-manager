@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using HomeBudgetManager.Core;
-using HomeBudgetManager.Core.DBTables;
-using HomeBudgetManager.Web.Endpoints;
+﻿using HomeBudgetManager.Core;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Primitives;
 
 namespace HomeBudgetManager.Web.appMaps
 {
@@ -35,14 +26,14 @@ namespace HomeBudgetManager.Web.appMaps
                     {
                         // użytkownik nie należy do domostwa
                         var html = $@"
-            <section class='card'>
-                <h2>Twoje domostwo</h2>
-                <p>Nie jesteś jeszcze członkiem żadnego domostwa.</p>
-                <div class='actions-box'>
-                    <a href='createHousehold.html' class='btn-primary'>Utwórz domostwo</a>
-                    <a href='joinHousehold.html' class='btn-primary'>Dołącz do domostwa</a>
-                </div>
-            </section>";
+                            <section class='card'>
+                                <h2>Twoje domostwo</h2>
+                                <p>Nie jesteś jeszcze członkiem żadnego domostwa.</p>
+                                <div class='actions-box'>
+                                    <a href='createHousehold.html' class='btn-primary'>Utwórz domostwo</a>
+                                    <a href='joinHousehold.html' class='btn-primary'>Dołącz do domostwa</a>
+                                </div>
+                            </section>";
                         return Results.Content(html, "text/html");
                     }
                     else
@@ -50,14 +41,14 @@ namespace HomeBudgetManager.Web.appMaps
                         // użytkownik ma domostwo
                         var house = user.House!;
                         var html = $@"
-            <section class='card'>
-                <h2>Twoje domostwo</h2>
-                <p><strong>Nazwa:</strong> {house.Name}</p>
-                <p><strong>Opis:</strong> {house.Description}</p>
-                <p><strong>Admin ID:</strong> {house.AdminId}</p>
-                <p><strong>Kod zaproszenia:</strong> {house.JoinCode}</p>
-                <!-- Tu później dodasz np. listę członków -->
-            </section>";
+                            <section class='card'>
+                                <h2>Twoje domostwo</h2>
+                                <p><strong>Nazwa:</strong> {house.Name}</p>
+                                <p><strong>Opis:</strong> {house.Description}</p>
+                                <p><strong>Admin ID:</strong> {house.AdminId}</p>
+                                <p><strong>Kod zaproszenia:</strong> {house.JoinCode}</p>
+                                <!-- Tu później dodasz np. listę członków -->
+                            </section>";
                         return Results.Content(html, "text/html");
                     }
                 }

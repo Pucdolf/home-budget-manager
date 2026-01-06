@@ -1,17 +1,4 @@
-using HomeBudgetManager.Core;
-using HomeBudgetManager.Core.DBTables;
 using HomeBudgetManager.Web.appMaps;
-using HomeBudgetManager.Web.Endpoints;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Primitives;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-
 
 namespace HomeBudgetManager.Web
 {
@@ -31,8 +18,4 @@ namespace HomeBudgetManager.Web
             }
         }
     }
-
-
-
-
 }

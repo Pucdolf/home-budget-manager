@@ -16,7 +16,7 @@
             <p>Utwórz konto</p>
         </div>
 
-        <form hx-post="/register" hx-target="#result-area" hx-swap="innerHTML">
+        <form hx-post="/registration" hx-target="#result-area" hx-swap="innerHTML">
             <div class="form-group">
                 <label for="username">Użytkownik</label>
                 <input id="username" name="username" type="text" placeholder="admin" class="form-input" />
@@ -39,7 +39,6 @@
                 Powrót do logowania
             </button>
         </form>
-
 
         <div id="result-area"></div>
     </div>
