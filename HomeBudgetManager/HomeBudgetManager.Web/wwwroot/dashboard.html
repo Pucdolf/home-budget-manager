@@ -59,7 +59,12 @@
             fetch("/dashboard-household")
                 .then(res => res.text())
                 .then(html => {
-                    document.getElementById("dashboard-main").innerHTML = html;
+                    const target = document.getElementById("dashboard-main");
+                    target.innerHTML = html;
+
+                    if (window.htmx) {
+                        htmx.process(target);
+                    }
                 })
                 .catch(err => {
                     document.getElementById("dashboard-main").innerHTML = "<p>Błąd ładowania domostwa.</p>";
@@ -70,6 +75,7 @@
             location.reload();
         }
     </script>
+
 
     <script>
         document.body.addEventListener('htmx:afterSwap', function (event) {
