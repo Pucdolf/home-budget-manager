@@ -14,15 +14,18 @@ namespace HomeBudgetManager.Core.DBTables
         [Column("transaction_id")]
         public int Id { get; set; }
 
-        [ForeignKey("CategoryId")]
+        [ForeignKey("category_id")]
         public required int CategoryId { get; set; }
+        public DBCategory? Category { get; set; }
+
+        [ForeignKey("user_id")]
+        public required int UserId { get; set; }
+        public DBUser? User { get; set; }
 
         [Required]
         [Column("transaction_value")]
         public decimal Value { get; set; }
 
-        [Column("transaction_from_user_id")]
-        public required int UserId { get; set; }
 
         [Column("transaction_description")]
         public string? Description { get; set; }
@@ -40,7 +43,6 @@ namespace HomeBudgetManager.Core.DBTables
         [Column("transaction_is_repeatable")]
         public bool IsRepeatable { get; set; }
 
-        [Column("description_category")]
-        public required string Category { get; set; }
+        public virtual DBRepetableTransaction? RepetableTransaction { get; set; }
     }
 }

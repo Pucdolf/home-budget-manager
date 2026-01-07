@@ -28,10 +28,11 @@ namespace HomeBudgetManager.Web.appMaps
                     return Results.Redirect("/");
                 }
 
+                
                 var balance = await db.Transactions
                                     .Where(t => t.UserId == user.Id)
                                     .SumAsync(t => t.Value);
-
+                
                 // 1. Ścieżka do pliku HTML
                 var filePath = Path.Combine(env.WebRootPath, "dashboard.html");
 

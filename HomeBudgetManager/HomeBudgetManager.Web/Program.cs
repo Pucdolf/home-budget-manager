@@ -8,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. Rejestracja serwisów (Dependency Injection)
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RegisterService>();
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<TransactionService>();
 
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
 {
@@ -26,7 +28,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 var app = builder.Build();
 
-app.UseDefaultFiles();
+using (var scope = app.Services.CreateScope())
+{
+    // Pobieramy serwis z kontenera DI
+    var categoryService = scope.ServiceProvider.GetRequiredService<CategoryService>();
+    categoryService.addDefaultCategories();
+}
+
+    app.UseDefaultFiles();
 app.UseStaticFiles();
 app.MapAllEndpoints();
 

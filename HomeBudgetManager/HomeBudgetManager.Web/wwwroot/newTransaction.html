@@ -30,24 +30,46 @@
                            class="form-input">
                 </div>
 
+                <!-- NOWE POLE: Rodzaj transakcji -->
+                <div class="form-group">
+                    <label>Rodzaj transakcji</label>
+
+                    <div class="radio-group" style="display: flex; gap: 20px; align-items: center;">
+                        <!-- Opcja 1: Wydatek (Domyślnie zaznaczony) -->
+                        <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio"
+                                   name="transactionType"
+                                   value="expense"
+                                   checked>
+                            Wydatek
+                        </label>
+
+                        <!-- Opcja 2: Przychód -->
+                        <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio"
+                                   name="transactionType"
+                                   value="income">
+                            Przychód
+                        </label>
+                    </div>
+                </div>
+
                 <!-- Pole kategoria -->
                 <div class="form-group">
                     <label for="category">Kategoria</label>
-                    <select id="category"
-                            name="category"
-                            required
-                            class="form-input">
-                        <!-- Dodać potem predefiniowane kategorie -->
-                        <option value="">Wybierz kategorię</option>
-                        <option value="Zakupy spożywcze">Zakupy spożywcze</option>
-                        <option value="Transport">Transport</option>
-                        <option value="Rozrywka">Rozrywka</option>
-                        <option value="Rachunki">Rachunki</option>
-                        <option value="Wynagrodzenie">Wynagrodzenie</option>
-                        <option value="Zdrowie">Zdrowie</option>
-                        <option value="Edukacja">Edukacja</option>
-                        <option value="Inne">Inne</option>
-                    </select>
+
+                    <div id="target-container-for-select">
+                        <select class="form-input" disabled>
+                            <option>Ładowanie kategorii...</option>
+                        </select>
+                    </div>
+
+                    <div hx-get="/list-categories"
+                         hx-trigger="load"
+                         hx-target="#target-container-for-select"
+                         hx-swap="innerHTML"
+                         style="display: none;">
+                    </div>
                 </div>
 
                 <!-- Pole opis -->
