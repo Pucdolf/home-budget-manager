@@ -1,4 +1,4 @@
-﻿using HomeBudgetManager.Core;
+using HomeBudgetManager.Core;
 using Microsoft.Extensions.Primitives;
 
 namespace HomeBudgetManager.Web.appMaps
