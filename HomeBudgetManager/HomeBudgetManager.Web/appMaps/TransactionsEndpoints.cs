@@ -70,7 +70,7 @@ public class TransactionsEndpoints : IEndpoint
 
             if (user == null)
             {
-                return Results.Content("<div class='error'>B³¹d: U¿ytkownik nieznaleziony.</div>", "text/html");
+                return Results.Content("<div class='error'>Bï¿½ï¿½d: Uï¿½ytkownik nieznaleziony.</div>", "text/html");
             }
 
             var transactions = await db.Transactions
