@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalendarz finansowy</title>
+
+    <!-- Twoje style aplikacji (sidebar/layout) -->
+    <link rel="stylesheet" href="/css/dashboard.css">
+
+    <!-- Ikony -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Style kalendarza (z folderu /calendar) -->
+    <link rel="stylesheet" href="/calendar/calendar.css">
+</head>
+
+<body class="calendar-page">
+    <div class="layout">
+        <aside class="calendar-=sidebar">
+            <p class="sidebar-title">Mój budżet</p>
+            <span class="user-name">Zalogowano jako: {username}</span>
+
+            <button class="sidebar-link" onclick="window.location.href='/dashboard'">Pulpit</button>
+            <button class="sidebar-link" onclick="window.location.href='/dashboard#household'">Domostwo</button>
+            <button class="sidebar-link" onclick="window.location.href='/calendar'">Kalendarz</button>
+
+            <form method="post" action="/logout" style="display:inline;">
+                <button type="submit" class="btn-logout">Wyloguj</button>
+            </form>
+        </aside>
+
+        <main class="container" id="calendar-main">
+            <div class="calendar-root">
+                <div class="app-container">
+                    <header class="app-header">
+                        <h1><i class="fas fa-calendar-alt"></i> Kalendarz finansowy</h1>
+                        <div class="header-controls">
+                            <button id="today-btn">Today</button>
+                            <div class="view-options">
+                                <button class="view-option active" data-view="day">Day</button>
+                                <button class="view-option" data-view="week">Week</button>
+                                <button class="view-option" data-view="month">Month</button>
+                            </div>
+                            <div class="date-navigation">
+                                <button id="prev-btn"><i class="fas fa-chevron-left"></i></button>
+                                <h2 id="current-date">May 2023</h2>
+                                <button id="next-btn"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main class="app-main">
+                        <div class="calendar-view" id="calendar-view"></div>
+
+                        <aside class="sidebar calendar-sidebar">
+                            <div class="sidebar-header">
+                                <h3>Upcoming Events</h3>
+                                <button id="add-event-btn"><i class="fas fa-plus"></i> Add Event</button>
+                            </div>
+                            <div class="events-list" id="events-list"></div>
+                        </aside>
+                    </main>
+                </div>
+
+                <!-- Add Event Modal -->
+                <div class="modal" id="event-modal">
+                    <div class="modal-content">
+                        <span class="close-btn">&times;</span>
+                        <h2>Add New Event</h2>
+
+                        <form id="event-form">
+                            <div class="form-group">
+                                <label for="event-title">Title</label>
+                                <input type="text" id="event-title" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="event-date">Date</label>
+                                <input type="date" id="event-date" required>
+                            </div>
+
+                            <div class="form-group time-group">
+                                <div>
+                                    <label for="event-start-time">Start Time</label>
+                                    <input type="time" id="event-start-time" required>
+                                </div>
+                                <div>
+                                    <label for="event-end-time">End Time</label>
+                                    <input type="time" id="event-end-time" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="event-description">Description</label>
+                                <textarea id="event-description" rows="3"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="event-color">Color</label>
+                                <select id="event-color">
+                                    <option value="#4e73df" selected>Blue</option>
+                                    <option value="#1cc88a">Green</option>
+                                    <option value="#f6c23e">Yellow</option>
+                                    <option value="#e74a3b">Red</option>
+                                    <option value="#858796">Gray</option>
+                                    <option value="#5a5c69">Dark</option>
+                                </select>
+                            </div>
+
+                            <!-- KLUCZOWE: ten checkbox MUSI być, bo script.js go używa -->
+                            <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+                                <input type="checkbox" id="event-reminder">
+                                <label for="event-reminder" style="margin:0;">Reminder</label>
+                            </div>
+
+                            <button type="submit" class="save-btn">Save Event</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Event Details Modal -->
+                <div class="modal" id="event-details-modal">
+                    <div class="modal-content">
+                        <span class="close-btn">&times;</span>
+                        <h2 id="details-title">Event Title</h2>
+                        <div class="event-details">
+                            <p><i class="fas fa-calendar-day"></i> <span id="details-date">Date</span></p>
+                            <p><i class="fas fa-clock"></i> <span id="details-time">Time</span></p>
+                            <p><i class="fas fa-align-left"></i> <span id="details-description">Description</span></p>
+                        </div>
+                        <div class="event-actions">
+                            <button id="edit-event-btn">Edit</button>
+                            <button id="delete-event-btn">Delete</button>
+                            <button id="close-details-btn">Close</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Skrypt kalendarza -->
+    <script src="/calendar/calendar.js"></script>
+</body>
+</html>
