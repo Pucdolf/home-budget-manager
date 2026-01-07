@@ -1,0 +1,7 @@
+Paleta kolorów do aplikacji
+
+.color1 {color: #131607;} - czarny -- nie wiem
+.color2 {color: #124708;} - ciemny zielony -- wykresy
+.color3 {color: #d66d24;} - pomarañczowy -- wykresy
+.color4 {color: #efc766;} - ¿ó³to/be¿owy -- nie wiem
+.color5 {color: #f8efbc;} - be¿owy -- t³o
