@@ -1,4 +1,5 @@
 ﻿using HomeBudgetManager.Core;
+using HomeBudgetManager.Core.DBTables;
 using Microsoft.EntityFrameworkCore;
 
 namespace HomeBudgetManager.Web.appMaps
@@ -40,15 +41,41 @@ namespace HomeBudgetManager.Web.appMaps
                     {
                         // użytkownik ma domostwo
                         var house = user.House!;
+                        bool isAdmin = user.Role == SystemRole.HouseholdAdmin;
+
+                        var confirmText = isAdmin
+                            ? "Jako administrator, opuszczając domostwo, spowodujesz jego trwałe usunięcie. Czy na pewno chcesz kontynuować?"
+                            : "Czy na pewno chcesz opuścić domostwo?";
+
+                        // ZAWSZE czerwony
+                        var buttonClass = "btn-danger";
+
                         var html = $@"
-                            <section class='card'>
-                                <h2>Twoje domostwo</h2>
-                                <p><strong>Nazwa:</strong> {house.Name}</p>
-                                <p><strong>Opis:</strong> {house.Description}</p>
-                                <p><strong>Admin ID:</strong> {house.AdminId}</p>
-                                <p><strong>Kod zaproszenia:</strong> {house.JoinCode}</p>
-                                <!-- Tu później dodasz np. listę członków -->
-                            </section>";
+                        <section class='card'>
+                            <h2>Twoje domostwo</h2>
+                            <p><strong>Nazwa:</strong> {house.Name}</p>
+                            <p><strong>Opis:</strong> {house.Description}</p>
+                            <p><strong>Admin ID:</strong> {house.AdminId}</p>
+                            <p><strong>Kod zaproszenia:</strong> {house.JoinCode}</p>
+
+                            <div style='margin-top: 16px;'>
+                                <form 
+                                    hx-post='/leave-household'
+                                    hx-target='#dashboard-main'
+                                    hx-swap='innerHTML'
+                                    hx-confirm='{confirmText}'
+                                    style='display:inline;'>
+            
+                                    <button type='submit' class='{buttonClass}'>
+                                        Opuść domostwo
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Tu później dodasz np. listę członków -->
+                        </section>";
+
+
                         return Results.Content(html, "text/html");
                     }
                 }
@@ -59,10 +86,9 @@ namespace HomeBudgetManager.Web.appMaps
                     {
                         Console.WriteLine($"Inner: {ex.InnerException.Message}");
                     }
-                    return Results.Content($"<div class='error'>Błąd serwera: nie udało się wczytać strony.</div>", "text/html");
+                    return Results.Content("<div class='error'>Błąd serwera: nie udało się wczytać strony.</div>", "text/html");
                 }
             });
-
         }
     }
 }
