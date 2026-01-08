@@ -3,6 +3,7 @@ using System;
 using HomeBudgetManager.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HomeBudgetManager.Core.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260106140554_fixWithrepetableTransactions")]
+    partial class fixWithrepetableTransactions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
@@ -32,9 +35,6 @@ namespace HomeBudgetManager.Core.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("category_name");
-
-                    b.Property<int?>("userId")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -118,12 +118,9 @@ namespace HomeBudgetManager.Core.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("transaction_is_repeatable");
 
-                    b.Property<int>("TransactionType")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("transaction_type");
-
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("transaction_from_user_id");
 
                     b.Property<decimal>("Value")
                         .HasColumnType("TEXT")

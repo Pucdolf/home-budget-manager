@@ -1,4 +1,4 @@
-﻿
+
 namespace HomeBudgetManager.Web.appMaps
 {
     public interface IEndpoint

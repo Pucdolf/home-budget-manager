@@ -3,6 +3,7 @@ using System;
 using HomeBudgetManager.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HomeBudgetManager.Core.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260106135833_addRepetableTransactions")]
+    partial class addRepetableTransactions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
@@ -32,9 +35,6 @@ namespace HomeBudgetManager.Core.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasColumnName("category_name");
-
-                    b.Property<int?>("userId")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -79,14 +79,20 @@ namespace HomeBudgetManager.Core.Migrations
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBRepetableTransaction", b =>
                 {
                     b.Property<int>("TransactionId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("repetable_transaction_id");
+
+                    b.Property<int>("TransactionId1")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("TransactionInterval")
                         .HasColumnType("TEXT")
                         .HasColumnName("repetable_transaction_renew_interval");
 
                     b.HasKey("TransactionId");
+
+                    b.HasIndex("TransactionId1");
 
                     b.ToTable("repetable_transactions");
                 });
@@ -118,12 +124,9 @@ namespace HomeBudgetManager.Core.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("transaction_is_repeatable");
 
-                    b.Property<int>("TransactionType")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("transaction_type");
-
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("transaction_from_user_id");
 
                     b.Property<decimal>("Value")
                         .HasColumnType("TEXT")
@@ -194,8 +197,8 @@ namespace HomeBudgetManager.Core.Migrations
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBRepetableTransaction", b =>
                 {
                     b.HasOne("HomeBudgetManager.Core.DBTables.DBTransaction", "Transaction")
-                        .WithOne("RepetableTransaction")
-                        .HasForeignKey("HomeBudgetManager.Core.DBTables.DBRepetableTransaction", "TransactionId")
+                        .WithMany()
+                        .HasForeignKey("TransactionId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -240,11 +243,6 @@ namespace HomeBudgetManager.Core.Migrations
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBHouse", b =>
                 {
                     b.Navigation("Members");
-                });
-
-            modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBTransaction", b =>
-                {
-                    b.Navigation("RepetableTransaction");
                 });
 #pragma warning restore 612, 618
         }
