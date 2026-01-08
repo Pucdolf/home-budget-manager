@@ -17,6 +17,9 @@ namespace HomeBudgetManager.Core.DBTables
         [Column("category_id")]
         public int Id { get; set; }
 
+        [ForeignKey("user_id")]
+        public int? userId {  get; set; } // jezeli userId == null to sa to kategorie domyslne
+
         [Required]
         [Column("category_name")]
         public required string Name { get; set; }

@@ -33,6 +33,9 @@ namespace HomeBudgetManager.Core.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("category_name");
 
+                    b.Property<int?>("userId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.ToTable("categories");
@@ -115,9 +118,12 @@ namespace HomeBudgetManager.Core.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("transaction_is_repeatable");
 
-                    b.Property<int>("UserId")
+                    b.Property<int>("TransactionType")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("transaction_from_user_id");
+                        .HasColumnName("transaction_type");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("Value")
                         .HasColumnType("TEXT")

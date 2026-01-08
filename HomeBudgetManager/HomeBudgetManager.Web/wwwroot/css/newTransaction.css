@@ -98,3 +98,49 @@
 .text-red-700 {
     color: #b91c1c;
 }
+
+/* T£O MODALU (Overlay) */
+.modal-overlay {
+    position: fixed; /* Kluczowe: przykleja do okna przegl¹darki */
+    top: 0;
+    left: 0;
+    width: 100vw; /* Ca³a szerokoœæ widoku */
+    height: 100vh; /* Ca³a wysokoœæ widoku */
+    background-color: rgba(0, 0, 0, 0.5); /* Pó³przezroczyste t³o */
+    /* Centrowanie zawartoœci */
+    display: none; /* Domyœlnie ukryty, JS zmienia na 'flex' */
+    justify-content: center; /* Poziomo na œrodku */
+    align-items: center; /* Pionowo na œrodku */
+
+    z-index: 9999; /* Musi byæ wy¿ej ni¿ cokolwiek innego na stronie */
+}
+
+/* OKNO MODALU */
+.modal-content {
+    background-color: #ffffff; /* Bia³e t³o */
+    padding: 2rem;
+    border-radius: 8px; /* Zaokr¹glone rogi */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Cieñ dla efektu g³êbi */
+
+    width: 90%; /* Na telefonach zajmie 90% szerokoœci */
+    max-width: 400px; /* Na komputerach nie szersze ni¿ 400px */
+    /* Reset stylów tekstowych, by nie dziedziczy³ dziwnych rzeczy */
+    text-align: left;
+    color: #333;
+}
+
+/* Dodatkowe style dla nag³ówka i przycisków */
+.modal-header {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end; /* Przyciski do prawej */
+    gap: 10px;
+    margin-top: 1.5rem;
+}

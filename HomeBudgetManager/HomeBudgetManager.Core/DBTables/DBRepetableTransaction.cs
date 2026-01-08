@@ -9,10 +9,9 @@ namespace HomeBudgetManager.Core.DBTables
     {
         [Key]
         [Column("repetable_transaction_id")]
-        [ForeignKey(nameof(DBTransaction))]
+        [ForeignKey("Transaction")]
         public required int TransactionId { get; set; }
-        public required DBTransaction Transaction { get; set; }
-
+        public DBTransaction? Transaction { get; set; }
 
         [Required]
         [Column("repetable_transaction_renew_interval")]
