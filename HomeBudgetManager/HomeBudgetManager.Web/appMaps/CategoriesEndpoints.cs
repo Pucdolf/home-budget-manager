@@ -34,10 +34,8 @@ namespace HomeBudgetManager.Web.appMaps
 
                 htmlBuilder.Append("</select>");
 
-
                 return Results.Content(htmlBuilder.ToString(), "text/html");
             });
-
         }
     }
 }

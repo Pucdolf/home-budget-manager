@@ -17,35 +17,46 @@ namespace HomeBudgetManager.Core
             this.db = db;
         }
 
-        public string addTransaction(DBTransaction transaction)
+        public void addTransaction(DBTransaction transaction)
         {
             try
             {
                 db.Add(transaction);
                 db.SaveChanges();
-                return "Pomyślnie dodano transakcję";
             }
             catch (Exception ex)
             {
-                return ex.ToString();
+                throw new InvalidOperationException("<div clas='error'>" + ex.ToString() + "</div>");
             }
         }
 
-        public string addTransaction(int userId, int categoryId, decimal value, bool isRepeatable, string? description, int? houseId)
+        public void addTransaction(int userId, int categoryId, decimal value, TransactionType type, DateTime date, bool isRepeatable, decimal? interval, string? description,  int? houseId)
         {
-            var newTransaction = new DBTransaction { UserId = userId, CategoryId = categoryId, Value = value, IsRepeatable = isRepeatable, Description = description, HouseId = houseId };
+            var newTransaction = new DBTransaction { UserId = userId, CategoryId = categoryId, Value = value, TransactionType = type, Date = date, IsRepeatable = isRepeatable, Description = description, HouseId = houseId };
             db.Add(newTransaction);
             db.SaveChanges();
-            return "Pomyślnie dodano transakcję";
+
+            if (isRepeatable && interval != null)
+            {
+                try
+                {
+                    var newRepTransaction = new DBRepetableTransaction { TransactionId = newTransaction.Id, TransactionInterval = (decimal)interval };
+                    db.Add(newRepTransaction);
+                    db.SaveChanges();
+                } catch
+                {
+                    throw new InvalidOperationException("<div class='error'>Błąd: nie dodano transakcji okresowej</div>");
+                }
+            }
         }
 
-        public string editTransaction(int transactionId, int categoryId, decimal value, bool isRepeatable, string? description, int? houseId)
+        public void editTransaction(int transactionId, int categoryId, decimal value, bool isRepeatable, string? description, int? houseId)
         {
             var transaction = db.Transactions.FirstOrDefault(t => t.Id == transactionId);
 
             if (transaction == null)
             {
-                return "Błąd: nie znaleziono transakcji";
+                throw new ArgumentNullException("<div class='error'>Błąd: nie znaleziono transakcji po ID</div>");
             }
 
             if (description == null)
@@ -60,24 +71,28 @@ namespace HomeBudgetManager.Core
 
             transaction = new DBTransaction { Id = transactionId, UserId = transaction.UserId, CategoryId = categoryId, Value = value, IsRepeatable = isRepeatable, Description = description, HouseId = houseId };
             db.SaveChanges();
-            return "Pomyślnie zedytowano transakcję";
         }
 
-        public string deleteTransaction(int transactionId, int userId)
+        public void deleteTransaction(int transactionId, int userId)
         {
             var transaction = db.Transactions.FirstOrDefault(t => t.Id == transactionId && t.UserId == userId);
 
             if (transaction == null)
             {
-                return "Błąd: Użytkownik nie posiada takiej transakcji";
+                throw new ArgumentNullException("<div class='error'>Błąd: nie znaleziono transakcji po ID</div>");
             }
 
-            db.Remove(transaction);
-            db.SaveChanges();
-            return "Pomyślnie usunięto transakcję";
+            try
+            {
+                db.Remove(transaction);
+                db.SaveChanges();
+            } catch (Exception ex)
+            {
+                throw new InvalidOperationException("<div class='error>" + ex.Message + "</div>");
+            }
         }
 
-        public StringBuilder listTransactionsForHtml(List<DBTransaction> transactions)
+        public StringBuilder listTransactionsForDashboard(List<DBTransaction> transactions)
         {
             var sb = new System.Text.StringBuilder();
 
@@ -86,6 +101,7 @@ namespace HomeBudgetManager.Core
                 string date = t.Date.ToString("dd.MM.yyyy");
                 string amount = t.Value.ToString("C2", new System.Globalization.CultureInfo("pl-PL"));
                 string colorClass = t.Value < 0 ? "amount-expense" : "amount-income";
+                var category = db.Categories.FirstOrDefault(c => c.Id == t.CategoryId);
 
                 sb.Append($"""
 
@@ -94,11 +110,10 @@ namespace HomeBudgetManager.Core
                             {amount}
                         </div>
                         <div class="transaction-details">
-                            <span class="category-badge">{t.Category}</span>
+                            <span class="category-badge">{category.Name}</span>
                             <span class="transaction-date">{date}</span>
                         </div>
                     </li>
-
                  """);
             }
 
@@ -112,7 +127,7 @@ namespace HomeBudgetManager.Core
 
         public List<DBTransaction> SomeUserTransactions(int userId, int amount)
         {
-            return db.Transactions.Where(t => t.UserId == userId).OrderByDescending(t => t.Date).Take(amount).ToList();
+            return db.Transactions.Where(t => t.UserId == userId && t.Date <= DateTime.Now).OrderByDescending(t => t.Date).Take(amount).ToList();
         }
 
         public List<DBTransaction> allHouseTransactions(int houseId)
