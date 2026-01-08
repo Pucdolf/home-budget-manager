@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Text;
 using HomeBudgetManager.Core;
 using HomeBudgetManager.Core.DBTables;

@@ -1,4 +1,4 @@
-﻿using HomeBudgetManager.Core;
+using HomeBudgetManager.Core;
 using HomeBudgetManager.Core.DBTables;
 using Microsoft.EntityFrameworkCore;
 

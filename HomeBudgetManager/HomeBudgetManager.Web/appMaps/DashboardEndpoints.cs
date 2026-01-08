@@ -1,4 +1,4 @@
-﻿using HomeBudgetManager.Core;
+using HomeBudgetManager.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 
