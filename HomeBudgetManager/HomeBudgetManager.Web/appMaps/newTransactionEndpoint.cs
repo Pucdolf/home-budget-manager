@@ -43,7 +43,8 @@ namespace HomeBudgetManager.Web.appMaps
 
             // POST - dodawanie nowej transakcji
 
-            app.MapPost("/new-transaction/add", async (HttpContext context, AppDbContext db, TransactionService tranService) => {
+            app.MapPost("/new-transaction/add", async (HttpContext context, AppDbContext db, TransactionService tranService) =>
+            {
 
                 var userLogin = context.Request.Cookies["logged_user"];
                 var user = await db.Users.FirstOrDefaultAsync(u => u.Login == userLogin);
@@ -100,12 +101,12 @@ namespace HomeBudgetManager.Web.appMaps
                 {
                     tranService.addTransaction(user.Id, category, amount, type, finalDate, isRecurring, intervalDays, description, user.HouseId);
                     return Results.Content("<div class='success'>transakcja dodana</div>", "text/html");
-                } catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     return Results.Content(ex.Message, "text/html");
                 }
             });
-
         }
     }
 }
