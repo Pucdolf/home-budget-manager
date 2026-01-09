@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HomeBudgetManager.Core.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260108102917_fixedCategoryIdNameInTransactions")]
-    partial class fixedCategoryIdNameInTransactions
+    [Migration("20260109095450_DataBaseFix")]
+    partial class DataBaseFix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,10 +36,13 @@ namespace HomeBudgetManager.Core.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("category_name");
 
-                    b.Property<int?>("userId")
-                        .HasColumnType("INTEGER");
+                    b.Property<int?>("UserId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("user_id");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("categories");
                 });
@@ -69,12 +72,9 @@ namespace HomeBudgetManager.Core.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("house_name");
 
-                    b.Property<int>("house_admin")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("house_admin");
+                    b.HasIndex("AdminId");
 
                     b.ToTable("houses");
                 });
@@ -126,7 +126,8 @@ namespace HomeBudgetManager.Core.Migrations
                         .HasColumnName("transaction_type");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("user_id");
 
                     b.Property<decimal>("Value")
                         .HasColumnType("TEXT")
@@ -173,9 +174,6 @@ namespace HomeBudgetManager.Core.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("user_role");
 
-                    b.Property<int?>("user_house_id")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
@@ -183,18 +181,23 @@ namespace HomeBudgetManager.Core.Migrations
 
                     b.HasIndex("HouseId");
 
-                    b.ToTable("users", t =>
-                        {
-                            t.Property("user_house_id")
-                                .HasColumnName("user_house_id1");
-                        });
+                    b.ToTable("users");
+                });
+
+            modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBCategory", b =>
+                {
+                    b.HasOne("HomeBudgetManager.Core.DBTables.DBUser", "User")
+                        .WithMany("Categories")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBHouse", b =>
                 {
                     b.HasOne("HomeBudgetManager.Core.DBTables.DBUser", "Admin")
                         .WithMany()
-                        .HasForeignKey("house_admin")
+                        .HasForeignKey("AdminId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -225,7 +228,7 @@ namespace HomeBudgetManager.Core.Migrations
                         .HasForeignKey("HouseId");
 
                     b.HasOne("HomeBudgetManager.Core.DBTables.DBUser", "User")
-                        .WithMany()
+                        .WithMany("Transactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -255,6 +258,13 @@ namespace HomeBudgetManager.Core.Migrations
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBTransaction", b =>
                 {
                     b.Navigation("RepetableTransaction");
+                });
+
+            modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBUser", b =>
+                {
+                    b.Navigation("Categories");
+
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }
