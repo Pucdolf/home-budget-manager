@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HomeBudgetManager.Core.Migrations
 {
     /// <inheritdoc />
-    public partial class fixedCategoryIdNameInTransactions : Migration
+    public partial class initialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,7 @@ namespace HomeBudgetManager.Core.Migrations
                 {
                     category_id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    userId = table.Column<int>(type: "INTEGER", nullable: true),
+                    user_id = table.Column<int>(type: "INTEGER", nullable: true),
                     category_name = table.Column<string>(type: "TEXT", nullable: false),
                     category_description = table.Column<string>(type: "TEXT", nullable: true)
                 },
@@ -33,7 +33,6 @@ namespace HomeBudgetManager.Core.Migrations
                     house_id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     house_admin_id = table.Column<int>(type: "INTEGER", nullable: false),
-                    house_admin = table.Column<int>(type: "INTEGER", nullable: false),
                     house_name = table.Column<string>(type: "TEXT", nullable: false),
                     house_description = table.Column<string>(type: "TEXT", nullable: true),
                     house_join_code = table.Column<string>(type: "TEXT", nullable: false)
@@ -53,8 +52,7 @@ namespace HomeBudgetManager.Core.Migrations
                     user_login = table.Column<string>(type: "TEXT", nullable: false),
                     user_password = table.Column<string>(type: "TEXT", nullable: false),
                     user_role = table.Column<int>(type: "INTEGER", nullable: false),
-                    user_house_id = table.Column<int>(type: "INTEGER", nullable: true),
-                    user_house_id1 = table.Column<int>(type: "INTEGER", nullable: true)
+                    user_house_id = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -74,7 +72,7 @@ namespace HomeBudgetManager.Core.Migrations
                     transaction_id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     category_id = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    user_id = table.Column<int>(type: "INTEGER", nullable: false),
                     transaction_value = table.Column<decimal>(type: "TEXT", nullable: false),
                     transaction_type = table.Column<int>(type: "INTEGER", nullable: false),
                     transaction_description = table.Column<string>(type: "TEXT", nullable: true),
@@ -97,8 +95,8 @@ namespace HomeBudgetManager.Core.Migrations
                         principalTable: "houses",
                         principalColumn: "house_id");
                     table.ForeignKey(
-                        name: "FK_transactions_users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_transactions_users_user_id",
+                        column: x => x.user_id,
                         principalTable: "users",
                         principalColumn: "user_id",
                         onDelete: ReferentialAction.Cascade);
@@ -123,9 +121,14 @@ namespace HomeBudgetManager.Core.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_houses_house_admin",
+                name: "IX_categories_user_id",
+                table: "categories",
+                column: "user_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_houses_house_admin_id",
                 table: "houses",
-                column: "house_admin");
+                column: "house_admin_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_transactions_category_id",
@@ -138,9 +141,9 @@ namespace HomeBudgetManager.Core.Migrations
                 column: "transaction_for_house_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_transactions_UserId",
+                name: "IX_transactions_user_id",
                 table: "transactions",
-                column: "UserId");
+                column: "user_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_users_user_email",
@@ -154,9 +157,16 @@ namespace HomeBudgetManager.Core.Migrations
                 column: "user_house_id");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_houses_users_house_admin",
+                name: "FK_categories_users_user_id",
+                table: "categories",
+                column: "user_id",
+                principalTable: "users",
+                principalColumn: "user_id");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_houses_users_house_admin_id",
                 table: "houses",
-                column: "house_admin",
+                column: "house_admin_id",
                 principalTable: "users",
                 principalColumn: "user_id",
                 onDelete: ReferentialAction.Cascade);
@@ -166,7 +176,7 @@ namespace HomeBudgetManager.Core.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_houses_users_house_admin",
+                name: "FK_houses_users_house_admin_id",
                 table: "houses");
 
             migrationBuilder.DropTable(

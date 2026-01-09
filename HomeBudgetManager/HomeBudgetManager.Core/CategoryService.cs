@@ -13,7 +13,7 @@ namespace HomeBudgetManager.Core
             this.db = db;
         }
 
-        private bool userHasCategory(int userId) { return db.Categories.Any(c => c.userId == userId); }
+        private bool userHasCategory(int userId) { return db.Categories.Any(c => c.UserId == userId); }
 
         // metoda dodająca nową transakcję dla użytkownika. Zwraca informację o powodzeniu
         public string addCategory(int userId, string name, string? description)
@@ -39,7 +39,7 @@ namespace HomeBudgetManager.Core
         public string deleteCategory(int userId, int categoryId)
         {
 
-            var category = db.Categories.FirstOrDefault(c => c.userId == userId);
+            var category = db.Categories.FirstOrDefault(c => c.UserId == userId);
 
             if (category == null) {
 
@@ -60,12 +60,12 @@ namespace HomeBudgetManager.Core
 
         public List<DBCategory> listAllUserCategories(int userId)
         {
-            return db.Categories.Where(c => c.userId == userId || c.userId == null).OrderByDescending(c => c.userId).ToList();
+            return db.Categories.Where(c => c.UserId == userId || c.UserId == null).OrderByDescending(c => c.UserId).ToList();
         }
 
         public string modifyCategory(int userId, int categoryId, string newName, string newDescription)
         {
-            var category = db.Categories.FirstOrDefault(c => c.userId == userId && c.Id == categoryId);
+            var category = db.Categories.FirstOrDefault(c => c.UserId == userId && c.Id == categoryId);
 
             if (category == null)
             {
@@ -80,12 +80,12 @@ namespace HomeBudgetManager.Core
 
         public string addDefaultCategories()
         {
-            var zakupy = new DBCategory { userId = null, Name = "Zakupy spożywcze", Description = "Opłaty za codzienne zakupy domowe" };
-            var rachunki = new DBCategory { userId = null, Name = "Rachunki", Description = "Opłaty za wodę, gaz, prąd itp." };
-            var transport = new DBCategory { userId = null, Name = "Transport", Description = "Opłaty za komunikację miejską lub paliwo" };
-            var finanse = new DBCategory { userId = null, Name = "Finanse", Description = "Kategoria dla finansów" };
-            var rozrywka = new DBCategory {userId = null, Name = "Rozrywka", Description = "Kategoria dla rozrywki" };
-            var inne = new DBCategory { userId = null, Name = "Inne" , Description = "Kategoria dla innych wydatków"};
+            var zakupy = new DBCategory { UserId = null, Name = "Zakupy spożywcze", Description = "Opłaty za codzienne zakupy domowe" };
+            var rachunki = new DBCategory { UserId = null, Name = "Rachunki", Description = "Opłaty za wodę, gaz, prąd itp." };
+            var transport = new DBCategory { UserId = null, Name = "Transport", Description = "Opłaty za komunikację miejską lub paliwo" };
+            var finanse = new DBCategory { UserId = null, Name = "Finanse", Description = "Kategoria dla finansów" };
+            var rozrywka = new DBCategory {UserId = null, Name = "Rozrywka", Description = "Kategoria dla rozrywki" };
+            var inne = new DBCategory { UserId = null, Name = "Inne" , Description = "Kategoria dla innych wydatków"};
 
             List<DBCategory> categories = new List<DBCategory> { zakupy, rachunki, transport, finanse, rozrywka, inne };
 
@@ -94,7 +94,7 @@ namespace HomeBudgetManager.Core
 
                 foreach (DBCategory category in categories)
                 {
-                    if (!db.Categories.Any(c => c.userId == null && c.Name == category.Name))
+                    if (!db.Categories.Any(c => c.UserId == null && c.Name == category.Name))
                     {
                         db.Categories.Add(category);
                         Console.WriteLine("Dodano domyślną kategorię: ", category.Name);
