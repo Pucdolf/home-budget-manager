@@ -21,6 +21,14 @@ namespace HomeBudgetManager.Core.DBTables
 
         [Column("category_id")]
         public required int CategoryId { get; set; }
+        public required DBCategory Category { get; set; }
+
+        [ForeignKey("CategoryId")] // To definiuje relację C# (opcjonalne przy konwencji nazewniczej)
+        public DBCategory? Category { get; set; }
+
+        [ForeignKey("user_id")]
+        public required int UserId { get; set; }
+        public DBUser? User { get; set; }
 
         [ForeignKey(nameof(CategoryId))]
         public DBCategory? Category { get; set; }

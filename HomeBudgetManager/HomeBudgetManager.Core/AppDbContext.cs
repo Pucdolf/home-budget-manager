@@ -18,6 +18,7 @@ namespace HomeBudgetManager.Core
         public DbSet<DBCategory> Categories { get; set; }
         public DbSet<DBUser> Users { get; set; }
 
+        public DbSet<DBRepetableTransaction> RepetableTransactions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -27,6 +28,12 @@ namespace HomeBudgetManager.Core
                 .WithMany(h => h.Members)
                 .HasForeignKey(u => u.HouseId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DBTransaction>()
+                .HasOne(a => a.RepetableTransaction) // Jeśli masz to pole w DBTransaction
+                .WithOne(b => b.Transaction)         // Wskazujemy na właściwość w DBRepetableTransaction
+                .HasForeignKey<DBRepetableTransaction>(b => b.TransactionId); // TU JEST KLUCZ: Wymuszamy użycie TransactionId
+
         }
 
     }

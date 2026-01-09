@@ -30,21 +30,21 @@ namespace HomeBudgetManager.Web.appMaps
 
                 if (StringValues.IsNullOrEmpty(username) || StringValues.IsNullOrEmpty(password) || StringValues.IsNullOrEmpty(email))
                 {
-                    var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>B³¹d: Nie podano wszystkich danych!</div>";
+                    var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>BÅ‚Ä…d: Nie podano wszystkich danych!</div>";
                     return Results.Content(htmlResponse, "text/html");
                 }
 
                 // sprawdz czy nazwa uzytkownika jest zajeta
                 if (registerService.IsUsernameTaken(username))
                 {
-                    var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>B³¹d: Ten login jest ju¿ zajêty!</div>";
+                    var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>BÅ‚Ä…d: Ten login jest juÅ¼ zajÄ™ty!</div>";
                     return Results.Content(htmlResponse, "text/html");
                 }
 
                 // Sprawdz, czy email jest zajety
                 if (registerService.IsEmailTaken(email))
                 {
-                    var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>B³¹d: Ten adres e-mail jest ju¿ zajêty!</div>";
+                    var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>BÅ‚Ä…d: Ten adres e-mail jest juÅ¼ zajÄ™ty!</div>";
                     return Results.Content(htmlResponse, "text/html");
                 }
 
@@ -52,7 +52,7 @@ namespace HomeBudgetManager.Web.appMaps
                 registerService.RegisterUser(email, username, password);
                 var successResponse = @"
                     <div class='p-4 bg-green-100 border border-green-400 text-green-700 rounded'>
-                        Rejestracja powiod³a siê!
+                        Rejestracja powiodÅ‚a siÄ™!
                     </div>
                     <script>
                         setTimeout(function() {
