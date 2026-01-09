@@ -17,8 +17,11 @@ namespace HomeBudgetManager.Core.DBTables
         [Column("category_id")]
         public int Id { get; set; }
 
-        [ForeignKey("user_id")]
-        public int? userId {  get; set; } // jezeli userId == null to sa to kategorie domyslne
+        [Column("user_id")]
+        public int? UserId { get; set; } // Nullable, bo systemowe kategorie nie mają usera
+
+        [ForeignKey(nameof(UserId))]
+        public DBUser? User { get; set; }
 
         [Required]
         [Column("category_name")]

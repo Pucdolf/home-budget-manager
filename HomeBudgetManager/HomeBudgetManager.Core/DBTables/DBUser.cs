@@ -38,6 +38,11 @@ namespace HomeBudgetManager.Core.DBTables
 
         [Column("user_house_id")]
         public int? HouseId { get; set; }
+
+        [ForeignKey(nameof(HouseId))]
         public DBHouse? House { get; set; }
+
+        public ICollection<DBCategory> Categories { get; set; } = new List<DBCategory>();
+        public ICollection<DBTransaction> Transactions { get; set; } = new List<DBTransaction>();
     }
 }

@@ -16,7 +16,7 @@ namespace HomeBudgetManager.Core.DBTables
         [Column("house_admin_id")]
         public int AdminId { get; set; }
 
-        [ForeignKey("house_admin")]
+        [ForeignKey(nameof(AdminId))]
         public DBUser Admin { get; set; }
 
         [Required]
