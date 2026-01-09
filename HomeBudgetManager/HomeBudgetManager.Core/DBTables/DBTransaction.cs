@@ -39,6 +39,15 @@ namespace HomeBudgetManager.Core.DBTables
         [ForeignKey(nameof(UserId))] 
         public DBUser? User { get; set; }
 
+        [ForeignKey(nameof(CategoryId))]
+        public DBCategory? Category { get; set; }
+
+        [Column("user_id")] 
+        public required int UserId { get; set; }
+
+        [ForeignKey(nameof(UserId))] 
+        public DBUser? User { get; set; }
+
         [Required]
         [Column("transaction_value")]
         public decimal Value { get; set; }
