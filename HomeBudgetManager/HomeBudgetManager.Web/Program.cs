@@ -35,8 +35,9 @@ using (var scope = app.Services.CreateScope())
     categoryService.addDefaultCategories();
 }
 
-    app.UseDefaultFiles();
+app.UseDefaultFiles();
 app.UseStaticFiles();
+app.UpdateDatabase();
 app.MapAllEndpoints();
 
 app.Run();
