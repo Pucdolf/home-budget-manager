@@ -52,7 +52,7 @@ body {
     border-radius: 0.5rem;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
     padding: 1.5rem;
-    text-align: center; /* klucz do centrowania treści */
+    text-align: center; 
 }
 
     .card h2 {
@@ -85,7 +85,7 @@ body {
     color: #1e40af;
     padding: 1rem;
     border-radius: 0.25rem;
-    display: inline-block; /* pozwala się ładnie centrować w .card */
+    display: inline-block; 
 }
 
 /* Wykresy kołowe */
@@ -131,8 +131,8 @@ body {
     list-style: none;
     padding: 0;
     margin: 0 auto;
-    display: inline-block; /* cała lista centrowana w .card */
-    text-align: left; /* ale same wiersze pozostają wyrównane do lewej dla czytelności */
+    display: inline-block; 
+    text-align: left; 
 }
 
 /* Styl transakcji */
