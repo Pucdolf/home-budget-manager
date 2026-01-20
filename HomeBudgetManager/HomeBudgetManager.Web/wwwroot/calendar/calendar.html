@@ -17,13 +17,14 @@
 
 <body class="calendar-page">
     <div class="layout">
-        <aside class="calendar-=sidebar">
+        <aside class="sidebar">
             <p class="sidebar-title">Mój budżet</p>
             <span class="user-name">Zalogowano jako: {username}</span>
 
             <button class="sidebar-link" onclick="window.location.href='/dashboard'">Pulpit</button>
-            <button class="sidebar-link" onclick="window.location.href='/dashboard#household'">Domostwo</button>
+            <button class="sidebar-link" onclick="window.location.href='/household'">Domostwo</button>
             <button class="sidebar-link" onclick="window.location.href='/calendar'">Kalendarz</button>
+            <button class="sidebar-link" onclick="window.location.href='/charts'">Wykresy</button>
 
             <form method="post" action="/logout" style="display:inline;">
                 <button type="submit" class="btn-logout">Wyloguj</button>
