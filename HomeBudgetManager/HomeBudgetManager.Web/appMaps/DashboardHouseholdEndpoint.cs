@@ -10,6 +10,24 @@ namespace HomeBudgetManager.Web.appMaps
     {
         public void Map(IEndpointRouteBuilder app)
         {
+            app.MapGet("/household", async (HttpContext context, IWebHostEnvironment env, AppDbContext db) =>
+            {
+                if (!context.Request.Cookies.ContainsKey("logged_user"))
+                    return Results.Redirect("/");
+
+                var username = context.Request.Cookies["logged_user"].ToString();
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Login == username);
+                if (user == null)
+                    return Results.Redirect("/");
+
+                var filePath = Path.Combine(env.WebRootPath, "household.html");
+                var html = File.ReadAllText(filePath, Encoding.UTF8);
+
+                html = html.Replace("{username}", username);
+
+                return Results.Content(html, "text/html; charset=utf-8");
+            });
+
             app.MapGet("/dashboard-household", async (HttpContext context, AppDbContext db) =>
             {
                 var login = context.Request.Cookies["logged_user"];
