@@ -16,6 +16,7 @@
             <button class="sidebar-link" onclick="loadDashboard()">Pulpit</button>
             <button class="sidebar-link" onclick="loadHousehold()">Domostwo</button>
             <button class="sidebar-link" onclick="window.location.href='/calendar'">Kalendarz</button>
+            <button class="sidebar-link" onclick="window.location.href='/charts'">Wykresy</button>
             <form method="post" action="/logout" style="display:inline;">
                 <button type="submit" class="btn-logout">Wyloguj</button>
             </form>
@@ -31,6 +32,12 @@
                 <div class="balance-box">
                     <p class="balance-label">Saldo konta</p>
                     <span class="balance-highlight">{balance} zł</span>
+                </div>
+
+                <div id="dashboard-charts" 
+                     hx-get="/dashboard/charts" 
+                     hx-trigger="load">
+                     <p style="text-align:center; color:#888;">Ładowanie wykresów...</p>
                 </div>
 
                 <div class="actions-box">

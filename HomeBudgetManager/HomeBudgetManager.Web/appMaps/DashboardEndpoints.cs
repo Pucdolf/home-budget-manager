@@ -46,6 +46,19 @@ namespace HomeBudgetManager.Web.appMaps
 
                 return Results.Content(html, "text/html");
             });
+
+            // NOWY ENDPOINT DLA WYKRESÓW NA PULPICIE
+            app.MapGet("/dashboard/charts", (HttpContext context, ChartService chartService) =>
+            {
+                if (!context.Request.Cookies.TryGetValue("user_id", out var userIdString) || 
+                    !int.TryParse(userIdString, out int userId))
+                {
+                     return Results.Content(""); // Pusty content jeśli brak usera
+                }
+
+                var chartsHtml = chartService.GenerateDashboardChartsHtml(userId);
+                return Results.Content(chartsHtml, "text/html");
+            });
         }
     }
 }
