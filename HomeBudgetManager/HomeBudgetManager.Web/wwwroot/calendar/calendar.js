@@ -30,16 +30,33 @@
     // App State
     let currentView = 'month';
     let currentDate = new Date();
-    let events = JSON.parse(localStorage.getItem('events')) || [];
+    let events = []; // Start empty, fetch from API
     let selectedEventId = null;
 
     // Initialize the app
     init();
 
     function init() {
-        renderCalendar();
-        renderEventsList();
-        setupEventListeners();
+        fetchEvents().then(() => {
+            switchView(currentView);
+            renderEventsList();
+            setupEventListeners();
+        });
+    }
+
+    async function fetchEvents() {
+        try {
+            const response = await fetch('/api/calendar-events');
+            if (response.ok) {
+                events = await response.json();
+            } else {
+                console.error('Failed to fetch events');
+                events = JSON.parse(localStorage.getItem('events')) || [];
+            }
+        } catch (error) {
+            console.error('Error fetching events:', error);
+            events = JSON.parse(localStorage.getItem('events')) || [];
+        }
     }
 
     function setupEventListeners() {
@@ -166,6 +183,39 @@
 
         // Get events for this day
         const dayEvents = getEventsForDate(date);
+
+        // --- NEW: Calculate Daily Summary ---
+        let dailyTotal = 0;
+        let transactionCount = dayEvents.length;
+
+        dayEvents.forEach(evt => {
+            // Ensure amount is a number
+            dailyTotal += (Number(evt.amount) || 0);
+        });
+
+        // Create summary element if there are transactions
+        if (transactionCount > 0) {
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = 'day-summary';
+            summaryDiv.style.fontSize = '0.75rem';
+            summaryDiv.style.marginTop = '2px';
+            summaryDiv.style.fontWeight = 'bold';
+            
+            // Format currency
+            const formattedTotal = dailyTotal.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' });
+            
+            // Color based on total (Green for net income/zero, Red for net loss)
+            // Or typically: expenses are red, income green. If sum is positive -> green, negative -> red.
+            summaryDiv.style.color = dailyTotal >= 0 ? '#1cc88a' : '#e74a3b';
+            
+            summaryDiv.innerHTML = `
+                <div>${formattedTotal}</div>
+                <div style="font-size: 0.7rem; color: #858796;">(${transactionCount} tr.)</div>
+            `;
+            
+            dayCell.appendChild(summaryDiv);
+        }
+        // ------------------------------------
 
         // Display up to 3 events (or 2 if one is multi-line)
         const maxEventsToShow = 3;
