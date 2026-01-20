@@ -38,9 +38,9 @@
                         <div class="header-controls">
                             <button id="today-btn">Today</button>
                             <div class="view-options">
-                                <button class="view-option active" data-view="day">Day</button>
+                                <button class="view-option" data-view="day">Day</button>
                                 <button class="view-option" data-view="week">Week</button>
-                                <button class="view-option" data-view="month">Month</button>
+                                <button class="view-option active" data-view="month">Month</button>
                             </div>
                             <div class="date-navigation">
                                 <button id="prev-btn"><i class="fas fa-chevron-left"></i></button>
@@ -71,8 +71,8 @@
 
                         <form id="event-form">
                             <div class="form-group">
-                                <label for="event-title">Title</label>
-                                <input type="text" id="event-title" required>
+                                <label for="event-amount">Amount</label>
+                                <input type="number" step="0.01" id="event-amount" required>
                             </div>
 
                             <div class="form-group">

@@ -12,7 +12,7 @@
     const eventDetailsModal = document.getElementById('event-details-modal');
     const closeBtns = document.querySelectorAll('.close-btn');
     const eventForm = document.getElementById('event-form');
-    const eventTitleInput = document.getElementById('event-title');
+    const eventAmountInput = document.getElementById('event-amount');
     const eventDateInput = document.getElementById('event-date');
     const eventStartTimeInput = document.getElementById('event-start-time');
     const eventEndTimeInput = document.getElementById('event-end-time');
@@ -30,16 +30,33 @@
     // App State
     let currentView = 'month';
     let currentDate = new Date();
-    let events = JSON.parse(localStorage.getItem('events')) || [];
+    let events = []; // Start empty, fetch from API
     let selectedEventId = null;
 
     // Initialize the app
     init();
 
     function init() {
-        renderCalendar();
-        renderEventsList();
-        setupEventListeners();
+        fetchEvents().then(() => {
+            switchView(currentView);
+            renderEventsList();
+            setupEventListeners();
+        });
+    }
+
+    async function fetchEvents() {
+        try {
+            const response = await fetch('/api/calendar-events');
+            if (response.ok) {
+                events = await response.json();
+            } else {
+                console.error('Failed to fetch events');
+                events = JSON.parse(localStorage.getItem('events')) || [];
+            }
+        } catch (error) {
+            console.error('Error fetching events:', error);
+            events = JSON.parse(localStorage.getItem('events')) || [];
+        }
     }
 
     function setupEventListeners() {
@@ -167,43 +184,70 @@
         // Get events for this day
         const dayEvents = getEventsForDate(date);
 
+        // --- NEW: Calculate Daily Summary ---
+        let expenseTotal = 0;
+        let incomeTotal = 0;
+        let transactionCount = dayEvents.length;
+
+        dayEvents.forEach(evt => {
+            const val = Number(evt.amount) || 0;
+            if (val < 0) {
+                expenseTotal += val;
+            } else {
+                incomeTotal += val;
+            }
+        });
+
+        // Create summary element if there are transactions
+        if (transactionCount > 0) {
+            const summaryDiv = document.createElement('div');
+            summaryDiv.className = 'day-summary';
+            summaryDiv.style.fontSize = '0.75rem';
+            summaryDiv.style.marginTop = '2px';
+            summaryDiv.style.fontWeight = 'bold';
+            summaryDiv.style.display = 'flex';
+            summaryDiv.style.flexDirection = 'column';
+            summaryDiv.style.alignItems = 'center';
+            
+            // Display Expenses if any
+            if (expenseTotal < 0) {
+                const expEl = document.createElement('div');
+                expEl.style.color = '#e74a3b'; // RED
+                expEl.textContent = expenseTotal.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' });
+                summaryDiv.appendChild(expEl);
+            }
+
+            // Display Incomes if any
+            if (incomeTotal > 0) {
+                const incEl = document.createElement('div');
+                incEl.style.color = '#1cc88a'; // GREEN
+                incEl.textContent = '+' + incomeTotal.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' });
+                summaryDiv.appendChild(incEl);
+            }
+            
+            const countEl = document.createElement('div');
+            countEl.style.fontSize = '0.65rem';
+            countEl.style.color = '#858796';
+            countEl.textContent = `(${transactionCount} tr.)`;
+            summaryDiv.appendChild(countEl);
+            
+            dayCell.appendChild(summaryDiv);
+        }
+        // ------------------------------------
+
         // Display up to 3 events (or 2 if one is multi-line)
         const maxEventsToShow = 3;
         let eventsShown = 0;
         let spaceUsed = 0;
 
+        // In month view, we only show the summary, not individual events
+        // The following block which rendered individual events is removed/commented out
+        
+        /* 
         for (const event of dayEvents) {
-            if (eventsShown >= maxEventsToShow || spaceUsed >= maxEventsToShow) break;
-
-            const eventElement = document.createElement('div');
-            eventElement.className = 'day-event';
-            eventElement.textContent = event.title;
-            eventElement.style.backgroundColor = event.color;
-
-            // Estimate if this event will take more space (long title)
-            const takesMoreSpace = event.title.length > 15;
-            if (takesMoreSpace) spaceUsed += 1.5;
-            else spaceUsed += 1;
-
-            if (spaceUsed <= maxEventsToShow) {
-                dayEventsContainer.appendChild(eventElement);
-                eventsShown++;
-
-                eventElement.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    showEventDetails(event.id);
-                });
-            }
+            // ... (original rendering logic)
         }
-
-        // Show "+X more" if there are more events
-        if (dayEvents.length > eventsShown) {
-            const moreEvents = document.createElement('div');
-            moreEvents.className = 'day-event';
-            moreEvents.textContent = `+${dayEvents.length - eventsShown} more`;
-            moreEvents.style.backgroundColor = '#5a5c69';
-            dayEventsContainer.appendChild(moreEvents);
-        }
+        */
 
         dayCell.appendChild(dayEventsContainer);
 
@@ -574,7 +618,7 @@
 
         const newEvent = {
             id: eventId,
-            title: eventTitleInput.value,
+            title: eventAmountInput.value,
             startTime: startDateTime.toISOString(),
             endTime: endDateTime.toISOString(),
             description: eventDescriptionInput.value,
@@ -627,7 +671,7 @@
         if (!event) return;
 
         // Populate form with event data
-        eventTitleInput.value = event.title;
+        eventAmountInput.value = event.amount; // Use amount
         eventDateInput.valueAsDate = new Date(event.startTime);
 
         const startDate = new Date(event.startTime);
@@ -641,32 +685,33 @@
         if (eventReminderInput) eventReminderInput.checked = event.reminder || false;
 
         // Change form submit to update instead of create
-        eventForm.onsubmit = function (e) {
+        eventForm.onsubmit = async function (e) {
             e.preventDefault();
 
-            // Update event
-            const startDateTime = new Date(eventDateInput.value);
-            const startTimeParts = eventStartTimeInput.value.split(':');
-            startDateTime.setHours(parseInt(startTimeParts[0]), parseInt(startTimeParts[1]));
+            // Construct FormData for PUT
+            const formData = new FormData();
+            formData.append('amount', eventAmountInput.value);
+            formData.append('description', eventDescriptionInput.value);
+            formData.append('date', eventDateInput.value);
 
-            const endDateTime = new Date(eventDateInput.value);
-            const endTimeParts = eventEndTimeInput.value.split(':');
-            endDateTime.setHours(parseInt(endTimeParts[0]), parseInt(endTimeParts[1]));
+            try {
+                const response = await fetch('/transactions?id=' + selectedEventId, {
+                    method: 'PUT',
+                    body: formData
+                });
 
-            event.title = eventTitleInput.value;
-            event.startTime = startDateTime.toISOString();
-            event.endTime = endDateTime.toISOString();
-            event.description = eventDescriptionInput.value;
-            event.color = eventColorInput.value;
-            event.reminder = eventReminderInput ? eventReminderInput.checked : false;
-
-
-            saveEventsToStorage();
-
-            // Update UI
-            renderCalendar();
-            renderEventsList();
-            closeModals();
+                if (response.ok) {
+                    await fetchEvents(); // Reload all events
+                    renderCalendar();
+                    renderEventsList();
+                    closeModals();
+                } else {
+                    alert('Failed to update event');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error updating event');
+            }
 
             // Reset form submit handler
             eventForm.onsubmit = saveEvent;
@@ -677,17 +722,27 @@
         eventModal.style.display = 'flex';
     }
 
-    function deleteEvent() {
+    async function deleteEvent() {
         if (!selectedEventId) return;
 
         if (confirm('Are you sure you want to delete this event?')) {
-            events = events.filter(event => event.id !== selectedEventId);
-            saveEventsToStorage();
+            try {
+                const response = await fetch('/transactions?id=' + selectedEventId, {
+                    method: 'DELETE'
+                });
 
-            // Update UI
-            renderCalendar();
-            renderEventsList();
-            closeModals();
+                if (response.ok) {
+                     await fetchEvents();
+                     renderCalendar();
+                     renderEventsList();
+                     closeModals();
+                } else {
+                    alert('Failed to delete event');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error deleting event');
+            }
         }
     }
 
