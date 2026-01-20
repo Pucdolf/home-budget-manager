@@ -34,6 +34,12 @@
                     <span class="balance-highlight">{balance} zł</span>
                 </div>
 
+                <div id="dashboard-charts" 
+                     hx-get="/dashboard/charts" 
+                     hx-trigger="load">
+                     <p style="text-align:center; color:#888;">Ładowanie wykresów...</p>
+                </div>
+
                 <div class="actions-box">
                     <a href="/new-transaction" class="btn-primary">Dodaj transakcję</a>
                 </div>

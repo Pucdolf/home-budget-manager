@@ -81,7 +81,9 @@ namespace HomeBudgetManager.Core
             var (expenses, incomes) = GetStatistics(userId, startDate, endDate);
             var sb = new StringBuilder();
 
-            // Using flexbox for side-by-side or stacked layout
+            // Inject simple tooltip CSS and JS
+            sb.Append(GetTooltipAssets());
+
             sb.Append("<div class='charts-container' style='display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px;'>");
 
             sb.Append(GenerateSingleChartHtml("Wydatki", expenses));
@@ -89,6 +91,58 @@ namespace HomeBudgetManager.Core
 
             sb.Append("</div>");
             return sb.ToString();
+        }
+
+        public string GenerateDashboardChartsHtml(int userId)
+        {
+             var now = DateTime.Now;
+             var startDate = new DateTime(now.Year, now.Month, 1);
+             var endDate = now.Date.AddDays(1).AddTicks(-1);
+             return GenerateChartsHtml(userId, startDate, endDate);
+        }
+
+        private string GetTooltipAssets()
+        {
+            return """
+            <style>
+                .chart-tooltip {
+                    position: fixed;
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    padding: 5px 10px;
+                    border-radius: 4px;
+                    pointer-events: none;
+                    font-size: 0.9em;
+                    z-index: 1000;
+                    display: none;
+                    white-space: nowrap;
+                }
+                .pie-slice:hover {
+                    opacity: 0.8;
+                    cursor: pointer;
+                }
+            </style>
+            <script>
+                document.addEventListener('mousemove', function(e) {
+                    var tooltip = document.getElementById('chart-tooltip');
+                    if (!tooltip) return;
+                    
+                    if (e.target.classList.contains('pie-slice')) {
+                        var name = e.target.getAttribute('data-name');
+                        var val = e.target.getAttribute('data-value');
+                        var pct = e.target.getAttribute('data-percent');
+                        
+                        tooltip.innerHTML = `<strong>${name}</strong><br>${pct}%<br>${val}`;
+                        tooltip.style.display = 'block';
+                        tooltip.style.left = (e.clientX + 10) + 'px';
+                        tooltip.style.top = (e.clientY + 10) + 'px';
+                    } else {
+                        tooltip.style.display = 'none';
+                    }
+                });
+            </script>
+            <div id="chart-tooltip" class="chart-tooltip"></div>
+            """;
         }
 
         private string GenerateSingleChartHtml(string title, List<CategoryStat> stats)
@@ -109,32 +163,59 @@ namespace HomeBudgetManager.Core
                 <div class='pie-chart-wrapper' style='display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 20px;'>
             ");
 
-            // Generate Conic Gradient
-            // conic-gradient(color1 0% 20%, color2 20% 50%, ...)
-            var gradientParts = new List<string>();
-            double currentPercent = 0;
-            foreach (var stat in stats)
-            {
-                double nextPercent = currentPercent + stat.Percentage;
-                // Using InvariantCulture to ensure dot separator for decimals in CSS
-                gradientParts.Add($"{stat.Color} {currentPercent.ToString(CultureInfo.InvariantCulture)}% {nextPercent.ToString(CultureInfo.InvariantCulture)}%");
-                currentPercent = nextPercent;
-            }
-            // Fallback if parts empty (shouldn't happen due to check above)
-            string gradientStyle = $"background: conic-gradient({string.Join(", ", gradientParts)});";
+            // SVG Generation
+            double currentAngle = -90; // Start at top
+            double radius = 100;
+            double centerX = 100;
+            double centerY = 100;
+            var culture = new CultureInfo("pl-PL");
 
-            sb.Append($@"
-                    <div class='pie-chart' style='width: 180px; height: 180px; border-radius: 50%; {gradientStyle}'></div>
+            sb.Append($"<svg width='200' height='200' viewBox='0 0 200 200' style='transform: rotate(0deg);'>");
+            
+            // Check if single slice 100%
+            if (stats.Count == 1)
+            {
+                 var stat = stats[0];
+                 string amountStr = stat.TotalAmount.ToString("C2", culture);
+                 sb.Append($"<circle cx='100' cy='100' r='100' fill='{stat.Color}' class='pie-slice' data-name='{stat.CategoryName}' data-value='{amountStr}' data-percent='100' />");
+            }
+            else
+            {
+                foreach (var stat in stats)
+                {
+                    double sliceAngle = (stat.Percentage / 100.0) * 360.0;
+                    double x1 = centerX + radius * Math.Cos(currentAngle * Math.PI / 180.0);
+                    double y1 = centerY + radius * Math.Sin(currentAngle * Math.PI / 180.0);
+                    
+                    double endAngle = currentAngle + sliceAngle;
+                    double x2 = centerX + radius * Math.Cos(endAngle * Math.PI / 180.0);
+                    double y2 = centerY + radius * Math.Sin(endAngle * Math.PI / 180.0);
+
+                    int largeArcFlag = sliceAngle > 180 ? 1 : 0;
+                    
+                    // M startX startY A radius radius 0 largeArcFlag 1 endX endY L centerX centerY Z
+                    string pathData = $"M {x1.ToString(CultureInfo.InvariantCulture)} {y1.ToString(CultureInfo.InvariantCulture)} A {radius} {radius} 0 {largeArcFlag} 1 {x2.ToString(CultureInfo.InvariantCulture)} {y2.ToString(CultureInfo.InvariantCulture)} L {centerX} {centerY} Z";
+                    
+                    string amountStr = stat.TotalAmount.ToString("C2", culture);
+                    
+                    sb.Append($"<path d='{pathData}' fill='{stat.Color}' stroke='white' stroke-width='1' class='pie-slice' data-name='{stat.CategoryName}' data-value='{amountStr}' data-percent='{stat.Percentage:F1}' />");
+                    
+                    currentAngle += sliceAngle;
+                }
+            }
+            sb.Append("</svg>");
+
+
+            sb.Append(@"
                     <ul class='chart-legend' style='list-style: none; padding: 0; margin: 0; font-size: 0.9em; max-width: 200px;'>
             ");
 
-            var culture = new CultureInfo("pl-PL");
             foreach (var stat in stats)
             {
                 sb.Append($@"
                         <li style='margin-bottom: 8px; display: flex; align-items: center; color: #555;'>
                             <span style='display: inline-block; width: 14px; height: 14px; background-color: {stat.Color}; margin-right: 10px; border-radius: 3px; flex-shrink: 0;'></span>
-                            <span><strong>{stat.CategoryName}</strong>: {stat.Percentage:F1}% <br><span style='font-size: 0.85em; color: #888;'>({stat.TotalAmount.ToString("C2", culture)})</span></span>
+                            <span><strong>{stat.CategoryName}</strong>: {stat.Percentage:F1}%</span>
                         </li>
                 ");
             }
