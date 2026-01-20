@@ -113,10 +113,30 @@ public class TransactionsEndpoints : IEndpoint
 
             var transaction = await db.Transactions
                             .FirstOrDefaultAsync(t => t.Id == id && t.UserId == user.Id);
+            
+            if (transaction == null)
+            {
+                 return Results.Content("<div class='error'>Błąd: Transakcja nieznaleziona.</div>", "text/html");
+            }
 
             var form = context.Request.Form;
-            transaction.Value = decimal.Parse(form["amount"]);
-            transaction.Description = form["description"].ToString();
+            if (form.ContainsKey("amount"))
+            {
+                 // Handle decimal parsing with invariant culture (dot separator)
+                 if (decimal.TryParse(form["amount"], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal val))
+                 {
+                     transaction.Value = val;
+                 }
+            }
+            
+            if (form.ContainsKey("description"))
+                transaction.Description = form["description"].ToString();
+
+            if (form.ContainsKey("date") && DateTime.TryParse(form["date"], out DateTime newDate))
+            {
+                transaction.Date = newDate;
+            }
+            
             //transaction.Category = form["category"].ToString();
 
             await db.SaveChangesAsync();
