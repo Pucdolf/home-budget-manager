@@ -10,6 +10,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RegisterService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<TransactionService>();
+builder.Services.AddScoped<ChartService>();
 
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
 {
