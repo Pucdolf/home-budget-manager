@@ -46,7 +46,7 @@
 
     async function fetchEvents() {
         try {
-            const response = await fetch('/api/calendar-events');
+            const response = await fetch('/api/calendar-events?t=' + new Date().getTime());
             if (response.ok) {
                 events = await response.json();
             } else {
@@ -270,171 +270,103 @@
         return dayCell;
     }
 
+    function createEventListItem(event, showDate = false) {
+        const item = document.createElement('div');
+        item.className = 'event-item-row';
+        item.style.backgroundColor = '#fff';
+        item.style.border = '1px solid #e0e0e0';
+        item.style.borderRadius = '8px';
+        item.style.padding = '15px';
+        item.style.marginBottom = '10px';
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.borderLeft = `5px solid ${event.color}`;
+        item.style.cursor = 'pointer';
+        item.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+
+        const timeString = formatTime(new Date(event.startTime));
+        const dateString = showDate ? new Date(event.startTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' : '';
+
+        item.innerHTML = `
+            <div style="flex: 1;">
+                <div style="font-weight: bold; font-size: 1.1em; color: #333;">${event.title}</div>
+                <div style="color: #666; font-size: 0.9em; margin-top: 4px;">
+                    <i class="far fa-clock"></i> ${dateString}${timeString}
+                </div>
+                ${event.description ? `<div style="color: #888; font-size: 0.9em; margin-top: 4px;">${event.description}</div>` : ''}
+            </div>
+            <div style="font-weight: bold; color: ${event.color}; font-size: 1.1em;">
+                ${Number(event.amount).toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' })}
+            </div>
+        `;
+
+        item.addEventListener('click', () => showEventDetails(event.id));
+        return item;
+    }
+
     function renderWeekView() {
         const weekContainer = document.createElement('div');
-        weekContainer.className = 'week-view';
+        weekContainer.className = 'week-view-list';
+        weekContainer.style.padding = '20px';
 
         // Week header
-        const weekHeader = document.createElement('div');
-        weekHeader.className = 'week-header';
-
-        // Empty cell for time labels
-        const emptyHeader = document.createElement('div');
-        weekHeader.appendChild(emptyHeader);
-
-        // Get start of week (Sunday)
         const startOfWeek = new Date(currentDate);
         startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-        // Add day headers
-        const today = new Date();
+        const header = document.createElement('div');
+        header.className = 'week-header-title';
+        header.style.marginBottom = '20px';
+        header.innerHTML = `<h2>Week of ${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</h2>`;
+        weekContainer.appendChild(header);
+
+        // Fetch events for the whole week
+        const weekEvents = [];
         for (let i = 0; i < 7; i++) {
             const dayDate = new Date(startOfWeek);
             dayDate.setDate(startOfWeek.getDate() + i);
-
-            const dayHeader = document.createElement('div');
-            dayHeader.className = 'week-day-header';
-
-            const isToday = dayDate.getDate() === today.getDate() &&
-                dayDate.getMonth() === today.getMonth() &&
-                dayDate.getFullYear() === today.getFullYear();
-            if (isToday) {
-                dayHeader.classList.add('current-day');
-            }
-
-            dayHeader.innerHTML = `
-                <div>${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i]}</div>
-                <div>${dayDate.getDate()}</div>
-            `;
-            weekHeader.appendChild(dayHeader);
+            const dayEvents = getEventsForDate(dayDate);
+            weekEvents.push(...dayEvents);
         }
 
-        weekContainer.appendChild(weekHeader);
+        weekEvents.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
-        // Week grid
-        const weekGrid = document.createElement('div');
-        weekGrid.className = 'week-grid';
-
-        // Time slots
-        for (let hour = 0; hour < 24; hour++) {
-            // Hour label
-            const hourLabel = document.createElement('div');
-            hourLabel.className = 'hour-label';
-            hourLabel.textContent = `${hour === 0 ? 12 : hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
-            weekGrid.appendChild(hourLabel);
-
-            // Day cells
-            for (let day = 0; day < 7; day++) {
-                const dayDate = new Date(startOfWeek);
-                dayDate.setDate(startOfWeek.getDate() + day);
-                dayDate.setHours(hour);
-
-                const dayCell = document.createElement('div');
-                dayCell.className = 'week-cell';
-                weekGrid.appendChild(dayCell);
-
-                // Add events to this time slot
-                const eventsForHour = getEventsForDateAndHour(dayDate, hour);
-                eventsForHour.forEach(event => {
-                    const eventElement = document.createElement('div');
-                    eventElement.className = 'week-event';
-                    eventElement.textContent = event.title;
-                    eventElement.style.backgroundColor = event.color;
-
-                    // Calculate position and height based on event duration
-                    const startMinutes = new Date(event.startTime).getHours() * 60 + new Date(event.startTime).getMinutes();
-                    const endMinutes = new Date(event.endTime).getHours() * 60 + new Date(event.endTime).getMinutes();
-                    const duration = endMinutes - startMinutes;
-                    const height = (duration / 60) * 60; // 60px per hour
-
-                    const position = (startMinutes % 60) / 60 * 60;
-
-                    eventElement.style.top = `${position}px`;
-                    eventElement.style.height = `${height}px`;
-
-                    dayCell.appendChild(eventElement);
-
-                    eventElement.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        showEventDetails(event.id);
-                    });
-                });
-
-                dayCell.addEventListener('click', () => {
-                    // Create a new event at this time
-                    currentDate = new Date(dayDate);
-                    openEventModalWithTime(hour);
-                });
-            }
+        if (weekEvents.length === 0) {
+            weekContainer.innerHTML += '<p style="color: #888; text-align: center;">No transactions for this week.</p>';
+        } else {
+            weekEvents.forEach(event => {
+                weekContainer.appendChild(createEventListItem(event, true));
+            });
         }
 
-        weekContainer.appendChild(weekGrid);
         calendarView.appendChild(weekContainer);
     }
 
     function renderDayView() {
         const dayContainer = document.createElement('div');
-        dayContainer.className = 'day-view';
+        dayContainer.className = 'day-view-list';
+        dayContainer.style.padding = '20px';
 
         // Day header
         const dayHeader = document.createElement('div');
-        dayHeader.className = 'day-header';
-        dayHeader.innerHTML = `
-            <h2>${currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</h2>
-        `;
+        dayHeader.className = 'day-header-title';
+        dayHeader.style.marginBottom = '20px';
+        dayHeader.innerHTML = `<h2>${currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</h2>`;
         dayContainer.appendChild(dayHeader);
 
-        // Day grid
-        const dayGrid = document.createElement('div');
-        dayGrid.className = 'day-grid';
+        // Get events for the day
+        const dayEvents = getEventsForDate(currentDate);
+        dayEvents.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
-        // Time slots
-        for (let hour = 0; hour < 24; hour++) {
-            // Hour label
-            const hourLabel = document.createElement('div');
-            hourLabel.className = 'day-hour-label hour-label';
-            hourLabel.textContent = `${hour === 0 ? 12 : hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`;
-            dayGrid.appendChild(hourLabel);
-
-            // Time block
-            const timeBlock = document.createElement('div');
-            timeBlock.className = 'day-time-block day-hour';
-            dayGrid.appendChild(timeBlock);
-
-            // Add events to this time slot
-            const eventsForHour = getEventsForDateAndHour(currentDate, hour);
-            eventsForHour.forEach(event => {
-                const eventElement = document.createElement('div');
-                eventElement.className = 'day-event';
-                eventElement.textContent = `${formatTime(new Date(event.startTime))} - ${event.title}`;
-                eventElement.style.backgroundColor = event.color;
-
-                // Calculate position and height based on event duration
-                const startMinutes = new Date(event.startTime).getHours() * 60 + new Date(event.startTime).getMinutes();
-                const endMinutes = new Date(event.endTime).getHours() * 60 + new Date(event.endTime).getMinutes();
-                const duration = endMinutes - startMinutes;
-                const height = (duration / 60) * 60; // 60px per hour
-
-                const position = (startMinutes % 60) / 60 * 60;
-
-                eventElement.style.top = `${position}px`;
-                eventElement.style.height = `${height}px`;
-
-                timeBlock.appendChild(eventElement);
-
-                eventElement.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    showEventDetails(event.id);
-                });
-            });
-
-            timeBlock.addEventListener('click', () => {
-                // Create a new event at this time
-                openEventModalWithTime(hour);
-            });
+        if (dayEvents.length === 0) {
+            dayContainer.innerHTML += '<p style="color: #888; text-align: center;">No transactions for this day.</p>';
+        } else {
+             dayEvents.forEach(event => {
+                 dayContainer.appendChild(createEventListItem(event, false));
+             });
         }
-
-        dayContainer.appendChild(dayGrid);
+        
         calendarView.appendChild(dayContainer);
     }
 
@@ -470,7 +402,7 @@
                     <span>${event.title}</span>
                     <span style="color: ${event.color}">●</span>
                 </div>
-                <div class="event-time">${formatDateTime(startDate, endDate)}</div>
+                <div class="event-time">${formatTime(startDate)}</div>
                 ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
             `;
 
@@ -482,20 +414,27 @@
         });
     }
 
+    function toLocalDateString(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
     function getEventsForDate(date) {
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = toLocalDateString(date);
         return events.filter(event => {
-            const eventDate = new Date(event.startTime).toISOString().split('T')[0];
-            return eventDate === dateStr;
+            const eventDate = new Date(event.startTime);
+            return toLocalDateString(eventDate) === dateStr;
         });
     }
 
     function getEventsForDateAndHour(date, hour) {
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = toLocalDateString(date);
         return events.filter(event => {
-            const eventDate = new Date(event.startTime).toISOString().split('T')[0];
-            const eventHour = new Date(event.startTime).getHours();
-            return eventDate === dateStr && eventHour === hour;
+            const eventDate = new Date(event.startTime);
+            const eventHour = eventDate.getHours();
+            return toLocalDateString(eventDate) === dateStr && eventHour === hour;
         });
     }
 
@@ -584,9 +523,23 @@
         // Reset form
         eventForm.reset();
         eventDateInput.valueAsDate = currentDate;
-        eventStartTimeInput.value = '09:00';
-        eventEndTimeInput.value = '10:00';
-        eventColorInput.value = '#4e73df';
+        
+        // Default time (current time)
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        eventStartTimeInput.value = `${hours}:${minutes}`;
+
+        document.getElementById('form-error').textContent = '';
+        
+        // Trigger HTMX to load categories if empty or just rely on the hx-trigger="load"
+        if (window.htmx) {
+            htmx.process(document.getElementById('categories-loader'));
+            // Manually trigger if needed, but hx-trigger="load" runs when element is present.
+            // Since modal is hidden, we might need to trigger it.
+            // Actually, best to just trigger a swap manually or ensure the div is re-processed
+            htmx.trigger('#categories-loader', 'load');
+        }
 
         // Show modal
         eventModal.style.display = 'flex';
@@ -595,7 +548,6 @@
     function openEventModalWithTime(hour) {
         openEventModal();
         eventStartTimeInput.value = `${hour.toString().padStart(2, '0')}:00`;
-        eventEndTimeInput.value = `${(hour + 1).toString().padStart(2, '0')}:00`;
     }
 
     function closeModals() {
@@ -603,42 +555,50 @@
         eventDetailsModal.style.display = 'none';
     }
 
-    function saveEvent(e) {
+    async function saveEvent(e) {
         e.preventDefault();
 
-        // Create event object
-        const eventId = Date.now().toString();
-        const startDateTime = new Date(eventDateInput.value);
-        const startTimeParts = eventStartTimeInput.value.split(':');
-        startDateTime.setHours(parseInt(startTimeParts[0]), parseInt(startTimeParts[1]));
+        // Validate Category
+        const categorySelect = document.querySelector('#target-container-for-select select');
+        if (!categorySelect || !categorySelect.value || categorySelect.value === "Wybierz...") {
+            document.getElementById('form-error').textContent = 'Wybierz kategorię!';
+            return;
+        }
 
-        const endDateTime = new Date(eventDateInput.value);
-        const endTimeParts = eventEndTimeInput.value.split(':');
-        endDateTime.setHours(parseInt(endTimeParts[0]), parseInt(endTimeParts[1]));
+        // Construct FormData for the endpoint
+        const formData = new FormData(eventForm);
+        // Ensure categoryId is set correctly (the select might have name="categoryId" or we append it)
+        // The endpoint expects "categoryId"
+        if (!formData.has('categoryId')) {
+            formData.append('categoryId', categorySelect.value);
+        }
+        
+        // The endpoint expects "transactionType" as 0 or 1. Radio buttons handle this.
+        
+        try {
+            const response = await fetch('/new-transaction/add', {
+                method: 'POST',
+                body: formData
+            });
 
-        const newEvent = {
-            id: eventId,
-            title: eventAmountInput.value,
-            startTime: startDateTime.toISOString(),
-            endTime: endDateTime.toISOString(),
-            description: eventDescriptionInput.value,
-            color: eventColorInput.value,
-            reminder: eventReminderInput ? eventReminderInput.checked : false
-
-        };
-
-        // Add to events array
-        events.push(newEvent);
-        saveEventsToStorage();
-
-        // Update UI
-        renderCalendar();
-        renderEventsList();
-        closeModals();
-
-        // Set reminder if needed
-        if (newEvent.reminder) {
-            setReminder(newEvent);
+            const text = await response.text();
+            
+            if (text.includes('success')) {
+                // Reload events
+                await fetchEvents();
+                renderCalendar();
+                renderEventsList();
+                closeModals();
+            } else {
+                // Show error (extract from response div)
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = text;
+                const errorDiv = tempDiv.querySelector('.error');
+                document.getElementById('form-error').textContent = errorDiv ? errorDiv.textContent : 'Błąd podczas zapisywania.';
+            }
+        } catch (err) {
+            console.error(err);
+            document.getElementById('form-error').textContent = 'Błąd połączenia.';
         }
     }
 
@@ -657,7 +617,8 @@
             year: 'numeric'
         });
 
-        detailsTime.textContent = `${formatTime(new Date(event.startTime))} - ${formatTime(new Date(event.endTime))}`;
+        // Removed end time display
+        detailsTime.textContent = formatTime(new Date(event.startTime));
         detailsDescription.textContent = event.description || 'No description';
 
         // Show modal
@@ -671,28 +632,42 @@
         if (!event) return;
 
         // Populate form with event data
-        eventAmountInput.value = event.amount; // Use amount
-        eventDateInput.valueAsDate = new Date(event.startTime);
+        const val = Number(event.amount);
+        eventAmountInput.value = Math.abs(val).toFixed(2);
+        
+        // Radios
+        const radios = document.getElementsByName('transactionType');
+        if (radios.length > 0) {
+            if (val < 0) radios[0].checked = true; // Expense
+            else radios[1].checked = true; // Income
+        }
 
-        const startDate = new Date(event.startTime);
-        eventStartTimeInput.value = `${startDate.getHours().toString().padStart(2, '0')}:${startDate.getMinutes().toString().padStart(2, '0')}`;
+        const dt = new Date(event.startTime);
+        const yyyy = dt.getFullYear();
+        const mm = String(dt.getMonth() + 1).padStart(2, '0');
+        const dd = String(dt.getDate()).padStart(2, '0');
+        eventDateInput.value = `${yyyy}-${mm}-${dd}`;
 
-        const endDate = new Date(event.endTime);
-        eventEndTimeInput.value = `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`;
+        const hh = String(dt.getHours()).padStart(2, '0');
+        const min = String(dt.getMinutes()).padStart(2, '0');
+        eventStartTimeInput.value = `${hh}:${min}`;
 
         eventDescriptionInput.value = event.description || '';
-        eventColorInput.value = event.color;
-        if (eventReminderInput) eventReminderInput.checked = event.reminder || false;
+        
+        // Category selection
+        const categorySelect = document.querySelector('#target-container-for-select select');
+        if (categorySelect && event.categoryId) {
+             categorySelect.value = event.categoryId;
+        }
 
         // Change form submit to update instead of create
         eventForm.onsubmit = async function (e) {
             e.preventDefault();
 
-            // Construct FormData for PUT
-            const formData = new FormData();
-            formData.append('amount', eventAmountInput.value);
-            formData.append('description', eventDescriptionInput.value);
-            formData.append('date', eventDateInput.value);
+            const formData = new FormData(eventForm);
+            if (!formData.has('categoryId') && categorySelect) {
+                formData.append('categoryId', categorySelect.value);
+            }
 
             try {
                 const response = await fetch('/transactions?id=' + selectedEventId, {

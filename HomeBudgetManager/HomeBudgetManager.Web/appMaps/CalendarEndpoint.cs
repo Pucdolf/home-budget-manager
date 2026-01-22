@@ -36,17 +36,33 @@ namespace HomeBudgetManager.Web.appMaps
                 if (user == null)
                     return Results.Unauthorized();
 
+                List<int> userIds = new List<int>();
+                if (user.HouseId.HasValue)
+                {
+                    userIds = await db.Users
+                        .Where(u => u.HouseId == user.HouseId.Value)
+                        .Select(u => u.Id)
+                        .ToListAsync();
+                }
+                else
+                {
+                    userIds.Add(user.Id);
+                }
+
                 var transactions = await db.Transactions
-                    .Where(t => t.UserId == user.Id)
+                    .Include(t => t.User) // Include User to get Login
+                    .Where(t => userIds.Contains(t.UserId))
+                    .OrderBy(t => t.Date) // Sort by date/time
                     .Select(t => new
                     {
                         id = t.Id.ToString(),
-                        title = t.Value.ToString("F2") + " - " + (string.IsNullOrEmpty(t.Description) ? "Transakcja" : t.Description), // Show amount + desc
-                        startTime = t.Date.ToString("yyyy-MM-ddTHH:mm:ss"), // ISO 8601
-                        endTime = t.Date.AddHours(1).ToString("yyyy-MM-ddTHH:mm:ss"), // Dummy end time
+                        title = $"{t.Value:F2} ({t.User.Login})", // Show amount + user
+                        startTime = t.Date.ToString("yyyy-MM-ddTHH:mm:ss"),
+                        endTime = t.Date.AddHours(1).ToString("yyyy-MM-ddTHH:mm:ss"),
                         amount = t.Value,
-                        description = t.Description,
-                        color = t.Value < 0 ? "#e74a3b" : "#1cc88a", // Red for expense, Green for income
+                        description = t.Description ?? "",
+                        categoryId = t.CategoryId,
+                        color = t.Value < 0 ? "#e74a3b" : "#1cc88a",
                         reminder = false
                     })
                     .ToListAsync();
