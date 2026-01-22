@@ -98,20 +98,23 @@ namespace HomeBudgetManager.Core
 
             foreach (var t in transactions)
             {
-                string date = t.Date.ToString("dd.MM.yyyy");
+                string date = t.Date.ToString("yyyy-MM-dd"); // Use ISO format for JS
+                string displayDate = t.Date.ToString("dd.MM.yyyy");
                 string amount = t.Value.ToString("C2", new System.Globalization.CultureInfo("pl-PL"));
                 string colorClass = t.Value < 0 ? "amount-expense" : "amount-income";
                 var category = db.Categories.FirstOrDefault(c => c.Id == t.CategoryId);
+                
+                string safeDescription = (t.Description ?? "").Replace("\"", "&quot;").Replace("'", "\\'");
 
                 sb.Append($"""
 
-                    <li class="transaction-item">
+                    <li class="transaction-item" onclick="openDashboardTransactionDetails({t.Id}, '{t.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}', '{safeDescription}', '{date}')" style="cursor: pointer;">
                         <div class="transaction-amount {colorClass}">
                             {amount}
                         </div>
                         <div class="transaction-details">
                             <span class="category-badge">{category.Name}</span>
-                            <span class="transaction-date">{date}</span>
+                            <span class="transaction-date">{displayDate}</span>
                         </div>
                     </li>
                  """);
