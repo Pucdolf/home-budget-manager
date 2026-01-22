@@ -114,7 +114,7 @@ namespace HomeBudgetManager.Web.appMaps
                                             class='removeBtn'
                                             hx-post='/remove-member?userId={m.Id}'
                                             hx-confirm='Czy na pewno chcesz usunąć użytkownika {loginEsc}?'
-                                            hx-target='#dashboard-main'>
+                                            hx-target='#household-main'>
                                             Usuń
                                         </button>";
                                 }
@@ -174,7 +174,7 @@ namespace HomeBudgetManager.Web.appMaps
                                 <div>
                                     <form 
                                         hx-post='/leave-household'
-                                        hx-target='#dashboard-main'
+                                        hx-target='#household-main'
                                         hx-swap='innerHTML'
                                         hx-confirm='{confirmText}'>
                                         
