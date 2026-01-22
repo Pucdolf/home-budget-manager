@@ -12,9 +12,9 @@ public class AuthService
         _context = context;
     }
 
-    public bool ValidateUser(string username, string password)
+    public bool ValidateUserByEmail(string email, string password)
     {
-        var user = _context.Users.FirstOrDefault(u => u.Login == username);
+        var user = _context.Users.FirstOrDefault(u => u.Email == email);
         if (user == null) return false;
 
         return _hasher.verifyPassword(user.Password, password);
@@ -28,5 +28,10 @@ public class AuthService
     public DBUser? GetUserByUsername(string username)
     {
         return _context.Users.FirstOrDefault(u => u.Login == username);
+    }
+
+    public DBUser? GetUserByEmail(string email)
+    {
+        return _context.Users.FirstOrDefault(u => u.Email == email);
     }
 }
