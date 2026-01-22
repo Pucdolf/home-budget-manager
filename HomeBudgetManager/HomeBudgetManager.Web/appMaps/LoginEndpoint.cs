@@ -9,15 +9,15 @@ namespace HomeBudgetManager.Web.appMaps
         {
             app.MapPost("/login", (HttpContext httpContext, AuthService authService) => {
 
-                var username = httpContext.Request.Form["username"];
+                var email = httpContext.Request.Form["email"];
                 var password = httpContext.Request.Form["password"];
 
-                bool isValid = authService.ValidateUser(username, password);
+                bool isValid = authService.ValidateUserByEmail(email, password);
 
                 if (isValid)
                 {
-                    var user = authService.GetUserByUsername(username);
-                    httpContext.Response.Cookies.Append("logged_user", username);
+                    var user = authService.GetUserByEmail(email);
+                    httpContext.Response.Cookies.Append("logged_user", user.Login); // Still store username/login for other services
                     httpContext.Response.Cookies.Append("user_id", user.Id.ToString());
                     // Przekierowanie htmx po udanym logowaniu
                     httpContext.Response.Headers.Append("HX-Redirect", "/dashboard");
@@ -25,7 +25,7 @@ namespace HomeBudgetManager.Web.appMaps
                 }
                 else
                 {
-                    var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Nieprawidłowy login lub hasło.</div>";
+                    var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Nieprawidłowy email lub hasło.</div>";
                     return Results.Content(htmlResponse, "text/html");
                 }
             });
