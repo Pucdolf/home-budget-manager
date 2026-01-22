@@ -18,7 +18,7 @@ namespace HomeBudgetManager.Web.appMaps
                 if (user == null)
                     return Results.Redirect("/");
 
-                var filePath = Path.Combine(env.WebRootPath, "calendar.html");
+                var filePath = Path.Combine(env.WebRootPath, "calendar", "calendar.html");
                 var html = File.ReadAllText(filePath, Encoding.UTF8);
 
                 html = html.Replace("{username}", username);
