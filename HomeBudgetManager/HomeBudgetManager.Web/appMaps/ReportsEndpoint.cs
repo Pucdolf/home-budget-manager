@@ -6,19 +6,17 @@ using System.Security.Claims;
 
 namespace HomeBudgetManager.Web.appMaps
 {
-    public class ChartsEndpoint : IEndpoint
+    public class ReportsEndpoint : IEndpoint
     {
         public void Map(IEndpointRouteBuilder app)
         {
-            app.MapGet("/charts", (HttpContext context) =>
+            app.MapGet("/reports", (HttpContext context) =>
             {
                 if (!context.Request.Cookies.TryGetValue("logged_user", out var username) || string.IsNullOrEmpty(username))
                 {
                     return Results.Redirect("/");
                 }
-                
-                // Basic layout similar to dashboard
-                // We'll use a simple form to pick dates, defaulting to current month
+
                 var now = DateTime.Now;
                 var startDate = new DateTime(now.Year, now.Month, 1).ToString("yyyy-MM-dd");
                 var endDate = now.ToString("yyyy-MM-dd");
@@ -28,11 +26,10 @@ namespace HomeBudgetManager.Web.appMaps
                 <html lang="pl">
                 <head>
                     <meta charset="UTF-8">
-                    <title>Wykresy - HomeBudgetManager</title>
+                    <title>Raporty - HomeBudgetManager</title>
                     <link rel="stylesheet" href="/css/dashboard.css">
-                    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
                     <style>
-                        .charts-controls {
+                        .report-controls {
                             background: #fff;
                             padding: 20px;
                             border-radius: 8px;
@@ -53,14 +50,16 @@ namespace HomeBudgetManager.Web.appMaps
                         }
                         .btn-generate {
                             padding: 10px 20px;
-                            background-color: #124708;
+                            background-color: #005f73;
                             color: white;
                             border: none;
                             border-radius: 4px;
                             cursor: pointer;
+                            text-decoration: none;
+                            display: inline-block;
                         }
                         .btn-generate:hover {
-                            background-color: #0e3606;
+                            background-color: #0a4c5e;
                         }
                     </style>
                 </head>
@@ -72,8 +71,8 @@ namespace HomeBudgetManager.Web.appMaps
                             <button class="sidebar-link" onclick="window.location.href='/dashboard'">Pulpit</button>
                             <button class="sidebar-link" onclick="window.location.href='/household'">Domostwo</button>
                             <button class="sidebar-link" onclick="window.location.href='/calendar'">Kalendarz</button>
-                            <button class="sidebar-link active" onclick="window.location.href='/charts'">Wykresy</button>
-                            <button class="sidebar-link" onclick="window.location.href='/reports'">Raporty</button>
+                            <button class="sidebar-link" onclick="window.location.href='/charts'">Wykresy</button>
+                            <button class="sidebar-link active" onclick="window.location.href='/reports'">Raporty</button>
                             <form method="post" action="/logout" style="display:inline;">
                                 <button type="submit" class="btn-logout">Wyloguj</button>
                             </form>
@@ -81,10 +80,10 @@ namespace HomeBudgetManager.Web.appMaps
 
                         <main class="container">
                             <section class="card">
-                                <h2>Wykresy finansowe</h2>
-                                <p class="card-desc">Wybierz zakres dat, aby wygenerować wykresy wydatków i przychodów.</p>
+                                <h2>Generator Raportów PDF</h2>
+                                <p class="card-desc">Wybierz zakres dat i wygeneruj szczegółowy raport PDF dla swojego domostwa.</p>
 
-                                <form class="charts-controls" hx-post="/charts/generate" hx-target="#charts-result">
+                                <form class="report-controls" method="post" action="/reports/generate">
                                     <div class="form-group">
                                         <label for="startDate">Od:</label>
                                         <input type="date" id="startDate" name="startDate" value="{{startDate}}" required>
@@ -93,20 +92,8 @@ namespace HomeBudgetManager.Web.appMaps
                                         <label for="endDate">Do:</label>
                                         <input type="date" id="endDate" name="endDate" value="{{endDate}}" required>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Zakres:</label>
-                                        <div style="display:flex; gap:10px; align-items:center;">
-                                            <label style="font-weight:normal; font-size:0.9em;"><input type="radio" name="scope" value="user" checked> Tylko ja</label>
-                                            <label style="font-weight:normal; font-size:0.9em;"><input type="radio" name="scope" value="house"> Cały dom</label>
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn-generate">Generuj</button>
+                                    <button type="submit" class="btn-generate">Pobierz Raport PDF</button>
                                 </form>
-
-                                <div id="charts-result">
-                                    <!-- Tu pojawią się wykresy -->
-                                    <p style="text-align:center; color:#888;">Kliknij "Generuj", aby zobaczyć dane.</p>
-                                </div>
                             </section>
                         </main>
                     </div>
@@ -116,30 +103,28 @@ namespace HomeBudgetManager.Web.appMaps
                 return Results.Content(html, "text/html");
             });
 
-            app.MapPost("/charts/generate", (HttpContext context, ChartService chartService) =>
+            app.MapPost("/reports/generate", (HttpContext context, ReportService reportService) =>
             {
                 if (!context.Request.Cookies.TryGetValue("user_id", out var userIdString) || 
                     !int.TryParse(userIdString, out int userId))
                 {
-                    // Redirect to login or show error
-                     return Results.Content("<div class='error'>Sesja wygasła. Zaloguj się ponownie.</div>", "text/html");
+                    return Results.Redirect("/");
                 }
 
                 var form = context.Request.Form;
                 if (!DateTime.TryParse(form["startDate"], out DateTime startDate) ||
                     !DateTime.TryParse(form["endDate"], out DateTime endDate))
                 {
-                     return Results.Content("<div class='error'>Nieprawidłowy format daty.</div>", "text/html");
+                     return Results.Content("Nieprawidłowa data");
                 }
                 
-                string scope = form["scope"];
-                bool includeHousehold = (scope == "house");
-
-                // End date should include the whole day
+                // End of day
                 endDate = endDate.Date.AddDays(1).AddTicks(-1);
 
-                var chartsHtml = chartService.GenerateChartsHtml(userId, startDate, endDate, includeHousehold);
-                return Results.Content(chartsHtml, "text/html");
+                var pdfBytes = reportService.GeneratePdfReport(userId, startDate, endDate);
+                var filename = $"Raport_HBM_{startDate:yyyyMMdd}_{endDate:yyyyMMdd}.pdf";
+
+                return Results.File(pdfBytes, "application/pdf", filename);
             });
         }
     }
