@@ -29,34 +29,42 @@
                     Prototyp panelu do podglądu stanu finansów.
                 </p>
 
-                <div class="balance-box">
-                    <p class="balance-label">Saldo konta</p>
-                    <span class="balance-highlight">{balance} zł</span>
-                </div>
+                <div class="dashboard-grid">
+                    <!-- Lewa kolumna: Bilans i Wykresy -->
+                    <div class="dashboard-center-column">
+                        <div class="balance-box">
+                            <p class="balance-label">Saldo konta</p>
+                            <span class="balance-highlight">{balance} zł</span>
+                        </div>
 
-                <div id="dashboard-charts" 
-                     hx-get="/dashboard/charts" 
-                     hx-trigger="load">
-                     <p style="text-align:center; color:#888;">Ładowanie wykresów...</p>
-                </div>
+                        <div id="dashboard-charts" 
+                             hx-get="/dashboard/charts" 
+                             hx-trigger="load">
+                             <p style="text-align:center; color:#888;">Ładowanie wykresów...</p>
+                        </div>
 
-                <div class="actions-box">
-                    <a href="/new-transaction" class="btn-primary">Dodaj transakcję</a>
-                </div>
+                        <div class="actions-box">
+                            <a href="/new-transaction" class="btn-primary">Dodaj transakcję</a>
+                        </div>
+                    </div>
 
-                <div class="transactions-box">
-                    <h3>Ostatnie transakcje</h3>
-                    <ul class="transactions-list"
-                        id="transactions-list"
-                        hx-get="/transactions/listsome"
-                        hx-trigger="load"
-                        hx-swap="innerHTML">
-                        <li class='transaction-item'>
-                            <div class='transaction-main'>
-                                <span>Ładowanie transakcji...</span>
-                            </div>
-                        </li>
-                    </ul>
+                    <!-- Prawa kolumna: Lista transakcji -->
+                    <div class="dashboard-right-column">
+                        <div class="transactions-box">
+                            <h3>Ostatnie transakcje</h3>
+                            <ul class="transactions-list"
+                                id="transactions-list"
+                                hx-get="/transactions/listsome"
+                                hx-trigger="load"
+                                hx-swap="innerHTML">
+                                <li class='transaction-item'>
+                                    <div class='transaction-main'>
+                                        <span>Ładowanie transakcji...</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
