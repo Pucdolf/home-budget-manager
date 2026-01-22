@@ -22,11 +22,11 @@ namespace HomeBudgetManager.Core
             public string Color { get; set; } = "#ccc";
         }
 
-        public (List<CategoryStat> Expenses, List<CategoryStat> Incomes) GetStatistics(int userId, DateTime startDate, DateTime endDate)
+        public (List<CategoryStat> Expenses, List<CategoryStat> Incomes) GetStatistics(List<int> userIds, DateTime startDate, DateTime endDate)
         {
             var transactions = _db.Transactions
                 .Include(t => t.Category)
-                .Where(t => t.UserId == userId && t.Date >= startDate && t.Date <= endDate)
+                .Where(t => userIds.Contains(t.UserId) && t.Date >= startDate && t.Date <= endDate)
                 .ToList();
 
             var expenses = transactions
@@ -76,9 +76,20 @@ namespace HomeBudgetManager.Core
             return (expenseStats, incomeStats);
         }
 
-        public string GenerateChartsHtml(int userId, DateTime startDate, DateTime endDate)
+        public string GenerateChartsHtml(int userId, DateTime startDate, DateTime endDate, bool includeHousehold = false)
         {
-            var (expenses, incomes) = GetStatistics(userId, startDate, endDate);
+            List<int> userIds = new List<int> { userId };
+            
+            if (includeHousehold)
+            {
+                var user = _db.Users.FirstOrDefault(u => u.Id == userId);
+                if (user != null && user.HouseId.HasValue)
+                {
+                    userIds = _db.Users.Where(u => u.HouseId == user.HouseId).Select(u => u.Id).ToList();
+                }
+            }
+
+            var (expenses, incomes) = GetStatistics(userIds, startDate, endDate);
             var sb = new StringBuilder();
 
             // Inject simple tooltip CSS and JS
@@ -86,8 +97,8 @@ namespace HomeBudgetManager.Core
 
             sb.Append("<div class='charts-container' style='display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px;'>");
 
-            sb.Append(GenerateSingleChartHtml("Wydatki", expenses));
-            sb.Append(GenerateSingleChartHtml("Przychody", incomes));
+            sb.Append(GenerateSingleChartHtml(includeHousehold ? "Wydatki (Domostwo)" : "Wydatki (Moje)", expenses));
+            sb.Append(GenerateSingleChartHtml(includeHousehold ? "Przychody (Domostwo)" : "Przychody (Moje)", incomes));
 
             sb.Append("</div>");
             return sb.ToString();
@@ -98,7 +109,7 @@ namespace HomeBudgetManager.Core
              var now = DateTime.Now;
              var startDate = new DateTime(now.Year, now.Month, 1);
              var endDate = now.Date.AddDays(1).AddTicks(-1);
-             return GenerateChartsHtml(userId, startDate, endDate);
+             return GenerateChartsHtml(userId, startDate, endDate, false);
         }
 
         private string GetTooltipAssets()
