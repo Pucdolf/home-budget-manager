@@ -19,7 +19,7 @@ namespace HomeBudgetManager.Web.appMaps
 
                 if (user == null)
                 {
-                    return Results.Content("<div class='error'>B³¹d: U¿ytkownik nieznaleziony.</div>", "text/html");
+                    return Results.Content("<div class='error'>BÅ‚Ä…d: UÅ¼ytkownik nieznaleziony.</div>", "text/html");
                 }
 
                 var categories = categoryService.listAllUserCategories(user.Id);
@@ -28,13 +28,13 @@ namespace HomeBudgetManager.Web.appMaps
                 var htmlBuilder = new System.Text.StringBuilder();
                 htmlBuilder.Append("<select id='category' name='categoryId' required class='form-input' onchange='handleCategoryChange(this)'>");
 
-                htmlBuilder.Append("<option value=''>Wybierz kategoriê</option>");
+                htmlBuilder.Append("<option value=''>Wybierz kategoriÄ™</option>");
                 foreach (var cat in categories)
                 {
                     htmlBuilder.Append($"<option value='{cat.Id}'>{cat.Name}</option>");
                 }
 
-                htmlBuilder.Append("<option value='new-category'>Dodaj kategoriê</option>");
+                htmlBuilder.Append("<option value='new-category'>Dodaj kategoriÄ™</option>");
                 htmlBuilder.Append("</select>");
 
                 return Results.Content(htmlBuilder.ToString(), "text/html");
@@ -47,7 +47,7 @@ namespace HomeBudgetManager.Web.appMaps
 
                 if (user == null)
                 {
-                    return Results.Content("<div class='error'>B³¹d: U¿ytkownik nieznaleziony.</div>", "text/html");
+                    return Results.Content("<div class='error'>BÅ‚Ä…d: UÅ¼ytkownik nieznaleziony.</div>", "text/html");
                 }
 
                 if (string.IsNullOrWhiteSpace(dto.Name))
