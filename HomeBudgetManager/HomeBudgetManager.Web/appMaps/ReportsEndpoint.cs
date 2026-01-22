@@ -36,8 +36,8 @@ namespace HomeBudgetManager.Web.appMaps
                             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
                             margin-bottom: 20px;
                             display: flex;
-                            gap: 15px;
-                            align-items: end;
+                            gap: 30px;
+                            align-items: flex-end;
                         }
                         .form-group {
                             display: flex;
@@ -57,6 +57,8 @@ namespace HomeBudgetManager.Web.appMaps
                             cursor: pointer;
                             text-decoration: none;
                             display: inline-block;
+                            height: fit-content;
+                            margin-bottom: 22px;
                         }
                         .btn-generate:hover {
                             background-color: #0a4c5e;
