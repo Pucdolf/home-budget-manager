@@ -45,7 +45,6 @@
     flex: 0 0 400px;
     display: flex;
     flex-direction: column;
-    margin-left: -250px;
 }
 
 .members-card {
