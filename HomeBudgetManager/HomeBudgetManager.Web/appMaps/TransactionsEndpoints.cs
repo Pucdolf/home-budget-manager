@@ -120,24 +120,68 @@ public class TransactionsEndpoints : IEndpoint
             }
 
             var form = context.Request.Form;
+            
+            // Transaction Type (0=Expense, 1=Income)
+            int transType = -1;
+            if (form.ContainsKey("transactionType"))
+            {
+                int.TryParse(form["transactionType"], out transType);
+            }
+
             if (form.ContainsKey("amount"))
             {
                  // Handle decimal parsing with invariant culture (dot separator)
                  if (decimal.TryParse(form["amount"], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal val))
                  {
+                     val = Math.Abs(val); // Start positive
+                     if (transType == 0) // Expense
+                         val = -val;
+                     else if (transType == 1) // Income
+                         val = val; // Positive
+                     else 
+                     {
+                         // If type not sent, preserve existing sign? Or assume expense?
+                         // Better: check existing sign if type not provided, but form should provide it.
+                         // If we are editing, we probably sent the type.
+                         // If type is not 0 or 1, maybe keep current sign logic? 
+                         // Let's rely on the provided type or infer from current value if missing
+                         if (transaction.Value < 0) val = -val;
+                     }
+                     
                      transaction.Value = val;
+                     transaction.TransactionType = (val < 0) ? TransactionType.expense : TransactionType.income;
                  }
             }
             
             if (form.ContainsKey("description"))
                 transaction.Description = form["description"].ToString();
 
-            if (form.ContainsKey("date") && DateTime.TryParse(form["date"], out DateTime newDate))
-            {
-                transaction.Date = newDate;
-            }
+            // Date and Time merging
+            string dateStr = form["transactionDate"];
+            string timeStr = form["transactionTime"];
             
-            //transaction.Category = form["category"].ToString();
+            if (!string.IsNullOrEmpty(dateStr))
+            {
+                // If time is missing, default to 00:00 or keep existing time?
+                // The form provides both.
+                string fullDateStr = dateStr;
+                if (!string.IsNullOrEmpty(timeStr))
+                {
+                    fullDateStr += " " + timeStr;
+                }
+                
+                if (DateTime.TryParse(fullDateStr, out DateTime newDate))
+                {
+                    transaction.Date = newDate;
+                }
+            } else if (form.ContainsKey("date") && DateTime.TryParse(form["date"], out DateTime legacyDate)) {
+                 transaction.Date = legacyDate;
+            }
+
+            if (form.ContainsKey("categoryId") && int.TryParse(form["categoryId"], out int catId))
+            {
+                transaction.CategoryId = catId;
+            }
 
             await db.SaveChangesAsync();
 
