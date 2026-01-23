@@ -4,14 +4,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Hosting;
 using System.Security.Claims;
-
+using HomeBudgetManager.Core.DBTables;
+using Microsoft.EntityFrameworkCore;
 namespace HomeBudgetManager.Web.appMaps
 {
     public class ChartsEndpoint : IEndpoint
     {
         public void Map(IEndpointRouteBuilder app)
         {
-            app.MapGet("/charts", async (HttpContext context, IWebHostEnvironment env) =>
+            app.MapGet("/charts", async (HttpContext context, IWebHostEnvironment env, AppDbContext db) =>
             {
                 if (!context.Request.Cookies.TryGetValue("logged_user", out var username) || string.IsNullOrEmpty(username))
                 {
@@ -27,9 +28,19 @@ namespace HomeBudgetManager.Web.appMaps
                 var now = DateTime.Now;
                 var startDate = new DateTime(now.Year, now.Month, 1).ToString("yyyy-MM-dd");
                 var endDate = now.ToString("yyyy-MM-dd");
-
+                string adminBtnHtml = "";
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Login == username);
+                if (user == null)
+                {
+                    return Results.Redirect("/");
+                }
+                if (user.Role == SystemRole.SystemAdmin)
+                {
+                    adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\">Ustawienia Admina</button>";
+                }
                 html = html.Replace("{{username}}", username)
                            .Replace("{{startDate}}", startDate)
+                           .Replace("{admin_panel_button}", adminBtnHtml)
                            .Replace("{{endDate}}", endDate);
                 
                 return Results.Content(html, "text/html");

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Panel finansowy</title>
     <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/adminConsole.css">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 <body>
@@ -23,5 +24,20 @@
                 <button type="submit" class="btn-logout">Wyloguj</button>
             </form>
         </aside>
+
+        <main class="admin-container">
+            <h1>Konsola SQL (Bezpośredni dostęp)</h1>
+            <p>Wpisz zapytanie SQL poniżej. </p>
+            
+            <form hx-post="/admin/execute-sql" hx-target="#query-results" hx-indicator="#loading">
+                <textarea name="sqlQuery" class="sql-editor" placeholder="Np. SELECT * FROM Users"></textarea>
+                <br>
+                <button type="submit" class="btn-run">Wykonaj Zapytanie</button>
+                <span id="loading" class="htmx-indicator">Wykonywanie...</span>
+            </form>
+
+            <div id="query-results">
+                </div>
+        </main>
     </div>
 </body>

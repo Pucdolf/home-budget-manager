@@ -24,7 +24,12 @@ namespace HomeBudgetManager.Web.appMaps
                 {
                     return Results.Content("<div class='error'>Nie znaleziono domostwa o takim kodzie.</div>", "text/html");
                 }
-
+                string adminBtnHtml = "";
+                
+                if (user.Role == SystemRole.SystemAdmin)
+                {
+                    adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\">Ustawienia Admina</button>";
+                }
                 user.HouseId = house.Id;
                 user.Role = SystemRole.HouseholdMember;
 
