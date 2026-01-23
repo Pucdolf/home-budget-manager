@@ -12,11 +12,14 @@
 
 .month-view, 
 .week-view, 
-.day-view {
+.day-view,
+.week-view-list,
+.day-view-list {
     flex: 1;             
     overflow-y: auto;    
     width: 100%;
-    padding-right: 0.5rem; 
+    padding-right: 0.5rem;
+    min-height: 0;
 }
 
 .app-container {
@@ -553,24 +556,48 @@ button {
 }
 
 /* 1. Ustawiamy szerokość paska */
-.modal-content::-webkit-scrollbar {
+.modal-content::-webkit-scrollbar,
+.month-view::-webkit-scrollbar,
+.week-view::-webkit-scrollbar,
+.day-view::-webkit-scrollbar,
+.week-view-list::-webkit-scrollbar,
+.day-view-list::-webkit-scrollbar,
+.events-list::-webkit-scrollbar {
     width: 10px; /* Nieco węższy niż standardowy */
 }
 
 /* 2. Tło paska (ścieżka) */
-.modal-content::-webkit-scrollbar-track {
+.modal-content::-webkit-scrollbar-track,
+.month-view::-webkit-scrollbar-track,
+.week-view::-webkit-scrollbar-track,
+.day-view::-webkit-scrollbar-track,
+.week-view-list::-webkit-scrollbar-track,
+.day-view-list::-webkit-scrollbar-track,
+.events-list::-webkit-scrollbar-track {
     background: transparent; /* KLUCZOWE: Przezroczyste tło nie zasłoni zaokrąglonego rogu */
     margin: 5px 0; /* Opcjonalnie: lekki odstęp od góry i dołu */
 }
 
 /* 3. Sam ruchomy suwak */
-.modal-content::-webkit-scrollbar-thumb {
+.modal-content::-webkit-scrollbar-thumb,
+.month-view::-webkit-scrollbar-thumb,
+.week-view::-webkit-scrollbar-thumb,
+.day-view::-webkit-scrollbar-thumb,
+.week-view-list::-webkit-scrollbar-thumb,
+.day-view-list::-webkit-scrollbar-thumb,
+.events-list::-webkit-scrollbar-thumb {
     background-color: var(--light-gray); /* Kolor pasujący do reszty motywu (#d1d3e2) */
     border-radius: 20px; /* Zaokrąglenie samego suwaka */
     border: 3px solid white; /* Biała obwódka sprawia, że suwak wygląda lżej i jest oddzielony od krawędzi */
 }
 
     /* 4. Suwak po najechaniu myszką */
-    .modal-content::-webkit-scrollbar-thumb:hover {
+    .modal-content::-webkit-scrollbar-thumb:hover,
+    .month-view::-webkit-scrollbar-thumb:hover,
+    .week-view::-webkit-scrollbar-thumb:hover,
+    .day-view::-webkit-scrollbar-thumb:hover,
+    .week-view-list::-webkit-scrollbar-thumb:hover,
+    .day-view-list::-webkit-scrollbar-thumb:hover,
+    .events-list::-webkit-scrollbar-thumb:hover {
         background-color: var(--text-color); /* Ciemniejszy kolor dla interakcji */
     }
