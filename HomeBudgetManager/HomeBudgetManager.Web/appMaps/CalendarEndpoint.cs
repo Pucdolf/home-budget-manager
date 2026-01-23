@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using HomeBudgetManager.Core;
+using HomeBudgetManager.Core.DBTables;
 
 namespace HomeBudgetManager.Web.appMaps
 {
@@ -22,7 +23,13 @@ namespace HomeBudgetManager.Web.appMaps
                 var html = File.ReadAllText(filePath, Encoding.UTF8);
 
                 html = html.Replace("{username}", username);
-
+                string adminBtnHtml = "";
+                
+                if (user.Role == SystemRole.SystemAdmin)
+                {
+                    adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\">Ustawienia Admina</button>";
+                }
+                html = html.Replace("{admin_panel_button}", adminBtnHtml);
                 return Results.Content(html, "text/html; charset=utf-8");
             });
 
