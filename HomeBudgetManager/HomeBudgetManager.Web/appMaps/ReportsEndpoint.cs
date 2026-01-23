@@ -3,105 +3,50 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using System.Security.Claims;
-
+using HomeBudgetManager.Core.DBTables;
+using Microsoft.EntityFrameworkCore;
+using System.Text;
 namespace HomeBudgetManager.Web.appMaps
 {
     public class ReportsEndpoint : IEndpoint
     {
         public void Map(IEndpointRouteBuilder app)
         {
-            app.MapGet("/reports", (HttpContext context) =>
+            app.MapGet("/reports", async (HttpContext context, IWebHostEnvironment env, AppDbContext db) =>
             {
+                // 1. Sprawdzenie ciastka
                 if (!context.Request.Cookies.TryGetValue("logged_user", out var username) || string.IsNullOrEmpty(username))
                 {
                     return Results.Redirect("/");
                 }
 
+                // 2. Pobranie usera z bazy (potrzebne do sprawdzenia roli Admina)
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Login == username);
+                if (user == null)
+                {
+                    return Results.Redirect("/");
+                }
+
+                // 3. Obliczenie domyślnych dat (pierwszy dzień miesiąca - dzisiaj)
                 var now = DateTime.Now;
                 var startDate = new DateTime(now.Year, now.Month, 1).ToString("yyyy-MM-dd");
                 var endDate = now.ToString("yyyy-MM-dd");
 
-                var html = $$"""
-                <!DOCTYPE html>
-                <html lang="pl">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Raporty - HomeBudgetManager</title>
-                    <link rel="stylesheet" href="/css/dashboard.css">
-                    <style>
-                        .report-controls {
-                            background: #fff;
-                            padding: 20px;
-                            border-radius: 8px;
-                            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                            margin-bottom: 20px;
-                            display: flex;
-                            gap: 15px;
-                            align-items: end;
-                        }
-                        .form-group {
-                            display: flex;
-                            flex-direction: column;
-                        }
-                        .form-group label {
-                            font-size: 0.9em;
-                            margin-bottom: 5px;
-                            color: #555;
-                        }
-                        .btn-generate {
-                            padding: 10px 20px;
-                            background-color: #005f73;
-                            color: white;
-                            border: none;
-                            border-radius: 4px;
-                            cursor: pointer;
-                            text-decoration: none;
-                            display: inline-block;
-                        }
-                        .btn-generate:hover {
-                            background-color: #0a4c5e;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="layout">
-                        <aside class="sidebar">
-                            <p class="sidebar-title">Mój budżet</p>
-                            <span class="user-name">Zalogowano jako: {{username}}</span>
-                            <button class="sidebar-link" onclick="window.location.href='/dashboard'">Pulpit</button>
-                            <button class="sidebar-link" onclick="window.location.href='/household'">Domostwo</button>
-                            <button class="sidebar-link" onclick="window.location.href='/calendar'">Kalendarz</button>
-                            <button class="sidebar-link" onclick="window.location.href='/charts'">Wykresy</button>
-                            <button class="sidebar-link active" onclick="window.location.href='/reports'">Raporty</button>
-                            <form method="post" action="/logout" style="display:inline;">
-                                <button type="submit" class="btn-logout">Wyloguj</button>
-                            </form>
-                        </aside>
+                // 4. Wczytanie pliku HTML
+                var filePath = Path.Combine(env.WebRootPath, "reports.html");
+                if (!File.Exists(filePath)) 
+                    return Results.Content("Błąd: Brak pliku reports.html", "text/plain");
 
-                        <main class="container">
-                            <section class="card">
-                                <h2>Generator Raportów PDF</h2>
-                                <p class="card-desc">Wybierz zakres dat i wygeneruj szczegółowy raport PDF dla swojego domostwa.</p>
+                var html = await File.ReadAllTextAsync(filePath, Encoding.UTF8);
 
-                                <form class="report-controls" method="post" action="/reports/generate">
-                                    <div class="form-group">
-                                        <label for="startDate">Od:</label>
-                                        <input type="date" id="startDate" name="startDate" value="{{startDate}}" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="endDate">Do:</label>
-                                        <input type="date" id="endDate" name="endDate" value="{{endDate}}" required>
-                                    </div>
-                                    <button type="submit" class="btn-generate">Pobierz Raport PDF</button>
-                                </form>
-                            </section>
-                        </main>
-                    </div>
-                </body>
-                </html>
-                """;
-                return Results.Content(html, "text/html");
+                // 6. Podmiana danych w HTML
+                html = html.Replace("{username}", username)
+                           .Replace("{startDate}", startDate)
+                           .Replace("{endDate}", endDate);
+
+                return Results.Content(html, "text/html; charset=utf-8");
             });
+
 
             app.MapPost("/reports/generate", (HttpContext context, ReportService reportService) =>
             {
