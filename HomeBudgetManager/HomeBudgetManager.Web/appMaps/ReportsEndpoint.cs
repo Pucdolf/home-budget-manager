@@ -6,6 +6,8 @@ using System.Security.Claims;
 using HomeBudgetManager.Core.DBTables;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
+
+using System.Globalization;
 namespace HomeBudgetManager.Web.appMaps
 {
     public class ReportsEndpoint : IEndpoint
@@ -29,8 +31,11 @@ namespace HomeBudgetManager.Web.appMaps
 
                 // 3. Obliczenie domyślnych dat (pierwszy dzień miesiąca - dzisiaj)
                 var now = DateTime.Now;
+                
+                // Ustawiamy start na miesiąc wstecz od dzisiaj (np. od 23.12 do 23.01)
                 var startDate = new DateTime(now.Year, now.Month, 1).ToString("yyyy-MM-dd");
                 var endDate = now.ToString("yyyy-MM-dd");
+
 
                 // 4. Wczytanie pliku HTML
                 var filePath = Path.Combine(env.WebRootPath, "reports.html");
