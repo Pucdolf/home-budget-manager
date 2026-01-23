@@ -1,4 +1,4 @@
-﻿document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
     // DOM Elements
     const calendarView = document.getElementById('calendar-view');
     const eventsList = document.getElementById('events-list');
@@ -285,7 +285,7 @@
         item.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
 
         const timeString = formatTime(new Date(event.startTime));
-        const dateString = showDate ? new Date(event.startTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ', ' : '';
+        const dateString = showDate ? new Date(event.startTime).toLocaleDateString('pl-PL', { month: 'short', day: 'numeric' }) + ', ' : '';
 
         item.innerHTML = `
             <div style="flex: 1;">
@@ -318,7 +318,7 @@
         const header = document.createElement('div');
         header.className = 'week-header-title';
         header.style.marginBottom = '20px';
-        header.innerHTML = `<h2>Week of ${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</h2>`;
+        header.innerHTML = `<h2>Tydzień ${startOfWeek.toLocaleDateString('pl-PL', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('pl-PL', { month: 'short', day: 'numeric', year: 'numeric' })}</h2>`;
         weekContainer.appendChild(header);
 
         // Fetch events for the whole week
@@ -333,7 +333,7 @@
         weekEvents.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
         if (weekEvents.length === 0) {
-            weekContainer.innerHTML += '<p style="color: #888; text-align: center;">No transactions for this week.</p>';
+            weekContainer.innerHTML += '<p style="color: #888; text-align: center;">Brak transakcji tego tygodnia</p>';
         } else {
             weekEvents.forEach(event => {
                 weekContainer.appendChild(createEventListItem(event, true));
@@ -352,7 +352,7 @@
         const dayHeader = document.createElement('div');
         dayHeader.className = 'day-header-title';
         dayHeader.style.marginBottom = '20px';
-        dayHeader.innerHTML = `<h2>${currentDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</h2>`;
+        dayHeader.innerHTML = `<h2>${currentDate.toLocaleDateString('pl-PL', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</h2>`;
         dayContainer.appendChild(dayHeader);
 
         // Get events for the day
@@ -360,7 +360,7 @@
         dayEvents.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
         if (dayEvents.length === 0) {
-            dayContainer.innerHTML += '<p style="color: #888; text-align: center;">No transactions for this day.</p>';
+            dayContainer.innerHTML += '<p style="color: #888; text-align: center;">Brak transakcji tego dnia.</p>';
         } else {
              dayEvents.forEach(event => {
                  dayContainer.appendChild(createEventListItem(event, false));
@@ -384,7 +384,7 @@
         if (upcomingEvents.length === 0) {
             const noEvents = document.createElement('div');
             noEvents.className = 'no-events';
-            noEvents.textContent = 'No upcoming events. Add one!';
+            noEvents.textContent = 'Brak nadchodzących wydarzeń';
             eventsList.appendChild(noEvents);
             return;
         }
@@ -441,7 +441,7 @@
     function updateCurrentDateDisplay() {
         switch (currentView) {
             case 'day':
-                currentDateElement.textContent = currentDate.toLocaleDateString('en-US', {
+                currentDateElement.textContent = currentDate.toLocaleDateString('pl-PL', {
                     weekday: 'long',
                     month: 'long',
                     day: 'numeric',
@@ -456,8 +456,8 @@
                 endOfWeek.setDate(startOfWeek.getDate() + 6);
 
                 currentDateElement.textContent = `
-                    ${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - 
-                    ${endOfWeek.toLocaleDateString('en-US', {
+                    ${startOfWeek.toLocaleDateString('pl-PL', { month: 'short', day: 'numeric' })} - 
+                    ${endOfWeek.toLocaleDateString('pl-PL', {
                     month: endOfWeek.getMonth() !== startOfWeek.getMonth() ? 'short' : undefined,
                     day: 'numeric',
                     year: endOfWeek.getFullYear() !== startOfWeek.getFullYear() ? 'numeric' : undefined
@@ -465,7 +465,7 @@
                 `;
                 break;
             case 'month':
-                currentDateElement.textContent = currentDate.toLocaleDateString('en-US', {
+                currentDateElement.textContent = currentDate.toLocaleDateString('pl-PL', {
                     month: 'long',
                     year: 'numeric'
                 });
@@ -610,7 +610,7 @@
 
         // Populate details
         detailsTitle.textContent = event.title;
-        detailsDate.textContent = new Date(event.startTime).toLocaleDateString('en-US', {
+        detailsDate.textContent = new Date(event.startTime).toLocaleDateString('pl-PL', {
             weekday: 'long',
             month: 'long',
             day: 'numeric',
@@ -619,7 +619,7 @@
 
         // Removed end time display
         detailsTime.textContent = formatTime(new Date(event.startTime));
-        detailsDescription.textContent = event.description || 'No description';
+        detailsDescription.textContent = event.description || 'Brak opisu';
 
         // Show modal
         eventDetailsModal.style.display = 'flex';
@@ -756,32 +756,14 @@
 
     // Helper functions
     function formatTime(date) {
-        return date.toLocaleTimeString('en-US', {
+        return date.toLocaleTimeString('pl-PL', {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
         });
     }
 
-    function formatDateTime(startDate, endDate) {
-        const isSameDay = startDate.toDateString() === endDate.toDateString();
-
-        if (isSameDay) {
-            return `${startDate.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric'
-            })} • ${formatTime(startDate)} - ${formatTime(endDate)}`;
-        } else {
-            return `${startDate.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric'
-            })} ${formatTime(startDate)} - ${endDate.toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric'
-            })} ${formatTime(endDate)}`;
-        }
-    }
-
+    
     // Request notification permission on page load
     if ('Notification' in window) {
         Notification.requestPermission();

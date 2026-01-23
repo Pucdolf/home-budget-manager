@@ -13,6 +13,22 @@ namespace HomeBudgetManager.Core.DBTables
         SystemAdmin = 4       // Globalny administrator systemu (zarządza aplikacją)
     }
 
+    [Table("roles")]
+    public class DBRole
+    {
+        // Używamy DatabaseGeneratedOption.None, bo chcemy, aby ID w bazie
+        // dokładnie odpowiadało wartościom z Enuma (0, 1, 2...), a nie było autoincrement
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Column("role_id")]
+        public SystemRole Id { get; set; }
+
+        [Required]
+        [MaxLength(50)]
+        [Column("role_name")]
+        public required string Name { get; set; }
+    }
+
     [Index(nameof(Email), IsUnique = true)]
     [Table("users")]
     public class DBUser
