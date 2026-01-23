@@ -95,6 +95,9 @@ namespace HomeBudgetManager.Core
 
         private void GenerateUserSection(ColumnDescriptor column, string username, List<DBTransaction> transactions)
         {
+            // ZMIANA: Tworzymy kulturę polską, aby wymusić formatowanie w PLN (zł)
+            var pl = new CultureInfo("pl-PL");
+
             var income = transactions.Where(t => t.Value > 0).Sum(t => t.Value);
             var expense = Math.Abs(transactions.Where(t => t.Value < 0).Sum(t => t.Value));
             var balance = income - expense;
@@ -119,9 +122,10 @@ namespace HomeBudgetManager.Core
                     header.Cell().Element(CellStyle).Text("Bilans").SemiBold();
                 });
 
-                table.Cell().Element(CellStyle).Text($"{income:C2}");
-                table.Cell().Element(CellStyle).Text($"{expense:C2}");
-                table.Cell().Element(CellStyle).Text($"{balance:C2}");
+                // ZMIANA: Używamy .ToString("C2", pl) zamiast interpolacji $"{var:C2}"
+                table.Cell().Element(CellStyle).Text(income.ToString("C2", pl));
+                table.Cell().Element(CellStyle).Text(expense.ToString("C2", pl));
+                table.Cell().Element(CellStyle).Text(balance.ToString("C2", pl));
             });
 
             column.Item().PaddingBottom(20);
@@ -148,7 +152,8 @@ namespace HomeBudgetManager.Core
                         barCol.Item().Height((float)(150 * (1 - ratio))); // Empty space
                         barCol.Item().Height((float)(150 * ratio)).Background(Colors.Green.Lighten2).Border(1).BorderColor(Colors.Green.Darken2); // Bar
                     });
-                    c.Item().Text($"{income:C0}").AlignCenter().FontSize(9);
+                    // ZMIANA: Formatowanie C0 (waluta bez groszy) z polską kulturą
+                    c.Item().Text(income.ToString("C0", pl)).AlignCenter().FontSize(9);
                 });
 
                 row.Spacing(20);
@@ -166,7 +171,8 @@ namespace HomeBudgetManager.Core
                         barCol.Item().Height((float)(150 * (1 - ratio))); // Empty space
                         barCol.Item().Height((float)(150 * ratio)).Background(Colors.Red.Lighten2).Border(1).BorderColor(Colors.Red.Darken2); // Bar
                     });
-                    c.Item().Text($"{expense:C0}").AlignCenter().FontSize(9);
+                    // ZMIANA: Formatowanie C0 z polską kulturą
+                    c.Item().Text(expense.ToString("C0", pl)).AlignCenter().FontSize(9);
                 });
                 
                 row.RelativeItem(2); // Spacer
@@ -201,7 +207,9 @@ namespace HomeBudgetManager.Core
                     table.Cell().Element(CellStyle).Text(transaction.Description ?? "");
                     
                     var color = transaction.Value < 0 ? Colors.Red.Medium : Colors.Green.Medium;
-                    table.Cell().Element(CellStyle).Text($"{transaction.Value:C2}").FontColor(color).AlignRight();
+                    
+                    // ZMIANA: Formatowanie C2 z polską kulturą
+                    table.Cell().Element(CellStyle).Text(transaction.Value.ToString("C2", pl)).FontColor(color).AlignRight();
                 }
             });
         }

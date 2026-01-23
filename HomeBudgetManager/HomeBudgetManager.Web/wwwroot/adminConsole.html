@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel finansowy</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+
+    <div class="layout">
+        <!-- Pasek boczny -->
+        <aside class="sidebar">
+            <p class="sidebar-title">Mój budżet</p>
+            <span class="user-name">Zalogowano jako: {username}</span>
+            <button class="sidebar-link" onclick="loadDashboard()">Pulpit</button>
+            <button class="sidebar-link" onclick="window.location.href='/household'">Domostwo</button>
+            <button class="sidebar-link" onclick="window.location.href='/calendar'">Kalendarz</button>
+            <button class="sidebar-link" onclick="window.location.href='/charts'">Wykresy</button>
+            <button class="sidebar-link" onclick="window.location.href='/reports'">Raporty</button>
+            <button class="sidebar-link" onclick="window.location.href='/adminConsole'">Ustawienia Admina</button>
+            <form method="post" action="/logout" style="display:inline;">
+                <button type="submit" class="btn-logout">Wyloguj</button>
+            </form>
+        </aside>
+    </div>
+</body>

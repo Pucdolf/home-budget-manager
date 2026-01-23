@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 
     <!-- Style kalendarza (z folderu /calendar) -->
-    <link rel="stylesheet" href="/calendar/calendar.css">
+    <link rel="stylesheet" href="/css/calendar.css">
 </head>
 
 <body class="calendar-page">
@@ -27,7 +27,7 @@
             <button class="sidebar-link" onclick="window.location.href='/calendar'">Kalendarz</button>
             <button class="sidebar-link" onclick="window.location.href='/charts'">Wykresy</button>
             <button class="sidebar-link" onclick="window.location.href='/reports'">Raporty</button>
-
+            {admin_panel_button}
             <form method="post" action="/logout" style="display:inline;">
                 <button type="submit" class="btn-logout">Wyloguj</button>
             </form>
@@ -39,11 +39,11 @@
                     <header class="app-header">
                         <h1><i class="fas fa-calendar-alt"></i> Kalendarz finansowy</h1>
                         <div class="header-controls">
-                            <button id="today-btn">Today</button>
+                            <button id="today-btn">Dziś</button>
                             <div class="view-options">
-                                <button class="view-option" data-view="day">Day</button>
-                                <button class="view-option" data-view="week">Week</button>
-                                <button class="view-option active" data-view="month">Month</button>
+                                <button class="view-option" data-view="day">Dzień</button>
+                                <button class="view-option" data-view="week">Tydzień</button>
+                                <button class="view-option active" data-view="month">Miesiąc</button>
                             </div>
                             <div class="date-navigation">
                                 <button id="prev-btn"><i class="fas fa-chevron-left"></i></button>
@@ -56,10 +56,10 @@
                     <main class="app-main">
                         <div class="calendar-view" id="calendar-view"></div>
 
-                        <aside class="sidebar calendar-sidebar">
+                        <aside class="calendar-events-panel">
                             <div class="sidebar-header">
-                                <h3>Upcoming Events</h3>
-                                <button id="add-event-btn"><i class="fas fa-plus"></i> Add Transaction</button>
+                                <h3>Nadchodzące wydarzenia</h3>
+                                <button id="add-event-btn"><i class="fas fa-plus"></i> Dodaj Transakcję</button>
                             </div>
                             <div class="events-list" id="events-list"></div>
                         </aside>
@@ -162,6 +162,6 @@
     </div>
 
     <!-- Skrypt kalendarza -->
-    <script src="/calendar/calendar.js"></script>
+    <script src="/js/calendar.js"></script>
 </body>
 </html>
