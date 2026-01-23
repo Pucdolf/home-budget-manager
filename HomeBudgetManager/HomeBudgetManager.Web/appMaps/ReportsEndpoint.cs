@@ -1,4 +1,5 @@
 using HomeBudgetManager.Core;
+using HomeBudgetManager.Core.DBTables;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -43,10 +44,16 @@ namespace HomeBudgetManager.Web.appMaps
                     return Results.Content("Błąd: Brak pliku reports.html", "text/plain");
 
                 var html = await File.ReadAllTextAsync(filePath, Encoding.UTF8);
-
+                string adminBtnHtml = "";
+                
+                if (user.Role == SystemRole.SystemAdmin)
+                {
+                    adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\">Ustawienia Admina</button>";
+                }
                 // 6. Podmiana danych w HTML
                 html = html.Replace("{username}", username)
                            .Replace("{startDate}", startDate)
+                           .Replace("{admin_panel_button}", adminBtnHtml)
                            .Replace("{endDate}", endDate);
 
                 return Results.Content(html, "text/html; charset=utf-8");

@@ -1,7 +1,8 @@
 using HomeBudgetManager.Core;
+using HomeBudgetManager.Core.DBTables;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
-
+using Microsoft.EntityFrameworkCore;
 namespace HomeBudgetManager.Web.appMaps
 {
     public class DashboardEndpoints : IEndpoint
@@ -39,11 +40,16 @@ namespace HomeBudgetManager.Web.appMaps
                 // 2. Wczytujemy treść pliku do zmiennej
                 // W prawdziwej produkcji warto by to cache'ować, ale dla prostego appa jest ok
                 var html = File.ReadAllText(filePath);
-
+                string adminBtnHtml = "";
+                
+                if (user.Role == SystemRole.SystemAdmin)
+                {
+                    adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\">Ustawienia Admina</button>";
+                }
                 // 3. Podmieniamy nasz placeholder {username} na prawdziwą nazwę
-                html = html.Replace("{username}", username);
-                html = html.Replace("{balance}", balance.ToString("N2"));
-
+                html =  html.Replace("{username}", username)
+                            .Replace("{balance}", balance.ToString("N2"))
+                            .Replace("{admin_panel_button}", adminBtnHtml);
                 return Results.Content(html, "text/html");
             });
 
