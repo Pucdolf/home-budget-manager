@@ -88,6 +88,7 @@ namespace HomeBudgetManager.Tests
 
             string secretCode = "XYZ123";
 
+
             using (var db = new AppDbContext(options))
             {
                 // Tworzymy istniejący dom
