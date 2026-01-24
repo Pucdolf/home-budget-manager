@@ -71,6 +71,7 @@ namespace HomeBudgetManager.Tests
             }
         }
 
+
         // 2. TEST: Admin rozwiązuje dom (LeaveHouseholdEndpoint)
         [Fact]
         public async Task LeaveHousehold_Admin_ShouldDissolveHouse()
