@@ -53,9 +53,14 @@ namespace HomeBudgetManager.Web.appMaps
                 if (string.IsNullOrWhiteSpace(dto.Name))
                     return Results.Json(new { success = false, message = "Nazwa wymagana" });
 
-                catService.addCategory(user.Id, dto.Name, dto.Description);
+                var result = catService.addCategory(user.Id, dto.Name, dto.Description);
 
-                return Results.Json(new { success = true });
+                if (result == "Poprawnie dodano kategorię")
+                {
+                    return Results.Json(new { success = true });
+                }
+
+                return Results.Json(new { success = false, message = result });
             });
         }
     }

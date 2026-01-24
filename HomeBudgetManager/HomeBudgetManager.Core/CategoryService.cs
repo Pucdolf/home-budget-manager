@@ -13,19 +13,21 @@ namespace HomeBudgetManager.Core
             this.db = db;
         }
 
-        private bool userHasCategory(int userId) { return db.Categories.Any(c => c.UserId == userId); }
+        private bool userHasCategory(int userId, string name) {
+            return db.Categories.Any(c => (c.UserId == userId || c.UserId == null) && c.Name.ToLower() == name.ToLower());
+        }
 
         // metoda dodająca nową transakcję dla użytkownika. Zwraca informację o powodzeniu
         public string addCategory(int userId, string name, string? description)
         {
-            if (userHasCategory(userId))
+            if (userHasCategory(userId, name))
             {
                 return "Posiadasz już kategorię o tej samej nazwie";
             }
 
             try
             {
-                var newCategory = new DBCategory { Name = name, Description = description };
+                var newCategory = new DBCategory { Name = name, Description = description, UserId = userId };
                 db.Categories.Add(newCategory);
                 db.SaveChanges();
                 return "Poprawnie dodano kategorię";
