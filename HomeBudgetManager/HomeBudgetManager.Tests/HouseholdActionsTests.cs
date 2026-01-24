@@ -7,6 +7,7 @@ namespace HomeBudgetManager.Tests
     public class HouseholdActionsTests
     {
 
+
         [Fact]
         public void LeaveHousehold_ShouldRemoveUser_WhenMemberLeaves()
         {
