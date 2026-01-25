@@ -81,7 +81,7 @@ namespace HomeBudgetManager.Tests
             {
                 var authService = new AuthService(db);
                 // Próbujemy zalogować się złym hasłem
-                bool result = authService.ValidateUser("user@test.pl", "ZleHaslo");
+                bool result = authService.ValidateUserByEmail("user@test.pl", "ZleHaslo");
 
                 Assert.False(result, "Logowanie powinno zostać odrzucone!");
             }
