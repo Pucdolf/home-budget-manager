@@ -13,7 +13,7 @@
         <!-- Pasek boczny -->
         <aside class="sidebar">
             <p class="sidebar-title"><i class="fas fa-wallet"></i> Mój budżet</p>
-            <span class="user-name">Zalogowano jako: {username}</span>
+            <span class="user-name" style="display: block;">Zalogowano jako: {username}</span>
             <button class="sidebar-link" onclick="loadDashboard()"><i class="fas fa-fw fa-tachometer-alt"></i> &nbsp; Pulpit</button>
             <button class="sidebar-link" onclick="window.location.href='/household'"><i class="fas fa-fw fa-home"></i> &nbsp; Domostwo</button>
             <button class="sidebar-link" onclick="window.location.href='/calendar'"><i class="fas fa-fw fa-calendar-alt"></i> &nbsp; Kalendarz</button>
@@ -21,7 +21,7 @@
             <button class="sidebar-link" onclick="window.location.href='/reports'"><i class="fas fa-fw fa-file-alt"></i> &nbsp; Raporty</button>
             <button class="sidebar-link" onclick="window.location.href='/new-transaction?returnUrl=' + encodeURIComponent(window.location.pathname)"><i class="fas fa-fw fa-exchange-alt"></i> &nbsp; Transakcje</button>
             {admin_panel_button}
-            <form method="post" action="/logout" style="margin-top: auto;">
+            <form method="post" action="/logout" style="margin-top: auto; width: 100%;">
                 <button type="submit" class="btn-logout">Wyloguj</button>
             </form>
         </aside>
@@ -73,10 +73,10 @@
                     <!-- Prawa kolumna: Reklamy -->
                     <div class="dashboard-ads-column">
                         <div class="ad-placeholder">
-                            <span>Miejsce na reklamę</span>
+                            <span class="ad-span">Miejsce na reklamę</span>
                         </div>
                         <div class="ad-placeholder">
-                            <span>Miejsce na reklamę</span>
+                            <span class="ad-span">Miejsce na reklamę</span>
                         </div>
                     </div>
                 </div>

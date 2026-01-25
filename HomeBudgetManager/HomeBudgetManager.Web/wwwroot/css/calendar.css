@@ -114,8 +114,9 @@ button {
 
     .date-navigation h2 {
         font-size: 1.25rem;
-        min-width: 120px;
+        min-width: 220px;
         text-align: center;
+        margin: 0;
     }
 
     .date-navigation button {
