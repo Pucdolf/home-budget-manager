@@ -137,8 +137,8 @@ namespace HomeBudgetManager.Core
                 string colorClass = t.Value < 0 ? "amount-expense" : "amount-income";
                 var category = db.Categories.FirstOrDefault(c => c.Id == t.CategoryId);
                 
-                string safeDescription = (t.Description ?? "").Replace("\"", "&quot;").Replace("'", "\\'");
-                string safeTitle = (t.Title ?? "Bez tytułu").Replace("\"", "&quot;").Replace("'", "\\'");
+                string safeDescription = (t.Description ?? "").Replace("\"", "&quot;").Replace("'", "\\'").Replace("\r", "").Replace("\n", " ");
+                string safeTitle = (t.Title ?? "Bez tytułu").Replace("\"", "&quot;").Replace("'", "\\'").Replace("\r", "").Replace("\n", " ");
 
                 sb.Append($"""
 

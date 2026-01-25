@@ -71,13 +71,14 @@ namespace HomeBudgetManager.Core
 
             if (category == null)
             {
-                return "Błąd: użytkownik nie posiada takiej transakcji";
+                return "Błąd: użytkownik nie posiada takiej kategorii";
             }
 
-            category = new DBCategory { Id = categoryId, Name = newName, Description = newDescription };
+            category.Name = newName;
+            category.Description = newDescription;
             db.SaveChanges();
 
-            return "Pomyślnie zedytowano transakcję";
+            return "Pomyślnie zedytowano kategorię";
         }
 
         public string addDefaultCategories()
