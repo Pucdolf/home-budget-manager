@@ -1,4 +1,5 @@
 using HomeBudgetManager.Core.DBTables;
+using HomeBudgetManager.Core.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using System.Globalization;
@@ -24,10 +25,59 @@ namespace HomeBudgetManager.Core
 
         public (List<CategoryStat> Expenses, List<CategoryStat> Incomes) GetStatistics(List<int> userIds, DateTime startDate, DateTime endDate)
         {
+            // 1. Fetch Real Transactions
             var transactions = _db.Transactions
                 .Include(t => t.Category)
                 .Where(t => userIds.Contains(t.UserId) && t.Date >= startDate && t.Date <= endDate)
                 .ToList();
+
+            // 2. Fetch Active Recurring Rules
+            var recurringRules = _db.RepetableTransactions
+                .Include(rt => rt.Category)
+                .Where(rt => userIds.Contains(rt.UserId) && rt.IsActive)
+                .ToList();
+
+            // 3. Project Future Transactions
+            foreach (var rule in recurringRules)
+            {
+                var currentDate = rule.NextRunDate;
+                var unit = (TransactionIntervalType)rule.FrequencyUnit;
+
+                // Loop to find all occurrences within the requested range
+                while (currentDate <= endDate)
+                {
+                    // Only include if it falls within the start-end range
+                    if (currentDate >= startDate)
+                    {
+                        // Create a transient transaction object for calculation
+                        var projected = new DBTransaction
+                        {
+                            // Required fields for DBTransaction (though not saved to DB)
+                            Id = 0, // transient
+                            UserId = rule.UserId,
+                            CategoryId = rule.CategoryId,
+                            Category = rule.Category, // Important for grouping
+                            Value = rule.Value,
+                            Title = "Projected", // Dummy
+                            TransactionType = (rule.Value < 0) ? TransactionType.expense : TransactionType.income,
+                            Date = currentDate,
+                            IsRepeatable = false
+                        };
+
+                        transactions.Add(projected);
+                    }
+
+                    // Advance to next occurrence
+                    currentDate = unit switch
+                    {
+                        TransactionIntervalType.Days => currentDate.AddDays(rule.TransactionInterval),
+                        TransactionIntervalType.Weeks => currentDate.AddDays(rule.TransactionInterval * 7),
+                        TransactionIntervalType.Months => currentDate.AddMonths(rule.TransactionInterval),
+                        TransactionIntervalType.Years => currentDate.AddYears(rule.TransactionInterval),
+                        _ => currentDate.AddMonths(1)
+                    };
+                }
+            }
 
             var expenses = transactions
                 .Where(t => t.TransactionType == TransactionType.expense)

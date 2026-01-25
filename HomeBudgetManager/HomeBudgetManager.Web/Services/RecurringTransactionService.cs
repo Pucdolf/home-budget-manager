@@ -45,6 +45,7 @@ namespace HomeBudgetManager.Web.Services
                                 HouseId = rule.Transaction.HouseId,
                                 Value = rule.Transaction.Value,
                                 TransactionType = rule.Transaction.TransactionType,
+                                Title = rule.Transaction.Title,
                                 Description = rule.Transaction.Description + " (Auto)",
                                 Date = rule.NextRunDate, // Data transakcji to data planowana
                                 IsRepeatable = false, // Nowa transakcja nie jest szablonem!

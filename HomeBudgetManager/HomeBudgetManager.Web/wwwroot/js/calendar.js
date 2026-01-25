@@ -70,10 +70,10 @@ document.addEventListener('DOMContentLoaded', function () {
             option.addEventListener('click', () => switchView(option.dataset.view));
         });
 
-        // Event modal
-        addEventBtn.addEventListener('click', openEventModal);
-        closeBtns.forEach(btn => btn.addEventListener('click', closeModals));
-        eventForm.addEventListener('submit', saveEvent);
+        // Event creation - Redirect to new transaction page
+        addEventBtn.addEventListener('click', () => {
+            window.location.href = '/new-transaction?returnUrl=' + encodeURIComponent('/calendar');
+        });
 
         // Event details modal
         deleteEventBtn.addEventListener('click', deleteEvent);
@@ -82,9 +82,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Close modal when clicking outside
         window.addEventListener('click', (e) => {
-            if (e.target === eventModal) {
-                closeModals();
-            }
             if (e.target === eventDetailsModal) {
                 closeModals();
             }
@@ -378,37 +375,67 @@ document.addEventListener('DOMContentLoaded', function () {
     function renderEventsList() {
         eventsList.innerHTML = '';
 
-        // Get upcoming events (today and future)
+        // 1. Get upcoming events (today and future)
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const upcomingEvents = events
-            .filter(event => new Date(event.startTime) >= today)
+        // 2. Filter & Sort
+        // We need ALL future recurring events to find the 'next' one for each type, 
+        // regardless of how far in the future it is (e.g. quarterly bill in 2 months).
+        const candidates = events
+            .filter(event => {
+                const eventDate = new Date(event.startTime);
+                return event.isRecurring === true && eventDate >= today;
+            })
             .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
-        if (upcomingEvents.length === 0) {
+        // 3. Deduplicate (Smart "Next Only" Logic)
+        // Keep only the FIRST occurrence of each event ID.
+        // Since list is sorted by date, the first one found is the nearest one.
+        const uniqueUpcoming = [];
+        const seenIds = new Set();
+
+        candidates.forEach(event => {
+            if (!seenIds.has(event.id)) {
+                seenIds.add(event.id);
+                uniqueUpcoming.push(event);
+            }
+        });
+
+        // 4. Render
+        if (uniqueUpcoming.length === 0) {
             const noEvents = document.createElement('div');
             noEvents.className = 'no-events';
-            noEvents.textContent = 'Brak nadchodzących wydarzeń';
+            noEvents.textContent = 'Brak nadchodzących transakcji cyklicznych';
             eventsList.appendChild(noEvents);
             return;
         }
 
-        upcomingEvents.forEach(event => {
+        uniqueUpcoming.forEach(event => {
             const eventElement = document.createElement('div');
             eventElement.className = 'event-item';
             eventElement.style.borderLeftColor = event.color;
 
             const startDate = new Date(event.startTime);
-            const endDate = new Date(event.endTime);
+            const amountVal = Number(event.amount);
+            const amountStr = amountVal.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' });
+            
+            // Styl koloru kwoty (czerwony/zielony)
+            const amountColor = amountVal < 0 ? '#e74a3b' : '#1cc88a';
 
             eventElement.innerHTML = `
-                <div class="event-title">
-                    <span>${event.title}</span>
-                    <span style="color: ${event.color}">●</span>
+                <div style="display:flex; justify-content:space-between; align-items: flex-start; width:100%;">
+                    <div class="event-info">
+                        <div class="event-title" style="font-weight:600;">${event.title}</div>
+                        <div class="event-time" style="color:#858796; font-size:0.85em;">
+                            <i class="far fa-calendar"></i> ${startDate.toLocaleDateString('pl-PL')}
+                        </div>
+                    </div>
+                    <div class="event-amount" style="color:${amountColor}; font-weight:bold; white-space:nowrap;">
+                        ${amountStr}
+                    </div>
                 </div>
-                <div class="event-time">${formatTime(startDate)}</div>
-                ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+                ${event.description ? `<div class="event-description" style="margin-top:4px; font-size:0.8em; color:#aaa;">${event.description}</div>` : ''}
             `;
 
             eventsList.appendChild(eventElement);
@@ -524,88 +551,10 @@ document.addEventListener('DOMContentLoaded', function () {
         renderCalendar();
     }
 
-    function openEventModal() {
-        // Reset form
-        eventForm.reset();
-        eventDateInput.valueAsDate = currentDate;
-        
-        // Default time (current time)
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        eventStartTimeInput.value = `${hours}:${minutes}`;
-
-        document.getElementById('form-error').textContent = '';
-        
-        // Trigger HTMX to load categories if empty or just rely on the hx-trigger="load"
-        if (window.htmx) {
-            htmx.process(document.getElementById('categories-loader'));
-            // Manually trigger if needed, but hx-trigger="load" runs when element is present.
-            // Since modal is hidden, we might need to trigger it.
-            // Actually, best to just trigger a swap manually or ensure the div is re-processed
-            htmx.trigger('#categories-loader', 'load');
-        }
-
-        // Show modal
-        eventModal.style.display = 'flex';
-    }
-
-    function openEventModalWithTime(hour) {
-        openEventModal();
-        eventStartTimeInput.value = `${hour.toString().padStart(2, '0')}:00`;
-    }
-
     function closeModals() {
-        eventModal.style.display = 'none';
         eventDetailsModal.style.display = 'none';
     }
 
-    async function saveEvent(e) {
-        e.preventDefault();
-
-        // Validate Category
-        const categorySelect = document.querySelector('#target-container-for-select select');
-        if (!categorySelect || !categorySelect.value || categorySelect.value === "Wybierz...") {
-            document.getElementById('form-error').textContent = 'Wybierz kategorię!';
-            return;
-        }
-
-        // Construct FormData for the endpoint
-        const formData = new FormData(eventForm);
-        // Ensure categoryId is set correctly (the select might have name="categoryId" or we append it)
-        // The endpoint expects "categoryId"
-        if (!formData.has('categoryId')) {
-            formData.append('categoryId', categorySelect.value);
-        }
-        
-        // The endpoint expects "transactionType" as 0 or 1. Radio buttons handle this.
-        
-        try {
-            const response = await fetch('/new-transaction/add', {
-                method: 'POST',
-                body: formData
-            });
-
-            const text = await response.text();
-            
-            if (text.includes('success')) {
-                // Reload events
-                await fetchEvents();
-                renderCalendar();
-                renderEventsList();
-                closeModals();
-            } else {
-                // Show error (extract from response div)
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = text;
-                const errorDiv = tempDiv.querySelector('.error');
-                document.getElementById('form-error').textContent = errorDiv ? errorDiv.textContent : 'Błąd podczas zapisywania.';
-            }
-        } catch (err) {
-            console.error(err);
-            document.getElementById('form-error').textContent = 'Błąd połączenia.';
-        }
-    }
 
     function showEventDetails(eventId) {
         const event = events.find(e => e.id === eventId);

@@ -31,12 +31,54 @@ namespace HomeBudgetManager.Web.appMaps
                 }
 
                 var username = context.Request.Cookies["logged_user"];
+                
+                // Get returnUrl from query or Referer
+                var returnUrl = context.Request.Query["returnUrl"].ToString();
+                if (string.IsNullOrEmpty(returnUrl)) 
+                {
+                    returnUrl = context.Request.Headers["Referer"].ToString();
+                }
+
+                // Security/Business logic
+                if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    if (returnUrl.Contains("/calendar")) 
+                    {
+                        returnUrl = "/calendar";
+                    }
+                    else if (returnUrl.Contains("/dashboard") && !returnUrl.Contains("/dashboard-household")) // Exclude household endpoint if it mimics dashboard
+                    {
+                        returnUrl = "/dashboard";
+                    }
+                    // Blocked pages: Stay on New Transaction page
+                    else if (returnUrl.Contains("/reports") || returnUrl.Contains("/charts") || returnUrl.Contains("/household")) 
+                    {
+                         returnUrl = "/new-transaction";
+                    }
+                    else 
+                    {
+                        // Default fallback for unknown sources or direct access
+                        returnUrl = "/dashboard";
+                    }
+                }
+                else 
+                {
+                    returnUrl = "/dashboard";
+                }
+
+                // Save to cookie for robust retrieval
+                context.Response.Cookies.Append("transaction_return_url", returnUrl, new CookieOptions { Expires = DateTime.Now.AddMinutes(30), Path = "/" });
 
                 // Wczytaj plik HTML z kodowaniem UTF-8
                 var filePath = Path.Combine(env.WebRootPath, "newTransaction.html");
                 var html = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
 
                 html = html.Replace("{username}", user.Login);
+                // Inject returnUrl into a hidden field placeholder or JS variable if exists, 
+                // but since I'll edit HTML I can add a placeholder there.
+                // For now, I'll assume I will add {returnUrl} placeholder in HTML.
+                html = html.Replace("{returnUrl}", returnUrl);
+
                 string adminBtnHtml = "";
 
                 if (user.Role == SystemRole.SystemAdmin)
@@ -73,7 +115,17 @@ namespace HomeBudgetManager.Web.appMaps
                 }
                 amount = (type == 0) ? -amount : amount;
 
-                var description = form["description"].ToString();
+                var title = form["title"].ToString();
+                if (string.IsNullOrWhiteSpace(title))
+                {
+                    return Results.Content("<div class='error'>Tytuł jest wymagany!</div>", "text/html");
+                }
+                if (title.Length > 20)
+                {
+                    return Results.Content("<div class='error'>Tytuł za długi (max 20 znaków)!</div>", "text/html");
+                }
+
+                var description = form["description"].ToString(); // Optional
                 var category = int.Parse(form["categoryId"]);
 
                 // Data
@@ -94,19 +146,19 @@ namespace HomeBudgetManager.Web.appMaps
                             transactionInterval = 1;
                             break;
                         case "weekly":
-                            frequencyUnit = 0; // Days
-                            transactionInterval = 7;
+                            frequencyUnit = 1; // Weeks
+                            transactionInterval = 1;
                             break;
                         case "monthly":
-                            frequencyUnit = 1; // Months
+                            frequencyUnit = 2; // Months
                             transactionInterval = 1;
                             break;
                         case "quarterly":
-                            frequencyUnit = 1; // Months
+                            frequencyUnit = 2; // Months
                             transactionInterval = 3;
                             break;
                         case "yearly":
-                            frequencyUnit = 2; // Years
+                            frequencyUnit = 3; // Years
                             transactionInterval = 1;
                             break;
                     }
@@ -126,7 +178,7 @@ namespace HomeBudgetManager.Web.appMaps
 
                 try
                 {
-                    tranService.addTransaction(user.Id, category, amount, type, finalDate, isRecurring, transactionInterval, description, user.HouseId, frequencyUnit);
+                    tranService.addTransaction(user.Id, category, amount, type, finalDate, isRecurring, transactionInterval, title, description, user.HouseId, frequencyUnit);
                     return Results.Content("<div class='success'>transakcja dodana</div>", "text/html");
                 }
                 catch (Exception ex)

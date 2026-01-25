@@ -45,6 +45,7 @@ namespace HomeBudgetManager.Tests
                     CategoryId = 10,
                     Value = 500.00m,
                     Date = DateTime.Now,
+                    Title = "Test Transaction",
                     TransactionType = TransactionType.income,
                     Description = "Wypłata za testy"
                 });

@@ -1,4 +1,5 @@
 ﻿using HomeBudgetManager.Core.DBTables;
+using HomeBudgetManager.Core.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -30,9 +31,9 @@ namespace HomeBudgetManager.Core
             }
         }
 
-        public void addTransaction(int userId, int categoryId, decimal value, TransactionType type, DateTime date, bool isRepeatable, int? transactionInterval, string? description,  int? houseId, int? frequencyUnit)
+        public void addTransaction(int userId, int categoryId, decimal value, TransactionType type, DateTime date, bool isRepeatable, int? transactionInterval, string title, string? description,  int? houseId, int? frequencyUnit)
         {
-            var newTransaction = new DBTransaction { UserId = userId, CategoryId = categoryId, Value = value, TransactionType = type, Date = date, IsRepeatable = isRepeatable, Description = description, HouseId = houseId };
+            var newTransaction = new DBTransaction { UserId = userId, CategoryId = categoryId, Value = value, TransactionType = type, Date = date, IsRepeatable = isRepeatable, Title = title, Description = description, HouseId = houseId };
             db.Add(newTransaction);
             db.SaveChanges();
 
@@ -40,6 +41,18 @@ namespace HomeBudgetManager.Core
             {
                 try
                 {
+                    DateTime nextRunDate = date;
+                    var unit = (TransactionIntervalType)frequencyUnit.Value;
+
+                    nextRunDate = unit switch
+                    {
+                        TransactionIntervalType.Days => date.AddDays(transactionInterval.Value),
+                        TransactionIntervalType.Weeks => date.AddDays(transactionInterval.Value * 7),
+                        TransactionIntervalType.Months => date.AddMonths(transactionInterval.Value),
+                        TransactionIntervalType.Years => date.AddYears(transactionInterval.Value),
+                        _ => date.AddMonths(transactionInterval.Value)
+                    };
+
                     var newRepTransaction = new DBRepetableTransaction
                     {
                         TransactionId = newTransaction.Id,
@@ -48,8 +61,13 @@ namespace HomeBudgetManager.Core
                         Value = value,
                         UserId = userId,
                         CategoryId = categoryId,
-                        NextRunDate = date.AddDays(transactionInterval.Value) // Initial next run
+                        NextRunDate = nextRunDate, 
+                        Title = title, 
+                        Description = description 
                     };
+
+                    Console.WriteLine($"DEBUG: Adding Recurring Transaction - Title: '{title}', Amount: {value}, NextRun: {nextRunDate}");
+
                     db.Add(newRepTransaction);
                     db.SaveChanges();
                 }
@@ -60,7 +78,7 @@ namespace HomeBudgetManager.Core
             }
         }
 
-        public void editTransaction(int transactionId, int categoryId, decimal value, bool isRepeatable, string? description, int? houseId)
+        public void editTransaction(int transactionId, int categoryId, decimal value, bool isRepeatable, string title, string? description, int? houseId)
         {
             var transaction = db.Transactions.FirstOrDefault(t => t.Id == transactionId);
 
@@ -82,6 +100,7 @@ namespace HomeBudgetManager.Core
             transaction.CategoryId = categoryId;
             transaction.Value = value;
             transaction.IsRepeatable = isRepeatable;
+            transaction.Title = title;
             transaction.Description = description;
             transaction.HouseId = houseId;
             db.SaveChanges();
@@ -119,16 +138,20 @@ namespace HomeBudgetManager.Core
                 var category = db.Categories.FirstOrDefault(c => c.Id == t.CategoryId);
                 
                 string safeDescription = (t.Description ?? "").Replace("\"", "&quot;").Replace("'", "\\'");
+                string safeTitle = (t.Title ?? "Bez tytułu").Replace("\"", "&quot;").Replace("'", "\\'");
 
                 sb.Append($"""
 
-                    <li class="transaction-item" onclick="openDashboardTransactionDetails({t.Id}, '{t.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}', '{safeDescription}', '{date}')" style="cursor: pointer;">
+                    <li class="transaction-item" onclick="openDashboardTransactionDetails({t.Id}, '{t.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}', '{safeTitle}', '{safeDescription}', '{date}')" style="cursor: pointer;">
+                        <div class="transaction-info">
+                             <div class="transaction-title">{safeTitle}</div>
+                             <div class="transaction-details-sub">
+                                <span class="category-badge">{category?.Name ?? "Brak"}</span>
+                                <span class="transaction-date">{displayDate}</span>
+                             </div>
+                        </div>
                         <div class="transaction-amount {colorClass}">
                             {amount}
-                        </div>
-                        <div class="transaction-details">
-                            <span class="category-badge">{category.Name}</span>
-                            <span class="transaction-date">{displayDate}</span>
                         </div>
                     </li>
                  """);

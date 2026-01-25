@@ -44,6 +44,7 @@ namespace HomeBudgetManager.Tests
                         Value = 100.00m, // Przychód
                         TransactionType = TransactionType.income,
                         Date = DateTime.Now,
+                        Title = "Zysk operacyjny",
                         Description = "Zysk"
                     },
                     new DBTransaction
@@ -54,6 +55,7 @@ namespace HomeBudgetManager.Tests
                         Value = -50.00m, // Wydatek
                         TransactionType = TransactionType.expense,
                         Date = DateTime.Now.AddDays(1),
+                        Title = "Strata operacyjna",
                         Description = "Strata"
                     }
                 );
@@ -72,7 +74,7 @@ namespace HomeBudgetManager.Tests
                     .Select(t => new
                     {
                         id = t.Id.ToString(),
-                        title = $"{t.Value:F2} ({t.User.Login})", // Formatowanie tytułu
+                        title = t.Title, // Formatowanie tytułu
                         color = t.Value < 0 ? "#e74a3b" : "#1cc88a", // Logika kolorów
                         amount = t.Value
                     })
@@ -85,7 +87,7 @@ namespace HomeBudgetManager.Tests
                 // Sprawdzenie Przychodu (Musi być zielony)
                 var incomeEvent = events.First(e => e.amount > 0);
                 Assert.Equal("#1cc88a", incomeEvent.color); // Zielony z CSS
-                Assert.Contains("(TestUser)", incomeEvent.title); // Czy login jest w tytule?
+                Assert.Equal("Zysk operacyjny", incomeEvent.title);
 
                 // Sprawdzenie Wydatku (Musi być czerwony)
                 var expenseEvent = events.First(e => e.amount < 0);

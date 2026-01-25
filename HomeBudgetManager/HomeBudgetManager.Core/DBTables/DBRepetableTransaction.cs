@@ -14,6 +14,11 @@ namespace HomeBudgetManager.Core.DBTables
         [Column("value")]
         public decimal Value { get; set; }
 
+        [Required]
+        [MaxLength(20)]
+        [Column("transaction_title")]
+        public required string Title { get; set; }
+
         [Column("description")]
         public string? Description { get; set; }
 
@@ -29,20 +34,17 @@ namespace HomeBudgetManager.Core.DBTables
         [ForeignKey(nameof(UserId))]
         public DBUser? User { get; set; }
 
-        // --- BRAKUJĄCE POLA (Naprawa błędu) ---
-
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
 
         [Column("next_run_date")]
         public DateTime NextRunDate { get; set; }
 
-        // Pola określające częstotliwość (np. co 1 miesiąc)
         [Column("transaction_interval")]
         public int TransactionInterval { get; set; } = 1;
 
         [Column("frequency_unit")] 
-        public int FrequencyUnit { get; set; } // np. 0=Dni, 1=Miesiące, 2=Lata
+        public int FrequencyUnit { get; set; } // np. 0=Dni, 1=Tygodnie, 2=Miesiące, 3=Lata
 
         [ForeignKey(nameof(TransactionId))]
         public virtual DBTransaction? Transaction { get; set; }

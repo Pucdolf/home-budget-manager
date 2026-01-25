@@ -31,16 +31,16 @@ namespace HomeBudgetManager.Tests
                 // Dodajemy Transakcje (W tym miesiącu)
                 db.Transactions.AddRange(
                     // 2x Jedzenie po 50zł = 100zł
-                    new DBTransaction { UserId = 1, CategoryId = 1, Value = -50m, TransactionType = TransactionType.expense, Date = DateTime.Now },
-                    new DBTransaction { UserId = 1, CategoryId = 1, Value = -50m, TransactionType = TransactionType.expense, Date = DateTime.Now },
+                    new DBTransaction { UserId = 1, CategoryId = 1, Value = -50m, TransactionType = TransactionType.expense, Date = DateTime.Now, Title = "Obiad" },
+                    new DBTransaction { UserId = 1, CategoryId = 1, Value = -50m, TransactionType = TransactionType.expense, Date = DateTime.Now, Title = "Kolacja" },
 
                     // 1x Paliwo po 50zł = 50zł
-                    new DBTransaction { UserId = 1, CategoryId = 2, Value = -50m, TransactionType = TransactionType.expense, Date = DateTime.Now }
+                    new DBTransaction { UserId = 1, CategoryId = 2, Value = -50m, TransactionType = TransactionType.expense, Date = DateTime.Now, Title = "Paliwo" }
                 );
 
                 // Dodajemy transakcję spoza zakresu (STARY ROK) - nie powinna być policzona!
                 db.Transactions.Add(
-                    new DBTransaction { UserId = 1, CategoryId = 1, Value = -999m, TransactionType = TransactionType.expense, Date = DateTime.Now.AddYears(-2) }
+                    new DBTransaction { UserId = 1, CategoryId = 1, Value = -999m, TransactionType = TransactionType.expense, Date = DateTime.Now.AddYears(-2), Title = "Stare" }
                 );
 
                 db.SaveChanges();
