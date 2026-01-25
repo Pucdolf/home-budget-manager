@@ -3,6 +3,7 @@ using System;
 using HomeBudgetManager.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HomeBudgetManager.Core.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260123175447_UpdateRecurringTransactions")]
+    partial class UpdateRecurringTransactions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.11");
@@ -80,19 +83,15 @@ namespace HomeBudgetManager.Core.Migrations
                 {
                     b.Property<int>("TransactionId")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("transaction_id");
+                        .HasColumnName("repetable_transaction_id");
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int>("IntervalType")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("category_id");
+                        .HasColumnName("interval_type");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("description");
-
-                    b.Property<int>("FrequencyUnit")
+                    b.Property<int>("IntervalValue")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("frequency_unit");
+                        .HasColumnName("interval_value");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER")
@@ -102,28 +101,7 @@ namespace HomeBudgetManager.Core.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("next_run_date");
 
-                    b.Property<int?>("TransactionId1")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TransactionInterval")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("transaction_interval");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("user_id");
-
-                    b.Property<decimal>("Value")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("value");
-
                     b.HasKey("TransactionId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("TransactionId1");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("repetable_transactions");
                 });
@@ -240,33 +218,13 @@ namespace HomeBudgetManager.Core.Migrations
 
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBRepetableTransaction", b =>
                 {
-                    b.HasOne("HomeBudgetManager.Core.DBTables.DBCategory", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HomeBudgetManager.Core.DBTables.DBTransaction", null)
+                    b.HasOne("HomeBudgetManager.Core.DBTables.DBTransaction", "Transaction")
                         .WithOne("RepetableTransaction")
                         .HasForeignKey("HomeBudgetManager.Core.DBTables.DBRepetableTransaction", "TransactionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HomeBudgetManager.Core.DBTables.DBTransaction", "Transaction")
-                        .WithMany()
-                        .HasForeignKey("TransactionId1");
-
-                    b.HasOne("HomeBudgetManager.Core.DBTables.DBUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-
                     b.Navigation("Transaction");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HomeBudgetManager.Core.DBTables.DBTransaction", b =>

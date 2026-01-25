@@ -118,14 +118,14 @@
 
                     <!-- Ukryte pole -->
                     <div id="recurring-box" style="display: none; margin-left: 25px;">
-                        <label for="recurringInterval" style="font-size: 0.9rem;">Powtarzaj co ile dni:</label>
-                        <input type="number"
-                               id="recurringInterval"
-                               name="recurringInterval"
-                               min="1"
-                               placeholder="np. 30"
-                               class="form-input"
-                               style="margin-top: 5px;">
+                        <label for="recurringType" style="font-size: 0.9rem;">Powtarzaj:</label>
+                        <select id="recurringType" name="recurringType" class="form-input" style="margin-top: 5px;">
+                            <option value="daily">Codziennie</option>
+                            <option value="weekly">Co tydzień</option>
+                            <option value="monthly">Co miesiąc</option>
+                            <option value="quarterly">Co kwartał</option>
+                            <option value="yearly">Co rok</option>
+                        </select>
                     </div>
                 </div>
 

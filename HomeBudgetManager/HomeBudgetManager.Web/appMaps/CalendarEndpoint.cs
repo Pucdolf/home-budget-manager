@@ -56,7 +56,9 @@ namespace HomeBudgetManager.Web.appMaps
                     userIds.Add(user.Id);
                 }
 
-                var transactions = await db.Transactions
+                List<dynamic> transactions = new List<dynamic>();
+
+                var regularTransactions = await db.Transactions
                     .Include(t => t.User) // Include User to get Login
                     .Where(t => userIds.Contains(t.UserId))
                     .OrderBy(t => t.Date) // Sort by date/time
@@ -70,9 +72,47 @@ namespace HomeBudgetManager.Web.appMaps
                         description = t.Description ?? "",
                         categoryId = t.CategoryId,
                         color = t.Value < 0 ? "#e74a3b" : "#1cc88a",
-                        reminder = false
+                        reminder = false,
+                        isRecurring = false
                     })
                     .ToListAsync();
+
+                transactions.AddRange(regularTransactions);
+
+                var repetableTransactions = await db.RepetableTransactions
+                    .Include(rt => rt.User)
+                    .Where(rt => userIds.Contains(rt.UserId) && rt.IsActive)
+                    .ToListAsync();
+
+                foreach (var rt in repetableTransactions)
+                {
+                    var nextDate = rt.NextRunDate;
+                    for (int i = 0; i < 12; i++) // Generate next 12 occurrences
+                    {
+                        transactions.Add(new
+                        {
+                            id = rt.TransactionId.ToString(),
+                            title = $"{rt.Value:F2} ({rt.User.Login})",
+                            startTime = nextDate.ToString("yyyy-MM-ddTHH:mm:ss"),
+                            endTime = nextDate.AddHours(1).ToString("yyyy-MM-ddTHH:mm:ss"),
+                            amount = rt.Value,
+                            description = rt.Description ?? "",
+                            categoryId = rt.CategoryId,
+                            color = "#f6c23e", // Yellow for recurring
+                            reminder = false,
+                            isRecurring = true
+                        });
+
+                        nextDate = rt.FrequencyUnit switch
+                        {
+                            0 => nextDate.AddDays(rt.TransactionInterval),
+                            1 => nextDate.AddMonths(rt.TransactionInterval),
+                            2 => nextDate.AddYears(rt.TransactionInterval),
+                            _ => nextDate.AddMonths(1),
+                        };
+                    }
+                }
+
 
                 return Results.Json(transactions);
             });
