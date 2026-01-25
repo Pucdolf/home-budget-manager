@@ -37,7 +37,13 @@ namespace HomeBudgetManager.Web.appMaps
                 var html = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
 
                 html = html.Replace("{username}", user.Login);
+                string adminBtnHtml = "";
 
+                if (user.Role == SystemRole.SystemAdmin)
+                {
+                    adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\">Ustawienia Admina</button>";
+                }
+                html = html.Replace("{admin_panel_button}", adminBtnHtml);
                 return Results.Content(html, "text/html; charset=utf-8");
             });
 
