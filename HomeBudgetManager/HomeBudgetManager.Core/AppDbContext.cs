@@ -16,6 +16,7 @@ namespace HomeBudgetManager.Core
         public DbSet<DBTransaction> Transactions { get; set; }
         public DbSet<DBCategory> Categories { get; set; }
         public DbSet<DBUser> Users { get; set; }
+        public DbSet<DBRole> Roles { get; set; }
 
         public DbSet<DBRepetableTransaction> RepetableTransactions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -33,6 +34,16 @@ namespace HomeBudgetManager.Core
                 .WithOne()         // Wskazujemy na właściwość w DBRepetableTransaction
                 .HasForeignKey<DBRepetableTransaction>(b => b.TransactionId); // TU JEST KLUCZ: Wymuszamy użycie TransactionId
 
+            // Seed Roles
+            modelBuilder.Entity<DBRole>().HasData(
+                Enum.GetValues(typeof(SystemRole))
+                    .Cast<SystemRole>()
+                    .Select(r => new DBRole
+                    {
+                        Id = r,
+                        Name = r.ToString()
+                    })
+            );
         }
 
     }
