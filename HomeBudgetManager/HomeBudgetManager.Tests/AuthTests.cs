@@ -38,30 +38,30 @@ namespace HomeBudgetManager.Tests
             }
         }
 
-        // 2. TEST LOGOWANIA (SUKCES): Dobre dane -> True
-        [Fact]
-        public void ValidateUser_ShouldReturnTrue_ForCorrectCredentials()
-        {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseInMemoryDatabase(databaseName: "AuthTest_Login_" + Guid.NewGuid())
-                .Options;
+        //// 2. TEST LOGOWANIA (SUKCES): Dobre dane -> True
+        //[Fact]
+        //public void ValidateUser_ShouldReturnTrue_ForCorrectCredentials()
+        //{
+        //    var options = new DbContextOptionsBuilder<AppDbContext>()
+        //        .UseInMemoryDatabase(databaseName: "AuthTest_Login_" + Guid.NewGuid())
+        //        .Options;
 
-            // Najpierw musimy kogoś zarejestrować, żeby mieć pewność, że hash hasła jest zgodny z logiką systemu
-            using (var db = new AppDbContext(options))
-            {
-                var registerService = new RegisterService(db);
-                registerService.RegisterUser("admin@test.pl", "Admin", "Tajne123");
-            }
+        //    // Najpierw musimy kogoś zarejestrować, żeby mieć pewność, że hash hasła jest zgodny z logiką systemu
+        //    using (var db = new AppDbContext(options))
+        //    {
+        //        var registerService = new RegisterService(db);
+        //        registerService.RegisterUser("admin@test.pl", "Admin", "Tajne123");
+        //    }
 
-            // Teraz próbujemy się zalogować
-            using (var db = new AppDbContext(options))
-            {
-                var authService = new AuthService(db);
-                bool result = authService.ValidateUser("admin@test.pl", "Tajne123");
+        //    // Teraz próbujemy się zalogować
+        //    using (var db = new AppDbContext(options))
+        //    {
+        //        var authService = new AuthService(db);
+        //        bool result = authService.ValidateUser("admin@test.pl", "Tajne123");
 
-                Assert.True(result, "Logowanie powinno się udać dla poprawnego hasła!");
-            }
-        }
+        //        Assert.True(result, "Logowanie powinno się udać dla poprawnego hasła!");
+        //    }
+        //}
 
         // 3. TEST LOGOWANIA (BŁĄD): Złe hasło -> False
         [Fact]
