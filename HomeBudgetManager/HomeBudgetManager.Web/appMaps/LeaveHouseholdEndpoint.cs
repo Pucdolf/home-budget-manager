@@ -37,13 +37,25 @@ namespace HomeBudgetManager.Web.appMaps
                 // Jeśli użytkownik jest administratorem domu
                 if (user.Role == SystemRole.HouseholdAdmin)
                 {
-                    // Reset dla wszystkich członków i usunięcie domu
+                    // 1. Odłącz transakcje od usuwanego domu (ustaw HouseId = null)
+                    var houseTransactions = await db.Transactions
+                        .Where(t => t.HouseId == house.Id)
+                        .ToListAsync();
+
+                    foreach (var t in houseTransactions)
+                    {
+                        t.HouseId = null;
+                    }
+
+                    // 2. Reset dla wszystkich członków
                     var members = await db.Users.Where(u => u.HouseId == house.Id).ToListAsync();
                     foreach (var member in members)
                     {
                         member.HouseId = null;
                         member.Role = SystemRole.Guest;
                     }
+
+                    // 3. Usuń dom
                     db.Houses.Remove(house);
                     await db.SaveChangesAsync();
 

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Panel finansowy</title>
     <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 <body>
@@ -11,16 +12,16 @@
     <div class="layout">
         <!-- Pasek boczny -->
         <aside class="sidebar">
-            <p class="sidebar-title">Mój budżet</p>
-            <span class="user-name">Zalogowano jako: {username}</span>
-            <button class="sidebar-link" onclick="loadDashboard()">Pulpit</button>
-            <button class="sidebar-link" onclick="window.location.href='/household'">Domostwo</button>
-            <button class="sidebar-link" onclick="window.location.href='/calendar'">Kalendarz</button>
-            <button class="sidebar-link" onclick="window.location.href='/charts'">Wykresy</button>
-            <button class="sidebar-link" onclick="window.location.href='/reports'">Raporty</button>
-            <button class="sidebar-link" onclick="window.location.href='/new-transaction?returnUrl=' + encodeURIComponent(window.location.pathname)">Transakcje</button>
+            <p class="sidebar-title"><i class="fas fa-wallet"></i> Mój budżet</p>
+            <span class="user-name" style="display: block;">Zalogowano jako: {username}</span>
+            <button class="sidebar-link" onclick="loadDashboard()"><i class="fas fa-fw fa-tachometer-alt"></i> &nbsp; Pulpit</button>
+            <button class="sidebar-link" onclick="window.location.href='/household'"><i class="fas fa-fw fa-home"></i> &nbsp; Domostwo</button>
+            <button class="sidebar-link" onclick="window.location.href='/calendar'"><i class="fas fa-fw fa-calendar-alt"></i> &nbsp; Kalendarz</button>
+            <button class="sidebar-link" onclick="window.location.href='/charts'"><i class="fas fa-fw fa-chart-pie"></i> &nbsp; Wykresy</button>
+            <button class="sidebar-link" onclick="window.location.href='/reports'"><i class="fas fa-fw fa-file-alt"></i> &nbsp; Raporty</button>
+            <button class="sidebar-link" onclick="window.location.href='/new-transaction?returnUrl=' + encodeURIComponent(window.location.pathname)"><i class="fas fa-fw fa-exchange-alt"></i> &nbsp; Transakcje</button>
             {admin_panel_button}
-            <form method="post" action="/logout" style="display:inline;">
+            <form method="post" action="/logout" style="margin-top: auto; width: 100%;">
                 <button type="submit" class="btn-logout">Wyloguj</button>
             </form>
         </aside>
@@ -29,29 +30,29 @@
             <section class="card">
                 <h2>Przegląd finansów</h2>
                 <p class="card-desc">
-                    Prototyp panelu do podglądu stanu finansów.
+                    Twój osobisty panel kontrolny.
                 </p>
 
                 <div class="dashboard-grid">
                     <!-- Lewa kolumna: Bilans i Wykresy -->
                     <div class="dashboard-center-column">
                         <div class="balance-box">
-                            <p class="balance-label">Saldo konta</p>
+                            <p class="balance-label">Całkowite Saldo</p>
                             <span class="balance-highlight">{balance} zł</span>
                         </div>
 
                         <div id="dashboard-charts" 
                              hx-get="/dashboard/charts" 
                              hx-trigger="load">
-                             <p style="text-align:center; color:#888;">Ładowanie wykresów...</p>
+                             <p style="text-align:center; color:#858796;">Ładowanie wykresów...</p>
                         </div>
 
-                        <div class="actions-box">
-                            <a href="/new-transaction" class="btn-primary">Dodaj transakcję</a>
+                        <div class="actions-box" style="text-align: center;">
+                            <a href="/new-transaction" class="btn-primary"><i class="fas fa-plus"></i> Dodaj nową transakcję</a>
                         </div>
                     </div>
 
-                    <!-- Prawa kolumna: Lista transakcji -->
+                    <!-- Środkowa kolumna: Lista transakcji -->
                     <div class="dashboard-right-column">
                         <div class="transactions-box">
                             <h3>Ostatnie transakcje</h3>
@@ -66,6 +67,16 @@
                                     </div>
                                 </li>
                             </ul>
+                        </div>
+                    </div>
+
+                    <!-- Prawa kolumna: Reklamy -->
+                    <div class="dashboard-ads-column">
+                        <div class="ad-placeholder">
+                            <span class="ad-span">Miejsce na reklamę</span>
+                        </div>
+                        <div class="ad-placeholder">
+                            <span class="ad-span">Miejsce na reklamę</span>
                         </div>
                     </div>
                 </div>

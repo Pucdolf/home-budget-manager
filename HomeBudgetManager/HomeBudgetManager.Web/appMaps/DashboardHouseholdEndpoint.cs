@@ -84,14 +84,18 @@ namespace HomeBudgetManager.Web.appMaps
                 {
                     var html = $@"
                         {cssLink}
-                        <section class='card'>
+                        <section class='card' style='display: flex; width: 600px; justify-content: center;'>
                             <h2>Twoje domostwo</h2>
                             <p>Nie jesteś jeszcze członkiem żadnego domostwa.</p>
                             <div class='actions-box'>
                                 <a href='createHousehold.html' class='btn-primary'>Utwórz domostwo</a>
                                 <a href='joinHousehold.html' class='btn-primary'>Dołącz do domostwa</a>
                             </div>
-                        </section>";
+                        </section>
+                        <div style='margin-top: 2rem; display: flex; gap: 1rem;'>
+                            <div class='ad-placeholder' style='flex: 1; height: 400px;'><span>Miejsce na reklamę</span></div>
+                            <div class='ad-placeholder' style='flex: 1; height: 400px;'><span>Miejsce na reklamę</span></div>
+                        </div>";
                     return Results.Content(html, "text/html");
                 }
                 else
@@ -233,6 +237,11 @@ namespace HomeBudgetManager.Web.appMaps
                             </table>
                         </div>
 
+                    </div>
+                    
+                    <div style='margin-top: 2rem; display: flex; gap: 1rem;'>
+                        <div class='ad-placeholder' style='flex: 1; height: 150px;'><span>Miejsce na reklamę</span></div>
+                        <div class='ad-placeholder' style='flex: 1; height: 150px;'><span>Miejsce na reklamę</span></div>
                     </div>";
 
                     return Results.Content(html, "text/html");

@@ -11,194 +11,199 @@
 <body>
     <div class="layout">
         <aside class="sidebar">
-            <p class="sidebar-title">Mój budżet</p>
-            <span class="user-name">Zalogowano jako: {username}</span>
-            <button class="sidebar-link" onclick="window.location.href='/dashboard'">Pulpit</button>
-            <button class="sidebar-link" onclick="window.location.href='/household'">Domostwo</button>
-            <button class="sidebar-link" onclick="window.location.href='/calendar'">Kalendarz</button>
-            <button class="sidebar-link" onclick="window.location.href='/charts'">Wykresy</button>
-            <button class="sidebar-link" onclick="window.location.href='/reports'">Raporty</button>
-            <button class="sidebar-link" onclick="window.location.href='/new-transaction'">Transakcje</button>
+            <p class="sidebar-title"><i class="fas fa-wallet"></i> Mój budżet</p>
+            <span class="user-name" style="display: block;">Zalogowano jako: {username}</span>
+            <button class="sidebar-link" onclick="window.location.href='/dashboard'"><i class="fas fa-fw fa-tachometer-alt"></i> &nbsp; Pulpit</button>
+            <button class="sidebar-link" onclick="window.location.href='/household'"><i class="fas fa-fw fa-home"></i> &nbsp; Domostwo</button>
+            <button class="sidebar-link" onclick="window.location.href='/calendar'"><i class="fas fa-fw fa-calendar-alt"></i> &nbsp; Kalendarz</button>
+            <button class="sidebar-link" onclick="window.location.href='/charts'"><i class="fas fa-fw fa-chart-pie"></i> &nbsp; Wykresy</button>
+            <button class="sidebar-link" onclick="window.location.href='/reports'"><i class="fas fa-fw fa-file-alt"></i> &nbsp; Raporty</button>
+            <button class="sidebar-link active" onclick="window.location.href='/new-transaction'"><i class="fas fa-fw fa-exchange-alt"></i> &nbsp; Transakcje</button>
             {admin_panel_button}
-            <form method="post" action="/logout" style="display:inline;">
+            <form method="post" action="/logout" style="margin-top: auto; width: 100%;">
                 <button type="submit" class="btn-logout">Wyloguj</button>
             </form>
         </aside>
         <main class="container">
-            <section class="card">
-                <h2>Dodaj nową transakcję</h2>
+            <div class="main-with-ads">
+                <div class="content-area">
+                    <section class="card">
+                        <h2>Dodaj nową transakcję</h2>
 
+                        <!-- Formularz dodawania transakcji -->
+                        <form hx-post="/new-transaction/add"
+                              hx-target="#form-response"
+                              hx-swap="innerHTML"
+                              class="transaction-form">
 
-                <!-- Formularz dodawania transakcji -->
-                <form hx-post="/new-transaction/add"
-                      hx-target="#form-response"
-                      hx-swap="innerHTML"
-                      class="transaction-form">
+                            <input type="hidden" id="returnUrl" name="returnUrl" value="{returnUrl}">
 
-                    <input type="hidden" id="returnUrl" name="returnUrl" value="{returnUrl}">
+                            <div style="display: flex; gap: 20px; align-items: flex-start;">
+                                <!-- Pole Tytuł -->
+                                <div class="form-group" style="flex: 2;">
+                                    <label for="title">Tytuł (max 20 znaków)</label>
+                                    <input type="text"
+                                           id="title"
+                                           name="title"
+                                           required
+                                           maxlength="20"
+                                           class="form-input"
+                                           placeholder="np. Zakupy spożywcze">
+                                </div>
+                                
+                                <!-- Pole kwota -->
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="amount">Kwota (zł)</label>
+                                    <input type="text"
+                                           inputmode="decimal"
+                                           pattern="[0-9]*[.,]?[0-9]+"
+                                           id="amount"
+                                           name="amount"
+                                           required
+                                           placeholder="0.00"
+                                           class="form-input"
+                                           oninput="this.value = this.value.replace(/[^0-9.,]/g, '').replace(/,/g, '.')">
+                                </div>
+                            </div>
 
-                    <div style="display: flex; gap: 20px; align-items: flex-start;">
-                        <!-- Pole Tytuł -->
-                        <div class="form-group" style="flex: 2;">
-                            <label for="title">Tytuł (max 20 znaków)</label>
-                            <input type="text"
-                                   id="title"
-                                   name="title"
-                                   required
-                                   maxlength="20"
-                                   class="form-input"
-                                   placeholder="np. Zakupy spożywcze">
-                        </div>
-                        
-                        <!-- Pole kwota -->
-                        <div class="form-group" style="flex: 1;">
-                            <label for="amount">Kwota (zł)</label>
-                            <input type="text"
-                                   inputmode="decimal"
-                                   pattern="[0-9]*[.,]?[0-9]+"
-                                   id="amount"
-                                   name="amount"
-                                   required
-                                   placeholder="0.00"
-                                   class="form-input"
-                                   oninput="this.value = this.value.replace(/[^0-9.,]/g, '').replace(/,/g, '.')">
-                        </div>
-                    </div>
+                            <div style="display: flex; gap: 20px; align-items: flex-start;">
+                                <!-- Pole kategoria -->
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="category">Kategoria</label>
 
-                    <div style="display: flex; gap: 20px; align-items: flex-start;">
-                        <!-- Pole kategoria -->
-                        <div class="form-group" style="flex: 1;">
-                            <label for="category">Kategoria</label>
+                                    <div style="display: flex; gap: 5px;">
+                                        <div id="target-container-for-select" style="flex-grow: 1;">
+                                            <select class="form-input" disabled>
+                                                <option>Ładowanie kategorii...</option>
+                                            </select>
+                                        </div>
+                                        <button type="button" class="btn-secondary" onclick="openManageCategories()" style="padding: 0 10px; display: flex; align-items: center; justify-content: center;" title="Zarządzaj kategoriami">
+                                            <i class="fas fa-cog"></i>
+                                        </button>
+                                    </div>
 
-                            <div style="display: flex; gap: 5px;">
-                                <div id="target-container-for-select" style="flex-grow: 1;">
-                                    <select class="form-input" disabled>
-                                        <option>Ładowanie kategorii...</option>
+                                    <!-- Wybor kategorii zwraca Id kategorii. wyciagamy z form categoryId-->
+                                    <div hx-get="/categories/list"
+                                         hx-trigger="load, reload-categories from:body"
+                                         hx-target="#target-container-for-select"
+                                         hx-swap="innerHTML"
+                                         style="display: none;">
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Data i czas transakcji</label>
+
+                                    <div style="display: flex; gap: 15px;">
+
+                                        <!-- Pole DATY -->
+                                        <input type="date"
+                                               id="transactionDate"
+                                               name="transactionDate"
+                                               class="form-input"
+                                               required
+                                               style="flex: 2;">
+                                        <!-- Pole GODZINY -->
+                                        <input type="time"
+                                               id="transactionTime"
+                                               name="transactionTime"
+                                               class="form-input"
+                                               required
+                                               style="flex: 1;">
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rodzaj transakcji -->
+                            <div class="form-group">
+                                <label>Rodzaj transakcji</label>
+                                <div class="radio-group" style="display: flex; gap: 20px; align-items: center;">
+                                    <!-- Wydatek (Domyslnie zaznaczony) -->
+                                    <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                        <input type="radio"
+                                               name="transactionType"
+                                               value="0"
+                                               checked>
+                                        Wydatek
+                                    </label>
+                                    <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                        <input type="radio"
+                                               name="transactionType"
+                                               value="1">
+                                        Przychód
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Sekcja Transakcji Okresowej -->
+                            <div class="form-group">
+                                <!-- Kontener Flexbox dla checkboxa i etykiety -->
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+
+                                    <input type="checkbox"
+                                           id="isRecurring"
+                                           name="isRecurring"
+                                           value="true"
+                                           onchange="toggleRecurring(this)"
+                                           style="width: auto; margin: 0; cursor: pointer;"> <!-- width:auto jest ważne, bo .form-input ma width:100% -->
+
+                                    <label for="isRecurring"
+                                           style="margin: 0; cursor: pointer; font-weight: normal; font-size: 1rem;">
+                                        Transakcja okresowa
+                                    </label>
+
+                                </div>
+
+                                <!-- Ukryte pole -->
+                                <div id="recurring-box" style="display: none; margin-left: 25px;">
+                                    <label for="recurringType" style="font-size: 0.9rem;">Powtarzaj:</label>
+                                    <select id="recurringType" name="recurringType" class="form-input" style="margin-top: 5px;">
+                                        <option value="daily">Codziennie</option>
+                                        <option value="weekly">Co tydzień</option>
+                                        <option value="monthly">Co miesiąc</option>
+                                        <option value="quarterly">Co kwartał</option>
+                                        <option value="yearly">Co rok</option>
                                     </select>
                                 </div>
-                                <button type="button" class="btn-secondary" onclick="openManageCategories()" style="padding: 0 10px; display: flex; align-items: center; justify-content: center;" title="Zarządzaj kategoriami">
-                                    <i class="fas fa-cog"></i>
+                            </div>
+
+                            <!-- Pole opis -->
+                            <div class="form-group">
+                                <label for="description">Opis (opcjonalny)</label>
+                                <input type="text"
+                                       id="description"
+                                       name="description"
+                                       class="form-input">
+                            </div>
+
+                            <!-- Miejsce na komunikaty z serwera -->
+                            <div id="form-response" class="form-response">
+
+                            </div>
+
+                            <div class="form-buttons">
+                                <button type="submit" class="btn-primary">
+                                    Dodaj transakcję
                                 </button>
+                                <a href="#" onclick="cancelTransaction()" class="btn-secondary">
+                                    Anuluj
+                                </a>
                             </div>
+                        </form>
+                    </section>
 
-                            <!-- Wybor kategorii zwraca Id kategorii. wyciagamy z form categoryId-->
-                            <div hx-get="/categories/list"
-                                 hx-trigger="load, reload-categories from:body"
-                                 hx-target="#target-container-for-select"
-                                 hx-swap="innerHTML"
-                                 style="display: none;">
-                            </div>
-                        </div>
-
-                        <div class="form-group" style="flex: 1;">
-                            <label>Data i czas transakcji</label>
-
-                            <div style="display: flex; gap: 15px;">
-
-                                <!-- Pole DATY -->
-                                <input type="date"
-                                       id="transactionDate"
-                                       name="transactionDate"
-                                       class="form-input"
-                                       required
-                                       style="flex: 2;">
-                                <!-- Pole GODZINY -->
-                                <input type="time"
-                                       id="transactionTime"
-                                       name="transactionTime"
-                                       class="form-input"
-                                       required
-                                       style="flex: 1;">
-
-                            </div>
-                        </div>
+                    <!-- Dolna reklama -->
+                    <div class="bottom-ad-area" style="margin-top: 65px;">
+                        <div class="ad-placeholder" style="height: 150px;"><span>Miejsce na reklamę</span></div>
                     </div>
+                </div>
 
-                    <!-- Rodzaj transakcji -->
-                    <div class="form-group">
-                        <label>Rodzaj transakcji</label>
-                        <div class="radio-group" style="display: flex; gap: 20px; align-items: center;">
-                            <!-- Wydatek (Domyslnie zaznaczony) -->
-                            <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                                <input type="radio"
-                                       name="transactionType"
-                                       value="0"
-                                       checked>
-                                Wydatek
-                            </label>
-                            <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                                <input type="radio"
-                                       name="transactionType"
-                                       value="1">
-                                Przychód
-                            </label>
-                        </div>
-                    </div>
+                <!-- Prawa reklama -->
+                
+            </div>
 
-                    <!-- Sekcja Transakcji Okresowej -->
-                    <div class="form-group">
-                        <!-- Kontener Flexbox dla checkboxa i etykiety -->
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-
-                            <input type="checkbox"
-                                   id="isRecurring"
-                                   name="isRecurring"
-                                   value="true"
-                                   onchange="toggleRecurring(this)"
-                                   style="width: auto; margin: 0; cursor: pointer;"> <!-- width:auto jest ważne, bo .form-input ma width:100% -->
-
-                            <label for="isRecurring"
-                                   style="margin: 0; cursor: pointer; font-weight: normal; font-size: 1rem;">
-                                Transakcja okresowa
-                            </label>
-
-                        </div>
-
-                        <!-- Ukryte pole -->
-                        <div id="recurring-box" style="display: none; margin-left: 25px;">
-                            <label for="recurringType" style="font-size: 0.9rem;">Powtarzaj:</label>
-                            <select id="recurringType" name="recurringType" class="form-input" style="margin-top: 5px;">
-                                <option value="daily">Codziennie</option>
-                                <option value="weekly">Co tydzień</option>
-                                <option value="monthly">Co miesiąc</option>
-                                <option value="quarterly">Co kwartał</option>
-                                <option value="yearly">Co rok</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <script>
-                        function toggleRecurring(checkbox) {
-                            var box = document.getElementById('recurring-box');
-                            box.style.display = checkbox.checked ? 'block' : 'none';
-                        }
-                    </script>
-
-                    <!-- Pole opis -->
-                    <div class="form-group">
-                        <label for="description">Opis (opcjonalny)</label>
-                        <input type="text"
-                               id="description"
-                               name="description"
-                               class="form-input">
-                    </div>
-
-                    <!-- Miejsce na komunikaty z serwera -->
-                    <div id="form-response" class="form-response">
-
-                    </div>
-
-                    <div class="form-buttons">
-                        <button type="submit" class="btn-primary">
-                            Dodaj transakcję
-                        </button>
-                        <a href="#" onclick="cancelTransaction()" class="btn-secondary">
-                            Anuluj
-                        </a>
-                    </div>
-                </form>
-            </section>
-
+            <!-- Modale -->
             <div id="newCategoryModal" class="modal-overlay" style="display: none;">
                 <div class="modal-content">
                     <div class="modal-header">Nowa kategoria</div>
@@ -209,7 +214,7 @@
 
                     <div class="form-group">
                         <label>Opis (opcjonalny)</label>
-                        <input type="text" id="newCatDesc" class="form-input" ">
+                        <input type="text" id="newCatDesc" class="form-input">
                     </div>
 
                     <div class="modal-actions">
@@ -236,9 +241,12 @@
             </div>
         </main>
 
-
-        <!-- Modal z dodawaniem nowej transakcji -->
         <script>
+            function toggleRecurring(checkbox) {
+                var box = document.getElementById('recurring-box');
+                box.style.display = checkbox.checked ? 'block' : 'none';
+            }
+
             // --- Zarządzanie kategoriami ---
             function openManageCategories() {
                 document.getElementById('manageCategoriesModal').style.display = 'flex';
@@ -247,7 +255,6 @@
 
             function closeManageCategories() {
                 document.getElementById('manageCategoriesModal').style.display = 'none';
-                // Odśwież select w tle
                 document.body.dispatchEvent(new Event("reload-categories"));
             }
 
@@ -281,7 +288,6 @@
                     row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;';
                     row.dataset.id = cat.id;
 
-                    // Tryb wyświetlania
                     const displayHtml = `
                         <div style="flex-grow: 1;">
                             <div style="font-weight: bold;">${cat.name} ${isSystem ? '<span style="font-size: 0.8em; color: #888;">(Systemowa)</span>' : ''}</div>
@@ -289,7 +295,7 @@
                         </div>
                         <div style="display: flex; gap: 5px;">
                             ${!isSystem ? `
-                                <button type="button" class="btn-secondary" onclick="enableEditCategory(${cat.id}, '${cat.name.replace(/'/g, "\\'")}', '${(cat.description||'').replace(/'/g, "\\'")}')" style="padding: 5px 10px; font-size: 0.8em;"><i class="fas fa-edit"></i></button>
+                                <button type="button" class="btn-secondary" onclick="enableEditCategory(${cat.id}, '${cat.name.replace(/'/g, "\'")}', '${(cat.description||'').replace(/'/g, "\'")}')" style="padding: 5px 10px; font-size: 0.8em;"><i class="fas fa-edit"></i></button>
                                 <button type="button" class="btn-secondary" onclick="deleteCategory(${cat.id})" style="padding: 5px 10px; font-size: 0.8em; color: #e74a3b;"><i class="fas fa-trash"></i></button>
                             ` : ''}
                         </div>
@@ -358,7 +364,6 @@
                 }
             }
 
-            // --- Istniejące skrypty ---
             function handleCategoryChange(selectElement) {
                 if (selectElement.value === 'new-category') {
                     document.getElementById('newCategoryModal').style.display = 'flex';
@@ -413,39 +418,25 @@
                     })
                     .catch(err => alert("Błąd połączenia"));
             }
-        </script>
 
-        <!-- Wróć do dashboard po dodaniu transakcji -->
-        <script>
             document.body.addEventListener('htmx:afterSwap', function (event) {
                 if (event.detail.target.id === 'form-response') {
                     const response = event.detail.target.innerHTML;
-
                     if (response.includes('success')) {
-                        // Przekieruj do returnUrl z ciasteczka
                         setTimeout(() => {
                             redirectToReturnUrl();
                         }, 1000);
                     }
                 }
             });
-        </script>
 
-        <!-- Skrypt ustawiający aktualną datę i czas -->
-        <script>
             const now = new Date();
-
-            // 1. Ustaw datę (YYYY-MM-DD)
             const dateField = document.getElementById('transactionDate');
             dateField.valueAsDate = now;
-
-            // 2. Ustaw czas (HH:MM)
-            // input type="time" wymaga formatu "HH:mm" (np. "14:30")
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-
             document.getElementById('transactionTime').value = `${hours}:${minutes}`;
         </script>
-        </div>
+    </div>
 </body>
 </html>
