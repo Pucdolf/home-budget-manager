@@ -39,6 +39,11 @@ namespace HomeBudgetManager.Core.DBTables
         [Column("transaction_type")]
         public TransactionType TransactionType { get; set; }
 
+        [Required]
+        [MaxLength(20)]
+        [Column("transaction_title")]
+        public required string Title { get; set; }
+
         [Column("transaction_description")]
         public string? Description { get; set; }
 

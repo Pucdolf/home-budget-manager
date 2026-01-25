@@ -34,9 +34,23 @@
                       hx-swap="innerHTML"
                       class="transaction-form">
 
+                    <input type="hidden" id="returnUrl" name="returnUrl" value="{returnUrl}">
+
                     <div style="display: flex; gap: 20px; align-items: flex-start;">
+                        <!-- Pole Tytuł -->
+                        <div class="form-group" style="flex: 2;">
+                            <label for="title">Tytuł (max 20 znaków)</label>
+                            <input type="text"
+                                   id="title"
+                                   name="title"
+                                   required
+                                   maxlength="20"
+                                   class="form-input"
+                                   placeholder="np. Zakupy spożywcze">
+                        </div>
+                        
                         <!-- Pole kwota -->
-                        <div class="form-group">
+                        <div class="form-group" style="flex: 1;">
                             <label for="amount">Kwota (zł)</label>
                             <input type="text"
                                    inputmode="decimal"
@@ -48,9 +62,11 @@
                                    class="form-input"
                                    oninput="this.value = this.value.replace(/[^0-9.,]/g, '').replace(/,/g, '.')">
                         </div>
+                    </div>
 
+                    <div style="display: flex; gap: 20px; align-items: flex-start;">
                         <!-- Pole kategoria -->
-                        <div class="form-group">
+                        <div class="form-group" style="flex: 1;">
                             <label for="category">Kategoria</label>
 
                             <div id="target-container-for-select">
@@ -68,7 +84,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" style="flex: 1;">
                             <label>Data i czas transakcji</label>
 
                             <div style="display: flex; gap: 15px;">
@@ -154,11 +170,10 @@
 
                     <!-- Pole opis -->
                     <div class="form-group">
-                        <label for="description">Opis</label>
+                        <label for="description">Opis (opcjonalny)</label>
                         <input type="text"
                                id="description"
                                name="description"
-                               required
                                class="form-input">
                     </div>
 
@@ -171,7 +186,7 @@
                         <button type="submit" class="btn-primary">
                             Dodaj transakcję
                         </button>
-                        <a href="/dashboard" class="btn-secondary">
+                        <a href="#" onclick="cancelTransaction()" class="btn-secondary">
                             Anuluj
                         </a>
                     </div>
@@ -214,6 +229,23 @@
                 document.getElementById('newCatName').value = '';
                 document.getElementById('newCatDesc').value = '';
             }
+            
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+
+            function redirectToReturnUrl() {
+                const cookieUrl = getCookie('transaction_return_url');
+                const targetUrl = cookieUrl ? decodeURIComponent(cookieUrl) : '/dashboard';
+                window.location.href = targetUrl;
+            }
+            
+            function cancelTransaction() {
+                redirectToReturnUrl();
+            }
 
             function submitNewCategory() {
                 const name = document.getElementById('newCatName').value;
@@ -248,9 +280,9 @@
                     const response = event.detail.target.innerHTML;
 
                     if (response.includes('success')) {
-                        // Przekieruj do dashboardu
+                        // Przekieruj do returnUrl z ciasteczka
                         setTimeout(() => {
-                            window.location.href = '/dashboard';
+                            redirectToReturnUrl();
                         }, 1000);
                     }
                 }

@@ -27,7 +27,7 @@
             <button class="sidebar-link" onclick="window.location.href='/calendar'">Kalendarz</button>
             <button class="sidebar-link" onclick="window.location.href='/charts'">Wykresy</button>
             <button class="sidebar-link" onclick="window.location.href='/reports'">Raporty</button>
-            <button class="sidebar-link" onclick="window.location.href='/new-transaction'">Transakcje</button>
+            <button class="sidebar-link" onclick="window.location.href='/new-transaction?returnUrl=' + encodeURIComponent(window.location.pathname)">Transakcje</button>
             {admin_panel_button}
             <form method="post" action="/logout" style="display:inline;">
                 <button type="submit" class="btn-logout">Wyloguj</button>
@@ -59,100 +59,13 @@
 
                         <aside class="calendar-events-panel">
                             <div class="sidebar-header">
-                                <h3>Nadchodzące wydarzenia</h3>
+                                <h3>Najbliższe nadchodzące wydarzenia</h3>
                                 <button id="add-event-btn"><i class="fas fa-plus"></i> Dodaj Transakcję</button>
                             </div>
                             <div class="events-list" id="events-list"></div>
                         </aside>
                     </main>
                 </div>
-
-                <!-- Add Transaction Modal -->
-                <div class="modal" id="event-modal">
-                    <div class="modal-content" style="max-width: 600px;">
-                        <span class="close-btn">&times;</span>
-                        <h2>Dodaj transakcję</h2>
-
-                        <form id="event-form" class="transaction-form">
-                            
-                            <div style="display: flex; gap: 20px; align-items: flex-start;">
-                                <div class="form-group" style="flex:1;">
-                                    <label for="amount">Kwota (zł)</label>
-                                    <input type="text"
-                                           inputmode="decimal"
-                                           pattern="[0-9]*[.,]?[0-9]+"
-                                           id="event-amount"
-                                           name="amount"
-                                           required
-                                           placeholder="0.00"
-                                           class="form-input"
-                                           oninput="this.value = this.value.replace(/[^0-9.,]/g, '').replace(/,/g, '.')">
-                                </div>
-
-                                <div class="form-group" style="flex:1;">
-                                    <label for="category">Kategoria</label>
-                                    <div id="target-container-for-select">
-                                        <select class="form-input" disabled><option>Wybierz...</option></select>
-                                    </div>
-                                    <div id="categories-loader" hx-get="/categories/list" hx-trigger="load" hx-target="#target-container-for-select" hx-swap="innerHTML" style="display: none;"></div>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Data i czas</label>
-                                <div style="display: flex; gap: 15px;">
-                                    <input type="date" id="event-date" name="transactionDate" class="form-input" required style="flex: 2;">
-                                    <input type="time" id="event-start-time" name="transactionTime" class="form-input" required style="flex: 1;">
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Rodzaj transakcji</label>
-                                <div class="radio-group" style="display: flex; gap: 20px; align-items: center;">
-                                    <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                                        <input type="radio" name="transactionType" value="0" checked> Wydatek
-                                    </label>
-                                    <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-                                        <input type="radio" name="transactionType" value="1"> Przychód
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                                    <input type="checkbox" id="isRecurring" name="isRecurring" value="true" onchange="toggleRecurring(this)" style="width: auto; margin: 0; cursor: pointer;">
-                                    <label for="isRecurring" style="margin: 0; cursor: pointer; font-weight: normal; font-size: 1rem;">Transakcja okresowa</label>
-                                </div>
-                                <div id="recurring-box" style="display: none; margin-left: 25px;">
-                                    <label for="recurringType" style="font-size: 0.9rem;">Powtarzaj:</label>
-                                    <select id="recurringType" name="recurringType" class="form-input" style="margin-top: 5px;">
-                                        <option value="daily">Codziennie</option>
-                                        <option value="weekly">Co tydzień</option>
-                                        <option value="monthly">Co miesiąc</option>
-                                        <option value="quarterly">Co kwartał</option>
-                                        <option value="yearly">Co rok</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="event-description">Opis</label>
-                                <input type="text" id="event-description" name="description" class="form-input">
-                            </div>
-
-                            <div id="form-error" class="error" style="color:red; margin-bottom:10px;"></div>
-
-                            <button type="submit" class="save-btn">Zapisz transakcję</button>
-                        </form>
-                    </div>
-                </div>
-
-                <script>
-                    function toggleRecurring(checkbox) {
-                        var box = document.getElementById('recurring-box');
-                        box.style.display = checkbox.checked ? 'block' : 'none';
-                    }
-                </script>
 
                 <!-- Event Details Modal -->
                 <div class="modal" id="event-details-modal">

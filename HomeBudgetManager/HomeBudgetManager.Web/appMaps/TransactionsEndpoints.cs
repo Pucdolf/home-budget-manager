@@ -156,6 +156,15 @@ public class TransactionsEndpoints : IEndpoint
             if (form.ContainsKey("description"))
                 transaction.Description = form["description"].ToString();
 
+            if (form.ContainsKey("title"))
+            {
+                var t = form["title"].ToString();
+                if (!string.IsNullOrWhiteSpace(t) && t.Length <= 20)
+                {
+                    transaction.Title = t;
+                }
+            }
+
             // Date and Time merging
             string dateStr = form["transactionDate"];
             string timeStr = form["transactionTime"];

@@ -39,8 +39,8 @@ namespace HomeBudgetManager.Tests
             {
                 var service = new TransactionService(db);
 
-                // SYGNATURA: userId, categoryId, value, type, date, isRepeatable, interval, description, houseId
-                service.addTransaction(1, 10, 50.00m, TransactionType.expense, DateTime.Now, false, null, "Obiad", null);
+                // SYGNATURA: userId, categoryId, value, type, date, isRepeatable, interval, title, description, houseId
+                service.addTransaction(1, 10, 50.00m, TransactionType.expense, DateTime.Now, false, null, "Testowy Tytuł", "Obiad", null, null);
             }
 
             // ASSERT
@@ -51,6 +51,7 @@ namespace HomeBudgetManager.Tests
                 Assert.NotNull(trans);
                 Assert.Equal(50.00m, trans.Value);
                 Assert.Equal("Obiad", trans.Description);
+                Assert.Equal("Testowy Tytuł", trans.Title);
                 Assert.Equal(10, trans.CategoryId); // Required zadziałał
             }
         }
@@ -73,6 +74,7 @@ namespace HomeBudgetManager.Tests
                     UserId = 1,      // Wymagane!
                     CategoryId = 10, // Wymagane!
                     Value = 100m,
+                    Title = "Do usunięcia",
                     Description = "Do usunięcia",
                     Date = DateTime.Now,
                     TransactionType = TransactionType.expense
@@ -112,6 +114,7 @@ namespace HomeBudgetManager.Tests
                     UserId = 1,
                     CategoryId = 10,
                     Value = 10m,
+                    Title = "Stara cena",
                     Description = "Stara cena",
                     Date = DateTime.Now,
                     TransactionType = TransactionType.expense
@@ -123,9 +126,9 @@ namespace HomeBudgetManager.Tests
             using (var db = new AppDbContext(options))
             {
                 var service = new TransactionService(db);
-                // SYGNATURA: transactionId, categoryId, value, isRepeatable, description, houseId
+                // SYGNATURA: transactionId, categoryId, value, isRepeatable, title, description, houseId
                 // Zmieniamy kwotę na 999m
-                service.editTransaction(200, 10, 999m, false, "Nowa cena", null);
+                service.editTransaction(200, 10, 999m, false, "Nowy Tytuł", "Nowa cena", null);
             }
 
             // ASSERT

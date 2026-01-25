@@ -65,7 +65,7 @@ namespace HomeBudgetManager.Web.appMaps
                     .Select(t => new
                     {
                         id = t.Id.ToString(),
-                        title = $"{t.Value:F2} ({t.User.Login})", // Show amount + user
+                        title = t.Title, // Use actual Title
                         startTime = t.Date.ToString("yyyy-MM-ddTHH:mm:ss"),
                         endTime = t.Date.AddHours(1).ToString("yyyy-MM-ddTHH:mm:ss"),
                         amount = t.Value,
@@ -81,18 +81,23 @@ namespace HomeBudgetManager.Web.appMaps
 
                 var repetableTransactions = await db.RepetableTransactions
                     .Include(rt => rt.User)
+                    .Include(rt => rt.Transaction)
                     .Where(rt => userIds.Contains(rt.UserId) && rt.IsActive)
                     .ToListAsync();
 
                 foreach (var rt in repetableTransactions)
                 {
+                    var baseTitle = !string.IsNullOrWhiteSpace(rt.Title) 
+                        ? rt.Title 
+                        : (!string.IsNullOrWhiteSpace(rt.Transaction?.Title) ? rt.Transaction.Title : "Brak tytułu");
+
                     var nextDate = rt.NextRunDate;
                     for (int i = 0; i < 12; i++) // Generate next 12 occurrences
                     {
                         transactions.Add(new
                         {
                             id = rt.TransactionId.ToString(),
-                            title = $"{rt.Value:F2} ({rt.User.Login})",
+                            title = $"Cykliczna: {baseTitle}",
                             startTime = nextDate.ToString("yyyy-MM-ddTHH:mm:ss"),
                             endTime = nextDate.AddHours(1).ToString("yyyy-MM-ddTHH:mm:ss"),
                             amount = rt.Value,
@@ -106,8 +111,9 @@ namespace HomeBudgetManager.Web.appMaps
                         nextDate = rt.FrequencyUnit switch
                         {
                             0 => nextDate.AddDays(rt.TransactionInterval),
-                            1 => nextDate.AddMonths(rt.TransactionInterval),
-                            2 => nextDate.AddYears(rt.TransactionInterval),
+                            1 => nextDate.AddDays(rt.TransactionInterval * 7), // Weeks
+                            2 => nextDate.AddMonths(rt.TransactionInterval),   // Months
+                            3 => nextDate.AddYears(rt.TransactionInterval),    // Years
                             _ => nextDate.AddMonths(1),
                         };
                     }
