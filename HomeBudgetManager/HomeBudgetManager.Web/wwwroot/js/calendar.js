@@ -79,6 +79,9 @@ document.addEventListener('DOMContentLoaded', function () {
         deleteEventBtn.addEventListener('click', deleteEvent);
         editEventBtn.addEventListener('click', editEvent);
         closeDetailsBtn.addEventListener('click', closeModals);
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', closeModals);
+        });
 
         // Close modal when clicking outside
         window.addEventListener('click', (e) => {
