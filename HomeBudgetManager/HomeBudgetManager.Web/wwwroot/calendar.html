@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalendarz finansowy</title>
+
+    <!-- Twoje style aplikacji (sidebar/layout) -->
+    <link rel="stylesheet" href="/css/dashboard.css">
+
+    <!-- Ikony -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Style kalendarza (z folderu /calendar) -->
+    <link rel="stylesheet" href="/css/calendar.css">
+</head>
+
+<body class="calendar-page">
+    <div class="layout">
+        <aside class="sidebar">
+            <p class="sidebar-title">Mój budżet</p>
+            <span class="user-name">Zalogowano jako: {username}</span>
+
+            <button class="sidebar-link" onclick="window.location.href='/dashboard'">Pulpit</button>
+            <button class="sidebar-link" onclick="window.location.href='/household'">Domostwo</button>
+            <button class="sidebar-link" onclick="window.location.href='/calendar'">Kalendarz</button>
+            <button class="sidebar-link" onclick="window.location.href='/charts'">Wykresy</button>
+            <button class="sidebar-link" onclick="window.location.href='/reports'">Raporty</button>
+            {admin_panel_button}
+            <form method="post" action="/logout" style="display:inline;">
+                <button type="submit" class="btn-logout">Wyloguj</button>
+            </form>
+        </aside>
+
+        <main class="container" id="calendar-main">
+            <div class="calendar-root">
+                <div class="app-container">
+                    <header class="app-header">
+                        <h1><i class="fas fa-calendar-alt"></i> Kalendarz finansowy</h1>
+                        <div class="header-controls">
+                            <button id="today-btn">Dziś</button>
+                            <div class="view-options">
+                                <button class="view-option" data-view="day">Dzień</button>
+                                <button class="view-option" data-view="week">Tydzień</button>
+                                <button class="view-option active" data-view="month">Miesiąc</button>
+                            </div>
+                            <div class="date-navigation">
+                                <button id="prev-btn"><i class="fas fa-chevron-left"></i></button>
+                                <h2 id="current-date">May 2023</h2>
+                                <button id="next-btn"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main class="app-main">
+                        <div class="calendar-view" id="calendar-view"></div>
+
+                        <aside class="calendar-events-panel">
+                            <div class="sidebar-header">
+                                <h3>Nadchodzące wydarzenia</h3>
+                                <button id="add-event-btn"><i class="fas fa-plus"></i> Dodaj Transakcję</button>
+                            </div>
+                            <div class="events-list" id="events-list"></div>
+                        </aside>
+                    </main>
+                </div>
+
+                <!-- Add Transaction Modal -->
+                <div class="modal" id="event-modal">
+                    <div class="modal-content" style="max-width: 600px;">
+                        <span class="close-btn">&times;</span>
+                        <h2>Dodaj transakcję</h2>
+
+                        <form id="event-form" class="transaction-form">
+                            
+                            <div style="display: flex; gap: 20px; align-items: flex-start;">
+                                <div class="form-group" style="flex:1;">
+                                    <label for="amount">Kwota (zł)</label>
+                                    <input type="text"
+                                           inputmode="decimal"
+                                           pattern="[0-9]*[.,]?[0-9]+"
+                                           id="event-amount"
+                                           name="amount"
+                                           required
+                                           placeholder="0.00"
+                                           class="form-input"
+                                           oninput="this.value = this.value.replace(/[^0-9.,]/g, '').replace(/,/g, '.')">
+                                </div>
+
+                                <div class="form-group" style="flex:1;">
+                                    <label for="category">Kategoria</label>
+                                    <div id="target-container-for-select">
+                                        <select class="form-input" disabled><option>Wybierz...</option></select>
+                                    </div>
+                                    <div id="categories-loader" hx-get="/categories/list" hx-trigger="load" hx-target="#target-container-for-select" hx-swap="innerHTML" style="display: none;"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Data i czas</label>
+                                <div style="display: flex; gap: 15px;">
+                                    <input type="date" id="event-date" name="transactionDate" class="form-input" required style="flex: 2;">
+                                    <input type="time" id="event-start-time" name="transactionTime" class="form-input" required style="flex: 1;">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Rodzaj transakcji</label>
+                                <div class="radio-group" style="display: flex; gap: 20px; align-items: center;">
+                                    <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                        <input type="radio" name="transactionType" value="0" checked> Wydatek
+                                    </label>
+                                    <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                        <input type="radio" name="transactionType" value="1"> Przychód
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                                    <input type="checkbox" id="isRecurring" name="isRecurring" value="true" onchange="toggleRecurring(this)" style="width: auto; margin: 0; cursor: pointer;">
+                                    <label for="isRecurring" style="margin: 0; cursor: pointer; font-weight: normal; font-size: 1rem;">Transakcja okresowa</label>
+                                </div>
+                                <div id="recurring-box" style="display: none; margin-left: 25px;">
+                                    <label for="recurringType" style="font-size: 0.9rem;">Powtarzaj:</label>
+                                    <select id="recurringType" name="recurringType" class="form-input" style="margin-top: 5px;">
+                                        <option value="daily">Codziennie</option>
+                                        <option value="weekly">Co tydzień</option>
+                                        <option value="monthly">Co miesiąc</option>
+                                        <option value="quarterly">Co kwartał</option>
+                                        <option value="yearly">Co rok</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="event-description">Opis</label>
+                                <input type="text" id="event-description" name="description" class="form-input">
+                            </div>
+
+                            <div id="form-error" class="error" style="color:red; margin-bottom:10px;"></div>
+
+                            <button type="submit" class="save-btn">Zapisz transakcję</button>
+                        </form>
+                    </div>
+                </div>
+
+                <script>
+                    function toggleRecurring(checkbox) {
+                        var box = document.getElementById('recurring-box');
+                        box.style.display = checkbox.checked ? 'block' : 'none';
+                    }
+                </script>
+
+                <!-- Event Details Modal -->
+                <div class="modal" id="event-details-modal">
+                    <div class="modal-content">
+                        <span class="close-btn">&times;</span>
+                        <h2 id="details-title">Event Title</h2>
+                        <div class="event-details">
+                            <p><i class="fas fa-calendar-day"></i> <span id="details-date">Date</span></p>
+                            <p><i class="fas fa-clock"></i> <span id="details-time">Time</span></p>
+                            <p><i class="fas fa-align-left"></i> <span id="details-description">Description</span></p>
+                        </div>
+                        <div class="event-actions">
+                            <button id="edit-event-btn">Edit</button>
+                            <button id="delete-event-btn">Delete</button>
+                            <button id="close-details-btn">Close</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Skrypt kalendarza -->
+    <script src="/js/calendar.js"></script>
+</body>
+</html>

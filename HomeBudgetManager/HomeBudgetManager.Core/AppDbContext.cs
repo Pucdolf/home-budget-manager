@@ -30,7 +30,7 @@ namespace HomeBudgetManager.Core
 
             modelBuilder.Entity<DBTransaction>()
                 .HasOne(a => a.RepetableTransaction) // Jeśli masz to pole w DBTransaction
-                .WithOne(b => b.Transaction)         // Wskazujemy na właściwość w DBRepetableTransaction
+                .WithOne()         // Wskazujemy na właściwość w DBRepetableTransaction
                 .HasForeignKey<DBRepetableTransaction>(b => b.TransactionId); // TU JEST KLUCZ: Wymuszamy użycie TransactionId
 
         }
