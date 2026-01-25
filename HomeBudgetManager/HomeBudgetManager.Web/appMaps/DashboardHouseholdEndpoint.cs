@@ -197,11 +197,6 @@ namespace HomeBudgetManager.Web.appMaps
                             </div>
 
                             <div class='info-row'>
-                                <span class='info-label'>Admin ID:</span>
-                                <span class='info-value'>{house.AdminId}</span>
-                            </div>
-
-                            <div class='info-row'>
                                 <span class='info-label'>Kod zaproszenia:</span>
                                 <span class='info-value' style='font-family: monospace; font-size: 1.2em;'>{WebUtility.HtmlEncode(house.JoinCode)}</span>
                             </div>

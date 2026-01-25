@@ -30,20 +30,30 @@ namespace HomeBudgetManager.Core
             }
         }
 
-        public void addTransaction(int userId, int categoryId, decimal value, TransactionType type, DateTime date, bool isRepeatable, decimal? interval, string? description,  int? houseId)
+        public void addTransaction(int userId, int categoryId, decimal value, TransactionType type, DateTime date, bool isRepeatable, int? transactionInterval, string? description,  int? houseId, int? frequencyUnit)
         {
             var newTransaction = new DBTransaction { UserId = userId, CategoryId = categoryId, Value = value, TransactionType = type, Date = date, IsRepeatable = isRepeatable, Description = description, HouseId = houseId };
             db.Add(newTransaction);
             db.SaveChanges();
 
-            if (isRepeatable && interval != null)
+            if (isRepeatable && transactionInterval.HasValue && frequencyUnit.HasValue)
             {
                 try
                 {
-                    var newRepTransaction = new DBRepetableTransaction { TransactionId = newTransaction.Id, TransactionInterval = (decimal)interval };
+                    var newRepTransaction = new DBRepetableTransaction
+                    {
+                        TransactionId = newTransaction.Id,
+                        TransactionInterval = transactionInterval.Value,
+                        FrequencyUnit = frequencyUnit.Value,
+                        Value = value,
+                        UserId = userId,
+                        CategoryId = categoryId,
+                        NextRunDate = date.AddDays(transactionInterval.Value) // Initial next run
+                    };
                     db.Add(newRepTransaction);
                     db.SaveChanges();
-                } catch
+                }
+                catch
                 {
                     throw new InvalidOperationException("<div class='error'>Błąd: nie dodano transakcji okresowej</div>");
                 }
@@ -69,7 +79,11 @@ namespace HomeBudgetManager.Core
                 houseId = transaction.HouseId;
             }
 
-            transaction = new DBTransaction { Id = transactionId, UserId = transaction.UserId, CategoryId = categoryId, Value = value, IsRepeatable = isRepeatable, Description = description, HouseId = houseId };
+            transaction.CategoryId = categoryId;
+            transaction.Value = value;
+            transaction.IsRepeatable = isRepeatable;
+            transaction.Description = description;
+            transaction.HouseId = houseId;
             db.SaveChanges();
         }
 

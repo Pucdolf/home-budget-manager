@@ -281,15 +281,18 @@ document.addEventListener('DOMContentLoaded', function () {
         item.style.display = 'flex';
         item.style.alignItems = 'center';
         item.style.borderLeft = `5px solid ${event.color}`;
-        item.style.cursor = 'pointer';
+        if(!event.isRecurring) {
+            item.style.cursor = 'pointer';
+        }
         item.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
 
         const timeString = formatTime(new Date(event.startTime));
         const dateString = showDate ? new Date(event.startTime).toLocaleDateString('pl-PL', { month: 'short', day: 'numeric' }) + ', ' : '';
+        const recurringIcon = event.isRecurring ? '<i class="fas fa-redo-alt" style="margin-left: 8px; color: #858796;"></i>' : '';
 
         item.innerHTML = `
             <div style="flex: 1;">
-                <div style="font-weight: bold; font-size: 1.1em; color: #333;">${event.title}</div>
+                <div style="font-weight: bold; font-size: 1.1em; color: #333;">${event.title}${recurringIcon}</div>
                 <div style="color: #666; font-size: 0.9em; margin-top: 4px;">
                     <i class="far fa-clock"></i> ${dateString}${timeString}
                 </div>
@@ -300,7 +303,9 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         `;
 
-        item.addEventListener('click', () => showEventDetails(event.id));
+        if(!event.isRecurring) {
+            item.addEventListener('click', () => showEventDetails(event.id));
+        }
         return item;
     }
 
@@ -620,6 +625,14 @@ document.addEventListener('DOMContentLoaded', function () {
         // Removed end time display
         detailsTime.textContent = formatTime(new Date(event.startTime));
         detailsDescription.textContent = event.description || 'Brak opisu';
+
+        if (event.isRecurring) {
+            editEventBtn.style.display = 'none';
+            deleteEventBtn.style.display = 'none';
+        } else {
+            editEventBtn.style.display = 'inline-block';
+            deleteEventBtn.style.display = 'inline-block';
+        }
 
         // Show modal
         eventDetailsModal.style.display = 'flex';
