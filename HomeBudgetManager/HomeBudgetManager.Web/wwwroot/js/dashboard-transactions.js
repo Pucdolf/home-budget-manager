@@ -1,22 +1,32 @@
 let selectedTransactionId = null;
 
-function openDashboardTransactionDetails(id, amount, description, date) {
+function openDashboardTransactionDetails(id, amount, title, description, date) {
     selectedTransactionId = id;
     
     // Elements
     const detailsModal = document.getElementById('event-details-modal');
     const detailsTitle = document.getElementById('details-title');
+    const detailsAmount = document.getElementById('details-amount');
     const detailsDate = document.getElementById('details-date');
-    const detailsTime = document.getElementById('details-time'); // We might not use time or just hide it
     const detailsDescription = document.getElementById('details-description');
 
     // Populate
-    detailsTitle.textContent = parseFloat(amount).toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' });
+    detailsTitle.textContent = title || 'Bez tytułu';
+    detailsAmount.textContent = parseFloat(amount).toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' });
+    
+    // Color amount
+    if (parseFloat(amount) < 0) {
+        detailsAmount.style.color = '#e74a3b';
+    } else {
+        detailsAmount.style.color = '#1cc88a';
+    }
+
     detailsDate.textContent = date;
     detailsDescription.textContent = description || 'Brak opisu';
     
     // Store raw data for edit
     detailsModal.dataset.amount = amount;
+    detailsModal.dataset.title = title;
     detailsModal.dataset.description = description;
     detailsModal.dataset.date = date;
 
@@ -30,17 +40,40 @@ function closeDashboardModals() {
 }
 
 function editDashboardTransaction() {
+    console.log('Edit button clicked for transaction:', selectedTransactionId);
     const detailsModal = document.getElementById('event-details-modal');
     const editModal = document.getElementById('event-modal');
     
+    if (!detailsModal || !editModal) {
+        console.error('Modals not found!');
+        return;
+    }
+
     const amount = detailsModal.dataset.amount;
+    const title = detailsModal.dataset.title;
     const description = detailsModal.dataset.description;
     const date = detailsModal.dataset.date;
 
+    console.log('Editing data:', { amount, title, description, date });
+
     // Populate Edit Form
-    document.getElementById('event-amount').value = amount;
-    document.getElementById('event-description').value = description;
-    document.getElementById('event-date').value = date;
+    // Determine type based on sign
+    let val = parseFloat(amount);
+    if (isNaN(val)) val = 0;
+
+    const isExpense = val < 0;
+    
+    const typeSelect = document.getElementById('event-type');
+    const amountInput = document.getElementById('event-amount');
+    const titleInput = document.getElementById('event-title');
+    const descInput = document.getElementById('event-description');
+    const dateInput = document.getElementById('event-date');
+
+    if (typeSelect) typeSelect.value = isExpense ? "0" : "1";
+    if (amountInput) amountInput.value = Math.abs(val); // Show positive value in input
+    if (titleInput) titleInput.value = title || "";
+    if (descInput) descInput.value = description || "";
+    if (dateInput) dateInput.value = date || "";
     
     // Hide details, show edit
     detailsModal.style.display = 'none';
@@ -48,13 +81,21 @@ function editDashboardTransaction() {
     
     // Hook up save
     const form = document.getElementById('event-form');
+    if (!form) {
+        console.error('Event form not found!');
+        return;
+    }
+
     form.onsubmit = async function(e) {
         e.preventDefault();
+        console.log('Submitting edit form...');
         
         const formData = new FormData();
-        formData.append('amount', document.getElementById('event-amount').value);
-        formData.append('description', document.getElementById('event-description').value);
-        formData.append('date', document.getElementById('event-date').value);
+        if (typeSelect) formData.append('transactionType', typeSelect.value);
+        if (amountInput) formData.append('amount', amountInput.value);
+        if (titleInput) formData.append('title', titleInput.value);
+        if (descInput) formData.append('description', descInput.value);
+        if (dateInput) formData.append('date', dateInput.value);
 
         try {
             const response = await fetch('/transactions?id=' + selectedTransactionId, {
@@ -63,6 +104,7 @@ function editDashboardTransaction() {
             });
 
             if (response.ok) {
+                console.log('Update successful');
                 closeDashboardModals();
                 // Reload transactions list via HTMX manually or just reload page/part
                 // HTMX trigger
@@ -74,10 +116,11 @@ function editDashboardTransaction() {
                     location.reload();
                 }
             } else {
+                console.error('Update failed', response);
                 alert('Błąd aktualizacji transakcji');
             }
         } catch (err) {
-            console.error(err);
+            console.error('Error submitting form:', err);
             alert('Wystąpił błąd');
         }
     };

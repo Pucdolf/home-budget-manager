@@ -80,9 +80,14 @@ document.addEventListener('DOMContentLoaded', function () {
         editEventBtn.addEventListener('click', editEvent);
         closeDetailsBtn.addEventListener('click', closeModals);
 
+        // Close buttons (X)
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', closeModals);
+        });
+
         // Close modal when clicking outside
         window.addEventListener('click', (e) => {
-            if (e.target === eventDetailsModal) {
+            if (e.target === eventDetailsModal || e.target === eventModal) {
                 closeModals();
             }
         });
@@ -552,9 +557,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function closeModals() {
-        eventDetailsModal.style.display = 'none';
+        if (eventDetailsModal) eventDetailsModal.style.display = 'none';
+        if (eventModal) eventModal.style.display = 'none';
     }
-
 
     function showEventDetails(eventId) {
         const event = events.find(e => e.id === eventId);
@@ -588,6 +593,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function editEvent() {
+        console.log('Edit event clicked', selectedEventId);
         if (!selectedEventId) return;
 
         const event = events.find(e => e.id === selectedEventId);
@@ -595,94 +601,91 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Populate form with event data
         const val = Number(event.amount);
-        eventAmountInput.value = Math.abs(val).toFixed(2);
-        
-        // Radios
-        const radios = document.getElementsByName('transactionType');
-        if (radios.length > 0) {
-            if (val < 0) radios[0].checked = true; // Expense
-            else radios[1].checked = true; // Income
-        }
+        const isExpense = val < 0;
 
+        // Elements
+        const titleInput = document.getElementById('event-title');
+        const typeSelect = document.getElementById('event-type');
+        const amountInput = document.getElementById('event-amount');
+        const dateInput = document.getElementById('event-date');
+        const descInput = document.getElementById('event-description');
+
+        if (titleInput) titleInput.value = event.title || "";
+        if (typeSelect) typeSelect.value = isExpense ? "0" : "1";
+        if (amountInput) amountInput.value = Math.abs(val).toFixed(2);
+        
         const dt = new Date(event.startTime);
         const yyyy = dt.getFullYear();
         const mm = String(dt.getMonth() + 1).padStart(2, '0');
         const dd = String(dt.getDate()).padStart(2, '0');
-        eventDateInput.value = `${yyyy}-${mm}-${dd}`;
+        if (dateInput) dateInput.value = `${yyyy}-${mm}-${dd}`;
 
-        const hh = String(dt.getHours()).padStart(2, '0');
-        const min = String(dt.getMinutes()).padStart(2, '0');
-        eventStartTimeInput.value = `${hh}:${min}`;
-
-        eventDescriptionInput.value = event.description || '';
-        
-        // Category selection
-        const categorySelect = document.querySelector('#target-container-for-select select');
-        if (categorySelect && event.categoryId) {
-             categorySelect.value = event.categoryId;
-        }
+        if (descInput) descInput.value = event.description || '';
 
         // Change form submit to update instead of create
-        eventForm.onsubmit = async function (e) {
-            e.preventDefault();
+        if (eventForm) {
+            eventForm.onsubmit = async function (e) {
+                e.preventDefault();
+                console.log('Submitting calendar edit form');
 
-            const formData = new FormData(eventForm);
-            if (!formData.has('categoryId') && categorySelect) {
-                formData.append('categoryId', categorySelect.value);
-            }
+                const formData = new FormData();
+                if (titleInput) formData.append('title', titleInput.value);
+                if (typeSelect) formData.append('transactionType', typeSelect.value);
+                if (amountInput) formData.append('amount', amountInput.value);
+                if (dateInput) formData.append('date', dateInput.value);
+                if (descInput) formData.append('description', descInput.value);
 
-            try {
-                const response = await fetch('/transactions?id=' + selectedEventId, {
-                    method: 'PUT',
-                    body: formData
-                });
+                try {
+                    const response = await fetch('/transactions?id=' + selectedEventId, {
+                        method: 'PUT',
+                        body: formData
+                    });
 
-                if (response.ok) {
-                    await fetchEvents(); // Reload all events
-                    renderCalendar();
-                    renderEventsList();
-                    closeModals();
-                } else {
-                    alert('Failed to update event');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Error updating event');
-            }
-
-            // Reset form submit handler
-            eventForm.onsubmit = saveEvent;
-        };
-
-        // Show edit modal
-        closeModals();
-        eventModal.style.display = 'flex';
-    }
-
-    async function deleteEvent() {
-        if (!selectedEventId) return;
-
-        if (confirm('Are you sure you want to delete this event?')) {
-            try {
-                const response = await fetch('/transactions?id=' + selectedEventId, {
-                    method: 'DELETE'
-                });
-
-                if (response.ok) {
-                     await fetchEvents();
-                     renderCalendar();
-                     renderEventsList();
-                     closeModals();
-                } else {
-                    alert('Failed to delete event');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Error deleting event');
-            }
-        }
-    }
-
+                                    if (response.ok) {
+                                        console.log('Update successful');
+                                        await fetchEvents(); // Reload all events
+                                        renderCalendar();
+                                        renderEventsList();
+                                        closeModals();
+                                    } else {
+                                        console.error('Failed to update event', response);
+                                        alert('Błąd podczas aktualizacji transakcji');
+                                    }
+                                } catch (err) {
+                                    console.error('Error updating event:', err);
+                                    alert('Wystąpił błąd podczas aktualizacji');
+                                }
+                            };
+                        }
+                    
+                        // Show edit modal
+                        closeModals();
+                        if (eventModal) eventModal.style.display = 'flex';
+                    }
+                    
+                    async function deleteEvent() {
+                        if (!selectedEventId) return;
+                    
+                        if (confirm('Czy na pewno chcesz usunąć tę transakcję?')) {
+                            try {
+                                const response = await fetch('/transactions?id=' + selectedEventId, {
+                                    method: 'DELETE'
+                                });
+                    
+                                if (response.ok) {
+                                     await fetchEvents();
+                                     renderCalendar();
+                                     renderEventsList();
+                                     closeModals();
+                                } else {
+                                    alert('Błąd podczas usuwania transakcji');
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                alert('Wystąpił błąd podczas usuwania');
+                            }
+                        }
+                    }
     function saveEventsToStorage() {
         localStorage.setItem('events', JSON.stringify(events));
     }

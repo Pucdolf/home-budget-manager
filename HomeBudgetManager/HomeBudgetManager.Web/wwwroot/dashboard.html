@@ -127,9 +127,22 @@
     <div class="modal" id="event-modal">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
-            <h2>Edytuj Transakcję</h2> <!-- Changed title to generic/edit -->
+            <h2>Edytuj Transakcję</h2>
 
             <form id="event-form">
+                <div class="form-group">
+                    <label for="event-title">Tytuł</label>
+                    <input type="text" id="event-title" required maxlength="20">
+                </div>
+
+                <div class="form-group">
+                    <label for="event-type">Typ</label>
+                    <select id="event-type">
+                        <option value="0">Wydatek</option>
+                        <option value="1">Przychód</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="event-amount">Kwota</label>
                     <input type="number" step="0.01" id="event-amount" required>
@@ -174,7 +187,8 @@
     <div class="modal" id="event-details-modal">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
-            <h2 id="details-title">Kwota</h2>
+            <h2 id="details-title" style="margin-bottom: 5px;">Tytuł</h2>
+            <h3 id="details-amount" style="margin-top: 0; color: #4e73df;">Kwota</h3>
             <div class="event-details">
                 <p><i class="fas fa-calendar-day"></i> <span id="details-date">Data</span></p>
                 <!-- Time hidden -->
