@@ -1,6 +1,7 @@
 using HomeBudgetManager.Core;
 using HomeBudgetManager.Core.DBTables;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace HomeBudgetManager.Web.appMaps
 {
@@ -8,6 +9,32 @@ namespace HomeBudgetManager.Web.appMaps
     {
         public void Map(IEndpointRouteBuilder app)
         {
+            app.MapGet("/createHousehold.html", async (HttpContext context, IWebHostEnvironment env, AppDbContext db) =>
+            {
+                if (!context.Request.Cookies.ContainsKey("logged_user"))
+                    return Results.Redirect("/");
+
+                var username = context.Request.Cookies["logged_user"].ToString();
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Login == username);
+                if (user == null) return Results.Redirect("/");
+
+                var filePath = Path.Combine(env.WebRootPath, "createHousehold.html");
+                if (!File.Exists(filePath)) return Results.NotFound();
+
+                var html = await File.ReadAllTextAsync(filePath, Encoding.UTF8);
+                
+                string adminBtnHtml = "";
+                if (user.Role == SystemRole.SystemAdmin)
+                {
+                    adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\">Ustawienia Admina</button>";
+                }
+
+                html = html.Replace("{username}", username)
+                           .Replace("{admin_panel_button}", adminBtnHtml);
+
+                return Results.Content(html, "text/html; charset=utf-8");
+            });
+
             app.MapPost("/create-household", async (HttpContext context, AppDbContext db) =>
             {
                 var form = context.Request.Form;
