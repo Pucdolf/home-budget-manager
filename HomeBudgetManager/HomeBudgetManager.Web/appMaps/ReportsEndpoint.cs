@@ -17,14 +17,12 @@ namespace HomeBudgetManager.Web.appMaps
         {
             app.MapGet("/reports", async (HttpContext context, IWebHostEnvironment env, AppDbContext db) =>
             {
-                // check cookies
-                if (!context.Request.Cookies.TryGetValue("logged_user", out var username) || string.IsNullOrEmpty(username))
-                {
-                    return Results.Redirect("/");
-                }
 
                 // load user
-                var user = await db.Users.FirstOrDefaultAsync(u => u.Login == username);
+                var userId = int.Parse(context.Request.Cookies["user_id"]);
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                var username = context.Request.Cookies["logged_user"];
                 if (user == null)
                 {
                     return Results.Redirect("/");

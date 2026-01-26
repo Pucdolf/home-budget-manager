@@ -14,17 +14,21 @@ namespace HomeBudgetManager.Web.appMaps
                 if (!context.Request.Cookies.ContainsKey("logged_user"))
                     return Results.Redirect("/");
 
-                var username = context.Request.Cookies["logged_user"].ToString();
-                var user = await db.Users.FirstOrDefaultAsync(u => u.Login == username);
-                if (user == null)
-                    return Results.Redirect("/");
+                var userId = int.Parse(context.Request.Cookies["user_id"]);
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
+                if (user == null)
+                {
+                    return Results.Content("brak uzytkownika o takiej nazwie");
+                }
+
+                var username = context.Request.Cookies["logged_user"];
                 var filePath = Path.Combine(env.WebRootPath, "calendar.html");
                 var html = File.ReadAllText(filePath, Encoding.UTF8);
 
                 html = html.Replace("{username}", username);
                 string adminBtnHtml = "";
-                
+
                 if (user.Role == SystemRole.SystemAdmin)
                 {
                     adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\"><i class=\"fas fa-fw fa-cogs\"></i> &nbsp; Ustawienia Admina</button>";
@@ -37,9 +41,10 @@ namespace HomeBudgetManager.Web.appMaps
             {
                 if (!context.Request.Cookies.ContainsKey("logged_user"))
                     return Results.Unauthorized();
+                var userId = int.Parse(context.Request.Cookies["user_id"]);
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
                 var username = context.Request.Cookies["logged_user"];
-                var user = await db.Users.FirstOrDefaultAsync(u => u.Login == username);
                 if (user == null)
                     return Results.Unauthorized();
 

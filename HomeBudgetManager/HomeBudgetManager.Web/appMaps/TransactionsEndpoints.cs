@@ -17,8 +17,8 @@ public class TransactionsEndpoints : IEndpoint
             var userLogin = context.Request.Cookies["logged_user"];
 
             Console.WriteLine($"DEBUG: Cookie logged_user = '{userLogin}'");
-
-            var user = await db.Users.FirstOrDefaultAsync(u => u.Login == userLogin);
+            var userId = int.Parse(context.Request.Cookies["user_id"]);
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
             {
@@ -59,8 +59,8 @@ public class TransactionsEndpoints : IEndpoint
             var userLogin = context.Request.Cookies["logged_user"];
 
             Console.WriteLine($"DEBUG: Cookie logged_user = '{userLogin}'");
-
-            var user = await db.Users.FirstOrDefaultAsync(u => u.Login == userLogin);
+            var userId = int.Parse(context.Request.Cookies["user_id"]);
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
             {
