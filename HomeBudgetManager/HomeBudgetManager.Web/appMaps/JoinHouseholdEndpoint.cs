@@ -26,7 +26,7 @@ namespace HomeBudgetManager.Web.appMaps
                 string adminBtnHtml = "";
                 if (user.Role == SystemRole.SystemAdmin)
                 {
-                    adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\">Ustawienia Admina</button>";
+                    adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\"><i class=\"fas fa-fw fa-cogs\"></i> &nbsp; Ustawienia Admina</button>";
                 }
 
                 html = html.Replace("{username}", username)
@@ -55,7 +55,7 @@ namespace HomeBudgetManager.Web.appMaps
                 
                 if (user.Role == SystemRole.SystemAdmin)
                 {
-                    adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\">Ustawienia Admina</button>";
+                    adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\"><i class=\"fas fa-fw fa-cogs\"></i> &nbsp; Ustawienia Admina</button>";
                 }
                 user.HouseId = house.Id;
                 user.Role = SystemRole.HouseholdMember;
