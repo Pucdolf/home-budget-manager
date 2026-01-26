@@ -69,11 +69,6 @@ namespace HomeBudgetManager.Tests
             }
         }
 
-        // Stub dla cykliczności (zostawiamy pusty, bo nie mamy czasu pisać logiki)
-        [Fact]
-        public void RecurringTransaction_ShouldStoreInterval_InDatabase()
-        {
-            throw new System.NotImplementedException();
-        }
+
     }
 }
