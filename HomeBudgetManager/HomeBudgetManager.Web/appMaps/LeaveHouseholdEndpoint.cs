@@ -76,7 +76,8 @@ namespace HomeBudgetManager.Web.appMaps
                     // Zwykły członek opuszcza domostwo
                     int houseId = user.HouseId.Value;
                     user.HouseId = null;
-                    user.Role = SystemRole.Guest;
+                    
+                    if (user.Role!=SystemRole.SystemAdmin)user.Role = SystemRole.Guest;
                     await db.SaveChangesAsync();
 
                     // Jeśli po jego odejściu dom jest pusty, usuń go

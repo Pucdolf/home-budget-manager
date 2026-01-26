@@ -28,22 +28,19 @@
             </form>
         </aside>
 
-        <main class="container">
-            <section class="card">
-                <h2>Konsola SQL (Bezpośredni dostęp)</h2>
-                <p class="card-desc">Wpisz zapytanie SQL poniżej. <strong>Zachowaj ostrożność!</strong></p>
-                
-                <form hx-post="/admin/execute-sql" hx-target="#query-results" hx-indicator="#loading">
-                    <textarea name="sqlQuery" class="sql-editor" placeholder="Np. SELECT * FROM Users"></textarea>
-                    <br>
-                    <button type="submit" class="btn-run">Wykonaj Zapytanie</button>
-                    <span id="loading" class="htmx-indicator">Wykonywanie...</span>
-                </form>
+        <main class="admin-container">
+            <h1>Konsola SQL (Bezpośredni dostęp)</h1>
+            <p>Wpisz zapytanie SQL poniżej. </p>
+            
+            <form hx-post="/admin/execute-sql" hx-target="#query-results" hx-indicator="#loading">
+                <textarea name="sqlQuery" class="sql-editor" placeholder="Np. SELECT * FROM Users"></textarea>
+                <br>
+                <button type="submit" class="btn-run">Wykonaj Zapytanie</button>
+                <span id="loading" class="htmx-indicator">Wykonywanie...</span>
+            </form>
 
-                <div id="query-results">
-                    <!-- Wyniki pojawią się tutaj -->
+            <div id="query-results">
                 </div>
-            </section>
         </main>
     </div>
 </body>
