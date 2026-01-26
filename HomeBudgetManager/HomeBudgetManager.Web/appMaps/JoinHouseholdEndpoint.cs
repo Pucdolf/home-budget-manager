@@ -58,7 +58,11 @@ namespace HomeBudgetManager.Web.appMaps
                     adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\"><i class=\"fas fa-fw fa-cogs\"></i> &nbsp; Ustawienia Admina</button>";
                 }
                 user.HouseId = house.Id;
-                user.Role = SystemRole.HouseholdMember;
+                
+                if (user.Role != SystemRole.SystemAdmin)
+                {
+                    user.Role = SystemRole.HouseholdMember;
+                }
 
                 await db.SaveChangesAsync();
 

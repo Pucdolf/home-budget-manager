@@ -9,6 +9,7 @@
     margin-bottom: 1.5rem; 
     color: #5a5c69;
     resize: vertical;
+    box-sizing: border-box;
 }
 
 .sql-editor:focus {

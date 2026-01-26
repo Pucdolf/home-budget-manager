@@ -18,6 +18,13 @@
     margin-top: 0.5rem;
 }
 
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+    }
+}
+
 .main-card {
     display: flex;
     flex-direction: row;
@@ -35,17 +42,37 @@
 }
 
 .card {
-    flex: 0 0 350px;
+    flex: 0 0 300px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     justify-content: center;
-    margin-left: 390px;
 }
 
 .members-card {
     flex: 1;
+    min-width: 0; /* Prevents overflow in flex container */
+}
+
+@media (max-width: 992px) {
+    .main-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .card {
+        flex: none;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 768px) {
+    .members-table {
+        display: block;
+        overflow-x: auto;
+    }
 }
 
 .info-row {
