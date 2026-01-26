@@ -34,8 +34,8 @@ namespace HomeBudgetManager.Web.appMaps
                     return Results.Content("<div class='error'>Domostwo nie istnieje.</div>", "text/html");
                 }
 
-                // Jeśli użytkownik jest administratorem domu
-                if (user.Role == SystemRole.HouseholdAdmin)
+                // Jeśli użytkownik jest administratorem domu (sprawdzamy po ID, bo SystemAdmin też może być adminem domu)
+                if (user.Id == house.AdminId)
                 {
                     // 1. Odłącz transakcje od usuwanego domu (ustaw HouseId = null)
                     var houseTransactions = await db.Transactions
@@ -52,7 +52,10 @@ namespace HomeBudgetManager.Web.appMaps
                     foreach (var member in members)
                     {
                         member.HouseId = null;
-                        member.Role = SystemRole.Guest;
+                        if (member.Role != SystemRole.SystemAdmin)
+                        {
+                            member.Role = SystemRole.Guest;
+                        }
                     }
 
                     // 3. Usuń dom
@@ -77,7 +80,11 @@ namespace HomeBudgetManager.Web.appMaps
                     int houseId = user.HouseId.Value;
                     user.HouseId = null;
                     
-                    if (user.Role!=SystemRole.SystemAdmin)user.Role = SystemRole.Guest;
+                    if (user.Role != SystemRole.SystemAdmin)
+                    {
+                        user.Role = SystemRole.Guest;
+                    }
+                    
                     await db.SaveChangesAsync();
 
                     // Jeśli po jego odejściu dom jest pusty, usuń go
