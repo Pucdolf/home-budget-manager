@@ -14,9 +14,10 @@ namespace HomeBudgetManager.Web.appMaps
             {
                 if (!context.Request.Cookies.ContainsKey("logged_user"))
                     return Results.Redirect("/");
+                var userId = int.Parse(context.Request.Cookies["user_id"]);
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
-                var username = context.Request.Cookies["logged_user"].ToString();
-                var user = await db.Users.FirstOrDefaultAsync(u => u.Login == username);
+                var username = context.Request.Cookies["logged_user"];
                 if (user == null)
                     return Results.Redirect("/");
 

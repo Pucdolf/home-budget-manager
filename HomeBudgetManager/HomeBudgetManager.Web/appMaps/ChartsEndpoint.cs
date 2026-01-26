@@ -14,10 +14,6 @@ namespace HomeBudgetManager.Web.appMaps
         {
             app.MapGet("/charts", async (HttpContext context, IWebHostEnvironment env, AppDbContext db) =>
             {
-                if (!context.Request.Cookies.TryGetValue("logged_user", out var username) || string.IsNullOrEmpty(username))
-                {
-                    return Results.Redirect("/");
-                }
                 
                 // Ścieżka do pliku HTML
                 var filePath = Path.Combine(env.WebRootPath, "charts.html");
@@ -29,7 +25,10 @@ namespace HomeBudgetManager.Web.appMaps
                 var startDate = new DateTime(now.Year, now.Month, 1).ToString("yyyy-MM-dd");
                 var endDate = now.ToString("yyyy-MM-dd");
                 string adminBtnHtml = "";
-                var user = await db.Users.FirstOrDefaultAsync(u => u.Login == username);
+                var userId = int.Parse(context.Request.Cookies["user_id"]);
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                var username = context.Request.Cookies["logged_user"];
                 if (user == null)
                 {
                     return Results.Redirect("/");

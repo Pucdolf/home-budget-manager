@@ -12,14 +12,12 @@ namespace HomeBudgetManager.Web.appMaps
             app.MapGet("/dashboard", async (HttpContext context, IWebHostEnvironment env, AppDbContext db) =>
             {
                 // check login status
-                if (!context.Request.Cookies.ContainsKey("logged_user"))
-                {
-                    return Results.Redirect("/");
-                }
+                var userId = int.Parse(context.Request.Cookies["user_id"]);
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+
 
                 var username = context.Request.Cookies["logged_user"];
-
-                var user = await db.Users.FirstOrDefaultAsync(u => u.Login == username);
 
                 if (user == null)
                 {
@@ -50,13 +48,15 @@ namespace HomeBudgetManager.Web.appMaps
 
             app.MapGet("/dashboard/charts", (HttpContext context, ChartService chartService) =>
             {
-                if (!context.Request.Cookies.TryGetValue("user_id", out var userIdString) || 
-                    !int.TryParse(userIdString, out int userId))
+                var userIdentifier = context.Request.Cookies["user_id"];
+                if (string.IsNullOrEmpty(userIdentifier))
                 {
-                     return Results.Content(""); // empty content is not user
+                    return Results.Content("");
                 }
+                int userId =int.Parse(userIdentifier);
+                string chartsHtml = chartService.GenerateDashboardChartsHtml(userId);
+                
 
-                var chartsHtml = chartService.GenerateDashboardChartsHtml(userId);
                 return Results.Content(chartsHtml, "text/html");
             });
         }

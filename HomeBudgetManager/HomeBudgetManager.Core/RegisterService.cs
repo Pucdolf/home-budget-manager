@@ -13,11 +13,6 @@ public class RegisterService
         _context = context;
     }
 
-    public bool IsUsernameTaken(string username)
-    {
-        return _context.Users.Any(u => u.Login == username);
-    }
-
     public bool IsEmailTaken(string email)
     {
         return _context.Users.Any(u => u.Email == email);

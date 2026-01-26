@@ -95,7 +95,8 @@ namespace HomeBudgetManager.Web.appMaps
             {
 
                 var userLogin = context.Request.Cookies["logged_user"];
-                var user = await db.Users.FirstOrDefaultAsync(u => u.Login == userLogin);
+                var userId = int.Parse(context.Request.Cookies["user_id"]);
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
                 if (user == null)
                 {

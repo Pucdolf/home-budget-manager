@@ -34,13 +34,6 @@ namespace HomeBudgetManager.Web.appMaps
                     return Results.Content(htmlResponse, "text/html");
                 }
 
-                // check if username is taken
-                if (registerService.IsUsernameTaken(username))
-                {
-                    var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Ten login jest już zajęty!</div>";
-                    return Results.Content(htmlResponse, "text/html");
-                }
-
                 // check if email is taken
                 if (registerService.IsEmailTaken(email))
                 {
