@@ -54,7 +54,8 @@ namespace HomeBudgetManager.Web.appMaps
                 html = html.Replace("{username}", username)
                            .Replace("{startDate}", startDate)
                            .Replace("{admin_panel_button}", adminBtnHtml)
-                           .Replace("{endDate}", endDate);
+                           .Replace("{endDate}", endDate)
+                           .Replace("{household_display}", user.HouseId.HasValue ? "block" : "none");
 
                 return Results.Content(html, "text/html; charset=utf-8");
             });
@@ -78,7 +79,10 @@ namespace HomeBudgetManager.Web.appMaps
                 // End of day
                 endDate = endDate.Date.AddDays(1).AddTicks(-1);
 
-                var pdfBytes = reportService.GeneratePdfReport(userId, startDate, endDate);
+                var scope = form["reportScope"].ToString();
+                bool includeHousehold = scope == "household";
+
+                var pdfBytes = reportService.GeneratePdfReport(userId, startDate, endDate, includeHousehold);
                 var filename = $"Raport_HBM_{startDate:yyyyMMdd}_{endDate:yyyyMMdd}.pdf";
 
                 return Results.File(pdfBytes, "application/pdf", filename);

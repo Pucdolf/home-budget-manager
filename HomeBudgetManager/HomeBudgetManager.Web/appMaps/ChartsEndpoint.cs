@@ -41,7 +41,8 @@ namespace HomeBudgetManager.Web.appMaps
                 html = html.Replace("{{username}}", username)
                            .Replace("{{startDate}}", startDate)
                            .Replace("{admin_panel_button}", adminBtnHtml)
-                           .Replace("{{endDate}}", endDate);
+                           .Replace("{{endDate}}", endDate)
+                           .Replace("{household_display}", user.HouseId.HasValue ? "block" : "none");
                 
                 return Results.Content(html, "text/html");
             });
