@@ -76,8 +76,8 @@ public class TransactionsEndpoints : IEndpoint
         app.MapDelete("/transactions", async (int id, HttpContext context, AppDbContext db) => {
 
             var userLogin = context.Request.Cookies["logged_user"];
-
-            var user = await db.Users.FirstOrDefaultAsync(u => u.Login == userLogin);
+            var userId = int.Parse(context.Request.Cookies["user_id"]);
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
             {
                 return Results.Content("<div class='error'>Błąd: Użytkownik nieznaleziony.</div>", "text/html");
