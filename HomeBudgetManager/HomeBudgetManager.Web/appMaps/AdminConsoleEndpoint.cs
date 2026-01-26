@@ -15,28 +15,25 @@ namespace HomeBudgetManager.Web.appMaps
 
                 var username = context.Request.Cookies["logged_user"].ToString();
                 
-                // Pobieramy użytkownika
+                // Fetch user
                 var user = await db.Users.FirstOrDefaultAsync(u => u.Login == username);
                 
                 if (user == null)
                     return Results.Redirect("/");
 
-                // --- ZABEZPIECZENIE BACKENDU ---
-                // Nawet jeśli ukryjesz przycisk, ktoś może wpisać adres z palca.
-                // Tutaj sprawdzamy, czy użytkownik w ogóle może widzieć tę stronę.
+                
+                // Backend security: verify role access directly
                 if (user.Role != SystemRole.SystemAdmin)
                 {
-                    // Jeśli nie jest adminem, przekieruj go np. na pulpit
+                    // Redirect non-admins
                     return Results.Redirect("/dashboard"); 
                 }
 
                 var filePath = Path.Combine(env.WebRootPath, "adminConsole.html");
                 var html = File.ReadAllText(filePath, Encoding.UTF8);
 
-                // --- LOGIKA PRZYCISKU ---
-                // Generujemy HTML przycisku tylko dla admina
-                // (W tym konkretnym pliku user na pewno jest adminem przez if wyżej,
-                // ale ten sam kod możesz skopiować do Dashboardu, gdzie user może być zwykłym członkiem)
+                
+                // Generate admin button HTML only for system admins
                 string adminBtnHtml = "";
                 
                 if (user.Role == SystemRole.SystemAdmin)
@@ -44,7 +41,7 @@ namespace HomeBudgetManager.Web.appMaps
                     adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\"><i class=\"fas fa-fw fa-cogs\"></i> &nbsp; Ustawienia Admina</button>";
                 }
 
-                // Podmieniamy placeholdery
+                // Replace placeholders
                 html = html.Replace("{username}", username);
                 html = html.Replace("{admin_panel_button}", adminBtnHtml);
 
@@ -53,7 +50,7 @@ namespace HomeBudgetManager.Web.appMaps
 
             app.MapPost("/admin/execute-sql", async (HttpContext context, AppDbContext db) =>
             {
-                // -- Zabezpieczenie: Tylko admin może to wykonać --
+                // Security: Only admins can execute SQL
                 if (!context.Request.Cookies.TryGetValue("logged_user", out var username)) 
                     return Results.Content("<div class='error-msg'>Brak sesji.</div>");
 
@@ -61,7 +58,7 @@ namespace HomeBudgetManager.Web.appMaps
                 if (user == null || user.Role != SystemRole.SystemAdmin) 
                     return Results.Content("<div class='error-msg'>Brak uprawnień administratora.</div>");
 
-                // Pobranie zapytania z formularza
+                // Get query from form
                 var form = await context.Request.ReadFormAsync();
                 string sqlQuery = form["sqlQuery"];
 
@@ -72,7 +69,7 @@ namespace HomeBudgetManager.Web.appMaps
 
                 try
                 {
-                    // Używamy surowego połączenia ADO.NET, aby obsługiwać dowolne kolumny
+                    // Use raw ADO.NET for flexible column handling
                     var connection = db.Database.GetDbConnection();
                     await connection.OpenAsync();
 
@@ -80,21 +77,21 @@ namespace HomeBudgetManager.Web.appMaps
                     {
                         command.CommandText = sqlQuery;
                         
-                        // Sprawdzamy czy to SELECT czy coś innego (UPDATE/INSERT/DELETE)
+                        // Determine if query is SELECT or data modification
                         if (sqlQuery.Trim().ToUpper().StartsWith("SELECT"))
                         {
                             using (var reader = await command.ExecuteReaderAsync())
                             {
                                 sb.Append("<table class='sql-result-table'><thead><tr>");
                                 
-                                // Generuj nagłówki kolumn
+                                // Generate table headers
                                 for (int i = 0; i < reader.FieldCount; i++)
                                 {
                                     sb.Append($"<th>{reader.GetName(i)}</th>");
                                 }
                                 sb.Append("</tr></thead><tbody>");
 
-                                // Generuj wiersze
+                               // Generate table rows
                                 while (await reader.ReadAsync())
                                 {
                                     sb.Append("<tr>");
@@ -110,7 +107,7 @@ namespace HomeBudgetManager.Web.appMaps
                         }
                         else
                         {
-                            // Dla UPDATE, DELETE, INSERT
+                            // Handle UPDATE, DELETE, INSERT
                             int rowsAffected = await command.ExecuteNonQueryAsync();
                             sb.Append($"<div class='success-msg'>Zapytanie wykonane pomyślnie. Zodyfikowano wierszy: {rowsAffected}</div>");
                         }

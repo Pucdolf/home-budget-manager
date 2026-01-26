@@ -12,13 +12,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const eventDetailsModal = document.getElementById('event-details-modal');
     const closeBtns = document.querySelectorAll('.close-btn');
     const eventForm = document.getElementById('event-form');
-    const eventAmountInput = document.getElementById('event-amount');
-    const eventDateInput = document.getElementById('event-date');
-    const eventStartTimeInput = document.getElementById('event-start-time');
-    const eventEndTimeInput = document.getElementById('event-end-time');
-    const eventDescriptionInput = document.getElementById('event-description');
-    const eventColorInput = document.getElementById('event-color');
-    const eventReminderInput = document.getElementById('event-reminder');
     const detailsTitle = document.getElementById('details-title');
     const detailsDate = document.getElementById('details-date');
     const detailsTime = document.getElementById('details-time');
@@ -173,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
         monthContainer.appendChild(daysGrid);
         calendarView.appendChild(monthContainer);
     }
-
+    // Generates a calendar day cell displaying the date and a financial summary (total income vs expenses) for that day.
     function createDayCell(date, isOtherMonth, isToday = false) {
         const dayCell = document.createElement('div');
         dayCell.className = `day-cell ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'current-day' : ''}`;
@@ -189,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Get events for this day
         const dayEvents = getEventsForDate(date);
 
-        // --- NEW: Calculate Daily Summary ---
+        // Calculate Daily Summary
         let expenseTotal = 0;
         let incomeTotal = 0;
         let transactionCount = dayEvents.length;
@@ -238,21 +231,6 @@ document.addEventListener('DOMContentLoaded', function () {
             
             dayCell.appendChild(summaryDiv);
         }
-        // ------------------------------------
-
-        // Display up to 3 events (or 2 if one is multi-line)
-        const maxEventsToShow = 3;
-        let eventsShown = 0;
-        let spaceUsed = 0;
-
-        // In month view, we only show the summary, not individual events
-        // The following block which rendered individual events is removed/commented out
-        
-        /* 
-        for (const event of dayEvents) {
-            // ... (original rendering logic)
-        }
-        */
 
         dayCell.appendChild(dayEventsContainer);
 
@@ -275,26 +253,40 @@ document.addEventListener('DOMContentLoaded', function () {
         return dayCell;
     }
 
+    // Renders a single event item for the sidebar list.
     function createEventListItem(event, showDate = false) {
+        // Create a new DIV element for the list item
         const item = document.createElement('div');
         item.className = 'event-item-row';
+
+        // Apply inline styles for the card appearance (white bg, border, shadow)
         item.style.backgroundColor = '#fff';
         item.style.border = '1px solid #e0e0e0';
         item.style.borderRadius = '8px';
         item.style.padding = '15px';
         item.style.marginBottom = '10px';
+
+        // Use Flexbox to align content (details left, amount right)
         item.style.display = 'flex';
         item.style.alignItems = 'center';
+
+        // Set the left border color based on event type (e.g., green for income, red for expense)
         item.style.borderLeft = `5px solid ${event.color}`;
+
+        // Add pointer cursor only for non-recurring events (clickable)
         if(!event.isRecurring) {
             item.style.cursor = 'pointer';
         }
         item.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
 
+        // Format time and optionally the date string (e.g., "Jan 20, ")
         const timeString = formatTime(new Date(event.startTime));
         const dateString = showDate ? new Date(event.startTime).toLocaleDateString('pl-PL', { month: 'short', day: 'numeric' }) + ', ' : '';
+
+        // Add a "redo" icon if the event is recurring
         const recurringIcon = event.isRecurring ? '<i class="fas fa-redo-alt" style="margin-left: 8px; color: #858796;"></i>' : '';
 
+        // Inject HTML structure: Title, Time/Date, Description, and Formatted Amount (PLN)
         item.innerHTML = `
             <div style="flex: 1;">
                 <div style="font-weight: bold; font-size: 1.1em; color: #333;">${event.title}${recurringIcon}</div>
@@ -418,17 +410,19 @@ document.addEventListener('DOMContentLoaded', function () {
             eventsList.appendChild(noEvents);
             return;
         }
-
+        // Renders the dashboard interface with a navigation sidebar and a direct SQL console for database management.
         uniqueUpcoming.forEach(event => {
+            // Create card element
             const eventElement = document.createElement('div');
             eventElement.className = 'event-item';
             eventElement.style.borderLeftColor = event.color;
 
+            // Format date and currency
             const startDate = new Date(event.startTime);
             const amountVal = Number(event.amount);
             const amountStr = amountVal.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' });
             
-            // Styl koloru kwoty (czerwony/zielony)
+            // Set amount color (expense vs income)
             const amountColor = amountVal < 0 ? '#e74a3b' : '#1cc88a';
 
             eventElement.innerHTML = `
@@ -454,13 +448,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Converts a Date object into a standard YYYY-MM-DD string format.
     function toLocalDateString(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
-
+    // Filters and returns all events occurring on the specified date.
     function getEventsForDate(date) {
         const dateStr = toLocalDateString(date);
         return events.filter(event => {
@@ -468,16 +463,9 @@ document.addEventListener('DOMContentLoaded', function () {
             return toLocalDateString(eventDate) === dateStr;
         });
     }
+    
 
-    function getEventsForDateAndHour(date, hour) {
-        const dateStr = toLocalDateString(date);
-        return events.filter(event => {
-            const eventDate = new Date(event.startTime);
-            const eventHour = eventDate.getHours();
-            return toLocalDateString(eventDate) === dateStr && eventHour === hour;
-        });
-    }
-
+    // Updates the header text to show the current date or range based on the active view.
     function updateCurrentDateDisplay() {
         switch (currentView) {
             case 'day':
@@ -512,7 +500,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 break;
         }
     }
-
+    // Changes the calendar view mode (Day/Week/Month) and triggers a re-render.
     function switchView(view) {
         currentView = view;
 
@@ -524,6 +512,7 @@ document.addEventListener('DOMContentLoaded', function () {
         renderCalendar();
     }
 
+    // Moves the calendar back by one day, week, or month depending on the current view.
     function navigatePrevious() {
         switch (currentView) {
             case 'day':
@@ -539,6 +528,7 @@ document.addEventListener('DOMContentLoaded', function () {
         renderCalendar();
     }
 
+    // Moves the calendar forward by one day, week, or month depending on the current view.
     function navigateNext() {
         switch (currentView) {
             case 'day':
@@ -554,16 +544,17 @@ document.addEventListener('DOMContentLoaded', function () {
         renderCalendar();
     }
 
+    // Resets the calendar focus to the current date.
     function goToToday() {
         currentDate = new Date();
         renderCalendar();
     }
-
+    // Hides all active modal windows (details and edit forms).
     function closeModals() {
         if (eventDetailsModal) eventDetailsModal.style.display = 'none';
         if (eventModal) eventModal.style.display = 'none';
     }
-
+    // Populates and displays the modal with details for a specific selected transaction.
     function showEventDetails(eventId) {
         const event = events.find(e => e.id === eventId);
         if (!event) return;
@@ -594,7 +585,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Show modal
         eventDetailsModal.style.display = 'flex';
     }
-
+    // Pre-fills the form with transaction data and handles the update logic via API.
     function editEvent() {
         console.log('Edit event clicked', selectedEventId);
         if (!selectedEventId) return;
@@ -665,7 +656,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         closeModals();
                         if (eventModal) eventModal.style.display = 'flex';
                     }
-                    
+                    // Sends a request to delete the selected transaction after user confirmation.
                     async function deleteEvent() {
                         if (!selectedEventId) return;
                     
@@ -689,38 +680,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
                         }
                     }
-    function saveEventsToStorage() {
-        localStorage.setItem('events', JSON.stringify(events));
-    }
+   
 
-    function setReminder(event) {
-        const reminderTime = new Date(event.startTime);
-        reminderTime.setMinutes(reminderTime.getMinutes() - 15); // 15 minutes before
-
-        const now = new Date();
-        const timeUntilReminder = reminderTime - now;
-
-        if (timeUntilReminder > 0) {
-            setTimeout(() => {
-                showReminderNotification(event);
-            }, timeUntilReminder);
-        }
-    }
-
-    function showReminderNotification(event) {
-        if (Notification.permission === 'granted') {
-            new Notification(`Reminder: ${event.title}`, {
-                body: `Your event starts at ${formatTime(new Date(event.startTime))}`,
-                icon: 'https://cdn-icons-png.flaticon.com/512/3652/3652191.png'
-            });
-        } else if (Notification.permission !== 'denied') {
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    showReminderNotification(event);
-                }
-            });
-        }
-    }
 
     // Helper functions
     function formatTime(date) {

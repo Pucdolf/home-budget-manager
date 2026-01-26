@@ -42,7 +42,6 @@
     width: 100%; 
     border-collapse: collapse; 
     margin-top: 2rem; 
-    /* box-shadow usunięty, bo jest już w karcie */
 }
 
 .sql-result-table th, .sql-result-table td { 

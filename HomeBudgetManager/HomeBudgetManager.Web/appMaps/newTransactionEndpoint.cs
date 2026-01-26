@@ -69,7 +69,7 @@ namespace HomeBudgetManager.Web.appMaps
                 // Save to cookie for robust retrieval
                 context.Response.Cookies.Append("transaction_return_url", returnUrl, new CookieOptions { Expires = DateTime.Now.AddMinutes(30), Path = "/" });
 
-                // Wczytaj plik HTML z kodowaniem UTF-8
+                // load html with utf-8
                 var filePath = Path.Combine(env.WebRootPath, "newTransaction.html");
                 var html = File.ReadAllText(filePath, System.Text.Encoding.UTF8);
 
@@ -89,7 +89,7 @@ namespace HomeBudgetManager.Web.appMaps
                 return Results.Content(html, "text/html; charset=utf-8");
             });
 
-            // POST - dodawanie nowej transakcji
+            // POST - add new transaction
 
             app.MapPost("/new-transaction/add", async (HttpContext context, AppDbContext db, TransactionService tranService) =>
             {
@@ -166,14 +166,13 @@ namespace HomeBudgetManager.Web.appMaps
 
                 DateTime finalDate;
 
-                // Używamy Parse, bo format z inputów HTML5 jest standardowy (ISO)
                 if (DateTime.TryParse($"{dateStr} {timeStr}", out DateTime parsedDate))
                 {
                     finalDate = parsedDate;
                 }
                 else
                 {
-                    finalDate = DateTime.Now; // Fallback w razie błędu
+                    finalDate = DateTime.Now; // Fallback
                 }
 
                 try

@@ -26,9 +26,7 @@
     display: flex;
     flex-direction: column;
     max-height: 90vh;
-    /* Zmiana z width: 1400px na 100% aby wypełnił dostępne miejsce */
     width: 100%;
-    /* Zmiana z margin: 0 auto na margin: 0 aby nie środkował kontenera */
     margin: 0;
     box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
 }

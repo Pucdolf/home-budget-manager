@@ -10,7 +10,7 @@ namespace HomeBudgetManager.Web.appMaps
         {
             app.MapPost("/leave-household", async (HttpContext context, AppDbContext db) =>
             {
-                // Pobranie zalogowanego użytkownika
+                // load user
                 var login = context.Request.Cookies["logged_user"];
                 if (string.IsNullOrEmpty(login))
                 {
@@ -27,17 +27,17 @@ namespace HomeBudgetManager.Web.appMaps
                     return Results.Content("<div class='error'>Nie należysz do żadnego domostwa.</div>", "text/html");
                 }
 
-                // Pobranie domu
+                // load household
                 var house = await db.Houses.FirstOrDefaultAsync(h => h.Id == user.HouseId);
                 if (house == null)
                 {
                     return Results.Content("<div class='error'>Domostwo nie istnieje.</div>", "text/html");
                 }
 
-                // Jeśli użytkownik jest administratorem domu (sprawdzamy po ID, bo SystemAdmin też może być adminem domu)
+                // check if user is admin
                 if (user.Id == house.AdminId)
                 {
-                    // 1. Odłącz transakcje od usuwanego domu (ustaw HouseId = null)
+                    // set household id to null
                     var houseTransactions = await db.Transactions
                         .Where(t => t.HouseId == house.Id)
                         .ToListAsync();
@@ -47,7 +47,7 @@ namespace HomeBudgetManager.Web.appMaps
                         t.HouseId = null;
                     }
 
-                    // 2. Reset dla wszystkich członków
+                    // reset for all members
                     var members = await db.Users.Where(u => u.HouseId == house.Id).ToListAsync();
                     foreach (var member in members)
                     {
@@ -58,7 +58,7 @@ namespace HomeBudgetManager.Web.appMaps
                         }
                     }
 
-                    // 3. Usuń dom
+                    // delete household
                     db.Houses.Remove(house);
                     await db.SaveChangesAsync();
 
@@ -76,7 +76,7 @@ namespace HomeBudgetManager.Web.appMaps
                 }
                 else
                 {
-                    // Zwykły członek opuszcza domostwo
+                    // regular user leaves household
                     int houseId = user.HouseId.Value;
                     user.HouseId = null;
                     
@@ -87,7 +87,7 @@ namespace HomeBudgetManager.Web.appMaps
                     
                     await db.SaveChangesAsync();
 
-                    // Jeśli po jego odejściu dom jest pusty, usuń go
+                    // if house empty -> delete it
                     bool anyLeft = await db.Users.AnyAsync(u => u.HouseId == houseId);
                     if (!anyLeft)
                     {

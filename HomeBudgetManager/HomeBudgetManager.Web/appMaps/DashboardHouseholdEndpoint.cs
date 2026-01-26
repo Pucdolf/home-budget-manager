@@ -57,12 +57,11 @@ namespace HomeBudgetManager.Web.appMaps
                 if (targetUser == null || targetUser.HouseId != adminUser.HouseId)
                     return Results.Text("Błąd: użytkownik nie należy do Twojego domostwa", "text/plain");
 
-                // Usuń użytkownika (zresetuj dom i rolę)
+                // Delete user
                 targetUser.HouseId = null;
                 targetUser.Role = SystemRole.Guest;
                 await db.SaveChangesAsync();
 
-                // Zwróć odświeżony widok
                 return await RenderHouseholdView(db, login);
             });
         }
@@ -109,7 +108,7 @@ namespace HomeBudgetManager.Web.appMaps
 
                     var buttonClass = "btn-danger";
 
-                    // SORTOWANIE: 1. Admini na górę, 2. Alfabetycznie
+                    // sort:  Admin on top, the rest alphabetically
                     var members = await db.Users
                         .Where(u => u.HouseId == house.Id)
                         .OrderByDescending(u => u.Role == SystemRole.HouseholdAdmin)
@@ -139,15 +138,10 @@ namespace HomeBudgetManager.Web.appMaps
                             var rowClass = isMe ? "member-row current-user" : "member-row";
                             var loginDisplay = isMe ? $"{loginEsc} (Ty)" : loginEsc;
 
-                            // LOGIKA PRZYCISKU:
-                            // Pokazujemy przycisk TYLKO JEŚLI:
-                            // 1. Ty (iAmAdmin) jesteś adminem
-                            // 2. Osoba na liście (isTargetAdmin) NIE jest adminem
                             string actionCell = "";
 
                             if (iAmAdmin && !isTargetAdmin)
                             {
-                                // Pamiętaj, aby obsłużyć endpoint /remove-member w backendzie
                                 actionCell = $@"
                                     <button 
                                         class='removeBtn'
