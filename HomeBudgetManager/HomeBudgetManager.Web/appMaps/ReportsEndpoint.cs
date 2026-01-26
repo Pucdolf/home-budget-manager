@@ -48,7 +48,7 @@ namespace HomeBudgetManager.Web.appMaps
                 
                 if (user.Role == SystemRole.SystemAdmin)
                 {
-                    adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\">Ustawienia Admina</button>";
+                    adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\"><i class=\"fas fa-fw fa-cogs\"></i> &nbsp; Ustawienia Admina</button>";
                 }
                 // 6. Podmiana danych w HTML
                 html = html.Replace("{username}", username)
