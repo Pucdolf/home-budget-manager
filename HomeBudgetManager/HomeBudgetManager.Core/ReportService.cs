@@ -4,6 +4,7 @@ using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using System.Globalization;
+using HomeBudgetManager.Core.Enums;
 
 namespace HomeBudgetManager.Core
 {
@@ -16,16 +17,16 @@ namespace HomeBudgetManager.Core
             _db = db;
         }
 
-        public byte[] GeneratePdfReport(int requestingUserId, DateTime startDate, DateTime endDate)
+        public byte[] GeneratePdfReport(int requestingUserId, DateTime startDate, DateTime endDate, bool includeHousehold)
         {
-            // 1. Get scope (Household)
+            // 1. Get scope
             var requestingUser = _db.Users.FirstOrDefault(u => u.Id == requestingUserId);
             if (requestingUser == null) return Array.Empty<byte>();
 
             List<int> userIds = new List<int>();
             string scopeTitle = "Raport Indywidualny";
 
-            if (requestingUser.HouseId.HasValue)
+            if (includeHousehold && requestingUser.HouseId.HasValue)
             {
                 userIds = _db.Users.Where(u => u.HouseId == requestingUser.HouseId).Select(u => u.Id).ToList();
                 scopeTitle = "Raport Domostwa";
@@ -35,21 +36,59 @@ namespace HomeBudgetManager.Core
                 userIds.Add(requestingUserId);
             }
 
-            // 2. Fetch Data
-            var usersData = _db.Users
-                .Where(u => userIds.Contains(u.Id))
-                .Select(u => new
-                {
-                    User = u,
-                    Transactions = _db.Transactions
-                        .Include(t => t.Category)
-                        .Where(t => t.UserId == u.Id && t.Date >= startDate && t.Date <= endDate)
-                        .OrderBy(t => t.Date)
-                        .ToList()
-                })
+            // 2. Fetch Real Transactions
+            var realTransactions = _db.Transactions
+                .Include(t => t.Category)
+                .Where(t => userIds.Contains(t.UserId) && t.Date >= startDate && t.Date <= endDate)
                 .ToList();
 
-            // 3. Generate PDF
+            // 3. Fetch Recurring Rules & Project Virtual Transactions
+            var recurringRules = _db.RepetableTransactions
+                .Include(rt => rt.Category)
+                .Where(rt => userIds.Contains(rt.UserId) && rt.IsActive)
+                .ToList();
+
+            var virtualTransactions = new List<DBTransaction>();
+
+            foreach (var rule in recurringRules)
+            {
+                var iterDate = rule.NextRunDate;
+                
+                if (rule.TransactionInterval <= 0) continue;
+
+                while (iterDate <= endDate)
+                {
+                    if (iterDate >= startDate)
+                    {
+                        virtualTransactions.Add(new DBTransaction
+                        {
+                            Id = 0, // Virtual
+                            UserId = rule.UserId,
+                            CategoryId = rule.CategoryId,
+                            Category = rule.Category,
+                            Value = rule.Value,
+                            Title = rule.Title + " (Plan)",
+                            Description = rule.Description,
+                            Date = iterDate,
+                            TransactionType = (rule.Value < 0) ? TransactionType.expense : TransactionType.income
+                        });
+                    }
+                    iterDate = CalculateNextDate(iterDate, rule.TransactionInterval, rule.FrequencyUnit);
+                }
+            }
+
+            var allTransactions = realTransactions.Concat(virtualTransactions).OrderBy(t => t.Date).ToList();
+
+            // 4. Group data for PDF
+            var usersData = userIds.Select(uid => new
+            {
+                User = _db.Users.FirstOrDefault(u => u.Id == uid),
+                Transactions = allTransactions.Where(t => t.UserId == uid).ToList()
+            })
+            .Where(d => d.User != null)
+            .ToList();
+
+            // 5. Generate PDF
             var document = Document.Create(container =>
             {
                 container.Page(page =>
@@ -76,7 +115,7 @@ namespace HomeBudgetManager.Core
                             foreach (var data in usersData)
                             {
                                 GenerateUserSection(column, data.User.Login, data.Transactions);
-                                column.Item().PageBreak(); // New page for each user or significant section
+                                column.Item().PageBreak(); 
                             }
                         });
 
@@ -95,7 +134,7 @@ namespace HomeBudgetManager.Core
 
         private void GenerateUserSection(ColumnDescriptor column, string username, List<DBTransaction> transactions)
         {
-            // ZMIANA: Tworzymy kulturę polską, aby wymusić formatowanie w PLN (zł)
+            // Ustawiamy kulturę polską
             var pl = new CultureInfo("pl-PL");
 
             var income = transactions.Where(t => t.Value > 0).Sum(t => t.Value);
@@ -122,7 +161,6 @@ namespace HomeBudgetManager.Core
                     header.Cell().Element(CellStyle).Text("Bilans").SemiBold();
                 });
 
-                // ZMIANA: Używamy .ToString("C2", pl) zamiast interpolacji $"{var:C2}"
                 table.Cell().Element(CellStyle).Text(income.ToString("C2", pl));
                 table.Cell().Element(CellStyle).Text(expense.ToString("C2", pl));
                 table.Cell().Element(CellStyle).Text(balance.ToString("C2", pl));
@@ -149,10 +187,9 @@ namespace HomeBudgetManager.Core
                         if (ratio < 0) ratio = 0;
                         if (ratio > 1) ratio = 1;
                         
-                        barCol.Item().Height((float)(150 * (1 - ratio))); // Empty space
-                        barCol.Item().Height((float)(150 * ratio)).Background(Colors.Green.Lighten2).Border(1).BorderColor(Colors.Green.Darken2); // Bar
+                        barCol.Item().Height((float)(150 * (1 - ratio))); 
+                        barCol.Item().Height((float)(150 * ratio)).Background(Colors.Green.Lighten2).Border(1).BorderColor(Colors.Green.Darken2); 
                     });
-                    // ZMIANA: Formatowanie C0 (waluta bez groszy) z polską kulturą
                     c.Item().Text(income.ToString("C0", pl)).AlignCenter().FontSize(9);
                 });
 
@@ -168,14 +205,13 @@ namespace HomeBudgetManager.Core
                         if (ratio < 0) ratio = 0;
                         if (ratio > 1) ratio = 1;
 
-                        barCol.Item().Height((float)(150 * (1 - ratio))); // Empty space
-                        barCol.Item().Height((float)(150 * ratio)).Background(Colors.Red.Lighten2).Border(1).BorderColor(Colors.Red.Darken2); // Bar
+                        barCol.Item().Height((float)(150 * (1 - ratio))); 
+                        barCol.Item().Height((float)(150 * ratio)).Background(Colors.Red.Lighten2).Border(1).BorderColor(Colors.Red.Darken2); 
                     });
-                    // ZMIANA: Formatowanie C0 z polską kulturą
                     c.Item().Text(expense.ToString("C0", pl)).AlignCenter().FontSize(9);
                 });
                 
-                row.RelativeItem(2); // Spacer
+                row.RelativeItem(2); 
             });
 
             column.Item().PaddingBottom(20);
@@ -208,7 +244,6 @@ namespace HomeBudgetManager.Core
                     
                     var color = transaction.Value < 0 ? Colors.Red.Medium : Colors.Green.Medium;
                     
-                    // ZMIANA: Formatowanie C2 z polską kulturą
                     table.Cell().Element(CellStyle).Text(transaction.Value.ToString("C2", pl)).FontColor(color).AlignRight();
                 }
             });
@@ -222,6 +257,19 @@ namespace HomeBudgetManager.Core
         static IContainer HeaderStyle(IContainer container)
         {
             return container.BorderBottom(1).BorderColor(Colors.Grey.Medium).PaddingVertical(5).DefaultTextStyle(x => x.SemiBold());
+        }
+
+        private DateTime CalculateNextDate(DateTime current, int value, int unit)
+        {
+            var type = (TransactionIntervalType)unit;
+            return type switch
+            {
+                TransactionIntervalType.Days => current.AddDays(value),
+                TransactionIntervalType.Weeks => current.AddDays(value * 7),
+                TransactionIntervalType.Months => current.AddMonths(value),
+                TransactionIntervalType.Years => current.AddYears(value),
+                _ => current.AddMonths(value)
+            };
         }
     }
 }
