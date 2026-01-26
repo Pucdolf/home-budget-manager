@@ -10,6 +10,13 @@
 </head>
 <body>
     <div class="layout">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <button id="sidebar-toggle" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="mobile-logo">Home Budget Manager</span>
+        </div>
         <aside class="sidebar">
             <p class="sidebar-title"><i class="fas fa-wallet"></i> Mój budżet</p>
             <span class="user-name" style="display: block;">Zalogowano jako: {username}</span>
@@ -57,11 +64,33 @@
                 </form>
             </section>
             
-            <div style="margin-top: 2rem; display: flex; gap: 1rem;">
-                <div class="ad-placeholder" style="flex: 1; height: 400px;"><span>Miejsce na reklamę</span></div>
-                <div class="ad-placeholder" style="flex: 1; height: 400px;"><span>Miejsce na reklamę</span></div>
+            <div class="ads-row">
+                <div class="ad-placeholder"><span>Miejsce na reklamę</span></div>
+                <div class="ad-placeholder"><span>Miejsce na reklamę</span></div>
             </div>
         </main>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if(toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('open');
+                });
+            }
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && 
+                    sidebar.classList.contains('open') && 
+                    !sidebar.contains(e.target) && 
+                    !toggleBtn.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

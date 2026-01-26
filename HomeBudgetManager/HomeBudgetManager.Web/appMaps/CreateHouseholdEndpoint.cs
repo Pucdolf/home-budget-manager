@@ -72,7 +72,11 @@ namespace HomeBudgetManager.Web.appMaps
 
                 // 2. Przypisz użytkownika do domu i ustaw jako admin
                 user.HouseId = house.Id;
-                user.Role = SystemRole.HouseholdAdmin;
+                
+                if (user.Role != SystemRole.SystemAdmin)
+                {
+                    user.Role = SystemRole.HouseholdAdmin;
+                }
 
                 await db.SaveChangesAsync();
 
