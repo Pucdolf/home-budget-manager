@@ -58,19 +58,19 @@ namespace HomeBudgetManager.Web.appMaps
                     return Results.Content("<div class='error'>Błąd: użytkownik należy już do domostwa.</div>", "text/html");
                 }
 
-                // 1. Stwórz domostwo
+                // create household
                 var house = new DBHouse
                 {
                     Name = name,
                     Admin = user,
                     Description = description,
                     AdminId = user.Id,
-                    JoinCode = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper() // np. "A1B2C3"
+                    JoinCode = Guid.NewGuid().ToString("N").Substring(0, 6).ToUpper() // ex. "A1B2C3"
                 };
                 db.Houses.Add(house);
                 await db.SaveChangesAsync();
 
-                // 2. Przypisz użytkownika do domu i ustaw jako admin
+                // set user as household admin
                 user.HouseId = house.Id;
                 
                 if (user.Role != SystemRole.SystemAdmin)

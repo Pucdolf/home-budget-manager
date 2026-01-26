@@ -19,7 +19,7 @@ namespace HomeBudgetManager.Web.appMaps
                     var user = authService.GetUserByEmail(email);
                     httpContext.Response.Cookies.Append("logged_user", user.Login); // Still store username/login for other services
                     httpContext.Response.Cookies.Append("user_id", user.Id.ToString());
-                    // Przekierowanie htmx po udanym logowaniu
+                    // redirect after succesfull login
                     httpContext.Response.Headers.Append("HX-Redirect", "/dashboard");
                     return Results.Ok();
                 }

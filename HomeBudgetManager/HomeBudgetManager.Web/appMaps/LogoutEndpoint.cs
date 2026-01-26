@@ -20,9 +20,6 @@ namespace HomeBudgetManager.Web.appMaps
                 context.Response.Cookies.Delete("logged_user");
                 return Results.Redirect("/index.html");
             });
-
-
-
         }
     }
 }

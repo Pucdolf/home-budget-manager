@@ -17,28 +17,27 @@ namespace HomeBudgetManager.Web.appMaps
         {
             app.MapGet("/reports", async (HttpContext context, IWebHostEnvironment env, AppDbContext db) =>
             {
-                // 1. Sprawdzenie ciastka
+                // check cookies
                 if (!context.Request.Cookies.TryGetValue("logged_user", out var username) || string.IsNullOrEmpty(username))
                 {
                     return Results.Redirect("/");
                 }
 
-                // 2. Pobranie usera z bazy (potrzebne do sprawdzenia roli Admina)
+                // load user
                 var user = await db.Users.FirstOrDefaultAsync(u => u.Login == username);
                 if (user == null)
                 {
                     return Results.Redirect("/");
                 }
 
-                // 3. Obliczenie domyślnych dat (pierwszy dzień miesiąca - dzisiaj)
                 var now = DateTime.Now;
                 
-                // Ustawiamy start na miesiąc wstecz od dzisiaj (np. od 23.12 do 23.01)
+                // set start to month before
                 var startDate = new DateTime(now.Year, now.Month, 1).ToString("yyyy-MM-dd");
                 var endDate = now.ToString("yyyy-MM-dd");
 
 
-                // 4. Wczytanie pliku HTML
+                // load html
                 var filePath = Path.Combine(env.WebRootPath, "reports.html");
                 if (!File.Exists(filePath)) 
                     return Results.Content("Błąd: Brak pliku reports.html", "text/plain");
@@ -50,7 +49,7 @@ namespace HomeBudgetManager.Web.appMaps
                 {
                     adminBtnHtml = "<button class=\"sidebar-link\" onclick=\"window.location.href='/adminConsole'\"><i class=\"fas fa-fw fa-cogs\"></i> &nbsp; Ustawienia Admina</button>";
                 }
-                // 6. Podmiana danych w HTML
+                // replace values in html
                 html = html.Replace("{username}", username)
                            .Replace("{startDate}", startDate)
                            .Replace("{admin_panel_button}", adminBtnHtml)

@@ -10,7 +10,7 @@ public class TransactionsEndpoints : IEndpoint
 {
     public void Map(IEndpointRouteBuilder app)
     {
-        // GET - lista wszystkich transakcji
+        // GET - list of all transactions
 
         app.MapGet("/transactions", async (HttpContext context, AppDbContext db, TransactionService tranService) => {
 
@@ -53,9 +53,6 @@ public class TransactionsEndpoints : IEndpoint
             return Results.Content(sb.ToString(), "text/html");
         });
 
-
-        // GET - lista x transakcji
-
         app.MapGet("/transactions/listSome", async (HttpContext context, AppDbContext db, TransactionService tranService) =>
         {
 
@@ -75,7 +72,7 @@ public class TransactionsEndpoints : IEndpoint
             return Results.Content(tranService.listTransactionsForDashboard(transactions).ToString(), "text/html");
         });
 
-        // DELETE - usuwanie transakcji
+        // DELETE transaction
         app.MapDelete("/transactions", async (int id, HttpContext context, AppDbContext db) => {
 
             var userLogin = context.Request.Cookies["logged_user"];
@@ -100,7 +97,7 @@ public class TransactionsEndpoints : IEndpoint
             return Results.Content("<div class='success'>Transakcja usunięta</div>", "text/html");
         });
 
-        // PUT - edycja transakcji
+        // PUT - edit transaction
         app.MapPut("/transactions", async (int id, HttpContext context, AppDbContext db) => {
 
             var userLogin = context.Request.Cookies["logged_user"];

@@ -34,21 +34,21 @@ namespace HomeBudgetManager.Web.appMaps
                     return Results.Content(htmlResponse, "text/html");
                 }
 
-                // sprawdz czy nazwa uzytkownika jest zajeta
+                // check if username is taken
                 if (registerService.IsUsernameTaken(username))
                 {
                     var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Ten login jest już zajęty!</div>";
                     return Results.Content(htmlResponse, "text/html");
                 }
 
-                // Sprawdz, czy email jest zajety
+                // check if email is taken
                 if (registerService.IsEmailTaken(email))
                 {
                     var htmlResponse = "<div class='p-4 bg-red-100 border border-red-400 text-red-700 rounded'>Błąd: Ten adres e-mail jest już zajęty!</div>";
                     return Results.Content(htmlResponse, "text/html");
                 }
 
-                // Zarejestruj uzytkownika
+                // register user
                 registerService.RegisterUser(email, username, password);
                 var successResponse = @"
                     <div class='p-4 bg-green-100 border border-green-400 text-green-700 rounded'>
