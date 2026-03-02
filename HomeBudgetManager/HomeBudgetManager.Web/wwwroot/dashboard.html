@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel finansowy</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+
+    <div class="layout">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <button id="sidebar-toggle" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="mobile-logo">Home Budget Manager</span>
+        </div>
+
+        <!-- Pasek boczny -->
+        <aside class="sidebar">
+            <p class="sidebar-title"><i class="fas fa-wallet"></i> Mój budżet</p>
+            <span class="user-name" style="display: block;">Zalogowano jako: {username}</span>
+            <button class="sidebar-link" onclick="loadDashboard()"><i class="fas fa-fw fa-tachometer-alt"></i> &nbsp; Pulpit</button>
+            <button class="sidebar-link" onclick="window.location.href='/household'"><i class="fas fa-fw fa-home"></i> &nbsp; Domostwo</button>
+            <button class="sidebar-link" onclick="window.location.href='/calendar'"><i class="fas fa-fw fa-calendar-alt"></i> &nbsp; Kalendarz</button>
+            <button class="sidebar-link" onclick="window.location.href='/charts'"><i class="fas fa-fw fa-chart-pie"></i> &nbsp; Wykresy</button>
+            <button class="sidebar-link" onclick="window.location.href='/reports'"><i class="fas fa-fw fa-file-alt"></i> &nbsp; Raporty</button>
+            <button class="sidebar-link" onclick="window.location.href='/new-transaction?returnUrl=' + encodeURIComponent(window.location.pathname)"><i class="fas fa-fw fa-exchange-alt"></i> &nbsp; Transakcje</button>
+            {admin_panel_button}
+            <form method="post" action="/logout" style="margin-top: auto; width: 100%;">
+                <button type="submit" class="btn-logout">Wyloguj</button>
+            </form>
+        </aside>
+
+        <main class="container" id="dashboard-main">
+            <section class="card">
+                <h2>Przegląd finansów</h2>
+                <p class="card-desc">
+                    Twój osobisty panel kontrolny.
+                </p>
+
+                <div class="dashboard-grid">
+                    <!-- Lewa kolumna: Bilans i Wykresy -->
+                    <div class="dashboard-center-column">
+                        <div class="balance-box">
+                            <p class="balance-label">Całkowite Saldo</p>
+                            <span class="balance-highlight">{balance} zł</span>
+                        </div>
+
+                        <div id="dashboard-charts" 
+                             hx-get="/dashboard/charts" 
+                             hx-trigger="load">
+                             <p style="text-align:center; color:#858796;">Ładowanie wykresów...</p>
+                        </div>
+
+                        <div class="actions-box" style="text-align: center;">
+                            <a href="/new-transaction" class="btn-primary"><i class="fas fa-plus"></i> Dodaj nową transakcję</a>
+                        </div>
+                    </div>
+
+                    <!-- Środkowa kolumna: Lista transakcji -->
+                    <div class="dashboard-right-column">
+                        <div class="transactions-box">
+                            <h3>Ostatnie transakcje</h3>
+                            <ul class="transactions-list"
+                                id="transactions-list"
+                                hx-get="/transactions/listsome"
+                                hx-trigger="load"
+                                hx-swap="innerHTML">
+                                <li class='transaction-item'>
+                                    <div class='transaction-main'>
+                                        <span>Ładowanie transakcji...</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Prawa kolumna: Reklamy -->
+                    <div class="dashboard-ads-column">
+                        <div class="ad-placeholder">
+                            <span class="ad-span">Miejsce na reklamę</span>
+                        </div>
+                        <div class="ad-placeholder">
+                            <span class="ad-span">Miejsce na reklamę</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if(toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('open');
+                });
+            }
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && 
+                    sidebar.classList.contains('open') && 
+                    !sidebar.contains(e.target) && 
+                    !toggleBtn.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        });
+
+        function loadHousehold() {
+            fetch("/dashboard-household")
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById("dashboard-main").innerHTML = html;
+                    if (window.htmx) htmx.process(document.getElementById("dashboard-main"));
+                })
+                .catch(err => {
+                    document.getElementById("dashboard-main").innerHTML = "<p>Błąd ładowania domostwa.</p>";
+                });
+        }
+
+        function loadDashboard() {
+            location.reload();
+        }
+
+        // NOWA funkcja – ładowanie widoku kalendarza
+        function loadCalendar() {
+            fetch("/calendar")
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById("dashboard-main").innerHTML = html;
+                })
+                .catch(err => {
+                    document.getElementById("dashboard-main").innerHTML = "<p>Błąd ładowania kalendarza.</p>";
+                });
+        }
+    </script>
+
+    <script>
+        document.body.addEventListener('htmx:afterSwap', function (event) {
+            if (event.detail.target.id === 'form-response') {
+                const response = event.detail.target.innerHTML;
+                if (response.includes('success')) {
+                    // Odśwież listę transakcji
+                    htmx.trigger('#transactions-list', 'load');
+                    // Odśwież saldo
+                    htmx.trigger('#balance-container', 'load');
+
+                    setTimeout(() => {
+                        document.getElementById('transaction-modal').style.display = 'none';
+                        document.querySelector('form').reset();
+                        document.getElementById('form-response').innerHTML = '';
+                    }, 1500);
+                }
+            }
+        });
+    </script>
+
+    <!-- Add Event Modal (Used for Edit in Dashboard) -->
+    <div class="modal" id="event-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Edytuj Transakcję</h2>
+
+            <form id="event-form">
+                <div class="form-group">
+                    <label for="event-title">Tytuł</label>
+                    <input type="text" id="event-title" required maxlength="20">
+                </div>
+
+                <div class="form-group">
+                    <label for="event-type">Typ</label>
+                    <select id="event-type">
+                        <option value="0">Wydatek</option>
+                        <option value="1">Przychód</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="event-amount">Kwota</label>
+                    <input type="number" step="0.01" id="event-amount" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="event-date">Data</label>
+                    <input type="date" id="event-date" required>
+                </div>
+
+                <!-- Hidden time fields if not used, or keep them if backend requires -->
+                <div class="form-group time-group" style="display:none;">
+                    <div>
+                        <label for="event-start-time">Start Time</label>
+                        <input type="time" id="event-start-time">
+                    </div>
+                    <div>
+                        <label for="event-end-time">End Time</label>
+                        <input type="time" id="event-end-time">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="event-description">Opis</label>
+                    <textarea id="event-description" rows="3"></textarea>
+                </div>
+
+                <!-- Color ignored for now -->
+                <div class="form-group" style="display:none;">
+                    <label for="event-color">Color</label>
+                    <select id="event-color">
+                        <option value="#4e73df">Blue</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="save-btn">Zapisz</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div class="modal" id="event-details-modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="details-title" style="margin-bottom: 5px;">Tytuł</h2>
+            <h3 id="details-amount" style="margin-top: 0; color: #4e73df;">Kwota</h3>
+            <div class="event-details">
+                <p><i class="fas fa-calendar-day"></i> <span id="details-date">Data</span></p>
+                <!-- Time hidden -->
+                <p style="display:none;"><i class="fas fa-clock"></i> <span id="details-time">Czas</span></p>
+                <p><i class="fas fa-align-left"></i> <span id="details-description">Opis</span></p>
+            </div>
+            <div class="event-actions">
+                <button id="edit-event-btn">Edytuj</button>
+                <button id="delete-event-btn">Usuń</button>
+                <button id="close-details-btn">Zamknij</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/dashboard-transactions.js"></script>
+</body>
+</html>

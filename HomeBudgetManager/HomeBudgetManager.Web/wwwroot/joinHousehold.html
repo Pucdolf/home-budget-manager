@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Dołącz do domostwa</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/joinHousehold.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Automatyczne wypełnienie pola kodu z adresu URL (?code=XYZ)
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            if (code) {
+                document.getElementById('join-code').value = code;
+            }
+        };
+    </script>
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <p class="sidebar-title"><i class="fas fa-wallet"></i> Mój budżet</p>
+            <span class="user-name" style="display: block;">Zalogowano jako: {username}</span>
+
+            <button class="sidebar-link" onclick="window.location.href='/dashboard'"><i class="fas fa-fw fa-tachometer-alt"></i> &nbsp; Pulpit</button>
+            <button class="sidebar-link active" onclick="window.location.href='/household'"><i class="fas fa-fw fa-home"></i> &nbsp; Domostwo</button>
+            <button class="sidebar-link" onclick="window.location.href='/calendar'"><i class="fas fa-fw fa-calendar-alt"></i> &nbsp; Kalendarz</button>
+            <button class="sidebar-link" onclick="window.location.href='/charts'"><i class="fas fa-fw fa-chart-pie"></i> &nbsp; Wykresy</button>
+            <button class="sidebar-link" onclick="window.location.href='/reports'"><i class="fas fa-fw fa-file-alt"></i> &nbsp; Raporty</button>
+            <button class="sidebar-link" onclick="window.location.href='/new-transaction?returnUrl=' + encodeURIComponent(window.location.pathname)"><i class="fas fa-fw fa-exchange-alt"></i> &nbsp; Transakcje</button>
+            {admin_panel_button}
+            <form method="post" action="/logout" style="margin-top: auto; width: 100%;">
+                <button type="submit" class="btn-logout">Wyloguj</button>
+            </form>
+        </aside>
+
+        <main class="container">
+            <section class="card">
+                <h2>Dołącz do domostwa</h2>
+                <p class="card-desc">Wprowadź kod zaproszenia, aby dołączyć do istniejącej grupy.</p>
+
+                <form hx-post="/join-household" hx-target="#result" class="join-household-form">
+                    <div class="form-group">
+                        <label for="join-code">Kod domostwa</label>
+                        <input id="join-code" type="text" name="code" placeholder="np. A1B2C3" required class="form-input" />
+                    </div>
+                    <button type="submit" class="btn-primary"><i class="fas fa-sign-in-alt"></i> Dołącz do grupy</button>
+                </form>
+
+                <div id="result"></div>
+
+                <div style="text-align: center;">
+                    <a href="/household" class="btn-secondary"><i class="fas fa-arrow-left"></i> Powrót</a>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domostwo</title>
+
+    <!-- Twoje style aplikacji (sidebar/layout) -->
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/householdView.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Ikony -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+
+<body>
+    <div class="layout">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <button id="sidebar-toggle" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="mobile-logo">Home Budget Manager</span>
+        </div>
+        <aside class="sidebar">
+            <p class="sidebar-title"><i class="fas fa-wallet"></i> Mój budżet</p>
+            <span class="user-name" style="display: block;">Zalogowano jako: {username}</span>
+
+            <button class="sidebar-link" onclick="window.location.href='/dashboard'"><i class="fas fa-fw fa-tachometer-alt"></i> &nbsp; Pulpit</button>
+            <button class="sidebar-link active" onclick="window.location.href='/household'"><i class="fas fa-fw fa-home"></i> &nbsp; Domostwo</button>
+            <button class="sidebar-link" onclick="window.location.href='/calendar'"><i class="fas fa-fw fa-calendar-alt"></i> &nbsp; Kalendarz</button>
+            <button class="sidebar-link" onclick="window.location.href='/charts'"><i class="fas fa-fw fa-chart-pie"></i> &nbsp; Wykresy</button>
+            <button class="sidebar-link" onclick="window.location.href='/reports'"><i class="fas fa-fw fa-file-alt"></i> &nbsp; Raporty</button>
+            <button class="sidebar-link" onclick="window.location.href='/new-transaction?returnUrl=' + encodeURIComponent(window.location.pathname)"><i class="fas fa-fw fa-exchange-alt"></i> &nbsp; Transakcje</button>
+            {admin_panel_button}
+            <form method="post" action="/logout" style="margin-top: auto; width: 100%;">
+                <button type="submit" class="btn-logout">Wyloguj</button>
+            </form>
+        </aside>
+
+        <main class="container" id="household-main" 
+              hx-get="/dashboard-household" 
+              hx-trigger="load" 
+              hx-swap="innerHTML">
+            <!-- Tutaj załaduje się widok domostwa -->
+            <p style="text-align:center; padding: 2rem;">Ładowanie domostwa...</p>
+        </main>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if(toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('open');
+                });
+            }
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && 
+                    sidebar.classList.contains('open') && 
+                    !sidebar.contains(e.target) && 
+                    !toggleBtn.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

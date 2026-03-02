@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Stwórz domostwo</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/createHousehold.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <p class="sidebar-title"><i class="fas fa-wallet"></i> Mój budżet</p>
+            <span class="user-name" style="display: block;">Zalogowano jako: {username}</span>
+
+            <button class="sidebar-link" onclick="window.location.href='/dashboard'"><i class="fas fa-fw fa-tachometer-alt"></i> &nbsp; Pulpit</button>
+            <button class="sidebar-link active" onclick="window.location.href='/household'"><i class="fas fa-fw fa-home"></i> &nbsp; Domostwo</button>
+            <button class="sidebar-link" onclick="window.location.href='/calendar'"><i class="fas fa-fw fa-calendar-alt"></i> &nbsp; Kalendarz</button>
+            <button class="sidebar-link" onclick="window.location.href='/charts'"><i class="fas fa-fw fa-chart-pie"></i> &nbsp; Wykresy</button>
+            <button class="sidebar-link" onclick="window.location.href='/reports'"><i class="fas fa-fw fa-file-alt"></i> &nbsp; Raporty</button>
+            <button class="sidebar-link" onclick="window.location.href='/new-transaction?returnUrl=' + encodeURIComponent(window.location.pathname)"><i class="fas fa-fw fa-exchange-alt"></i> &nbsp; Transakcje</button>
+            {admin_panel_button}
+            <form method="post" action="/logout" style="margin-top: auto; width: 100%;">
+                <button type="submit" class="btn-logout">Wyloguj</button>
+            </form>
+        </aside>
+
+        <main class="container">
+            <section class="card">
+                <h2>Utwórz swoją grupę domową</h2>
+                <p class="card-desc">Rozpocznij wspólne zarządzanie finansami tworząc nowe domostwo.</p>
+
+                <form hx-post="/create-household" hx-target="#result" class="create-household-form">
+                    <div class="form-group">
+                        <label for="name">Nazwa grupy</label>
+                        <input type="text" id="name" name="name" placeholder="np. Rodzina Kowalskich" required class="form-input" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Opis (opcjonalnie)</label>
+                        <input type="text" id="description" name="description" placeholder="Krótki opis domostwa" class="form-input" />
+                    </div>
+
+                    <button type="submit" class="btn-primary"><i class="fas fa-plus-circle"></i> Utwórz domostwo</button>
+                </form>
+
+                <div id="result"></div>
+
+                <div style="text-align: center;">
+                    <a href="/household" class="btn-secondary"><i class="fas fa-arrow-left"></i> Powrót</a>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

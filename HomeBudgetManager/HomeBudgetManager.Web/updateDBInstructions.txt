@@ -1,0 +1,9 @@
+W konsoli paczek (Tools -> NuGet Package Manager -> Package Manager Console) wykonujemy polecenia:
+
+- Jak zmieniamy cia³o bazy to najpierw robimy migracjê:
+
+	Add-Migration tutajDodajOpis -Project HomeBudgetManager.Core -StartupProject HomeBudgetManager.Web
+
+- Jak chcemy zaktualizowaæ bazê danych tak dla siebie albo po migracji (najpierw musi siê udaæ migracja), to wpisujemy:
+
+	Update-Database -Project HomeBudgetManager.Core -StartupProject HomeBudgetManager.Web

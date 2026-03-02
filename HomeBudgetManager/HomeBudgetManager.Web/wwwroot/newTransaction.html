@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Dodaj transakcję</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/newTransaction.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <div class="layout">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <button id="sidebar-toggle" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="mobile-logo">Home Budget Manager</span>
+        </div>
+        <aside class="sidebar">
+            <p class="sidebar-title"><i class="fas fa-wallet"></i> Mój budżet</p>
+            <span class="user-name" style="display: block;">Zalogowano jako: {username}</span>
+            <button class="sidebar-link" onclick="window.location.href='/dashboard'"><i class="fas fa-fw fa-tachometer-alt"></i> &nbsp; Pulpit</button>
+            <button class="sidebar-link" onclick="window.location.href='/household'"><i class="fas fa-fw fa-home"></i> &nbsp; Domostwo</button>
+            <button class="sidebar-link" onclick="window.location.href='/calendar'"><i class="fas fa-fw fa-calendar-alt"></i> &nbsp; Kalendarz</button>
+            <button class="sidebar-link" onclick="window.location.href='/charts'"><i class="fas fa-fw fa-chart-pie"></i> &nbsp; Wykresy</button>
+            <button class="sidebar-link" onclick="window.location.href='/reports'"><i class="fas fa-fw fa-file-alt"></i> &nbsp; Raporty</button>
+            <button class="sidebar-link active" onclick="window.location.href='/new-transaction'"><i class="fas fa-fw fa-exchange-alt"></i> &nbsp; Transakcje</button>
+            {admin_panel_button}
+            <form method="post" action="/logout" style="margin-top: auto; width: 100%;">
+                <button type="submit" class="btn-logout">Wyloguj</button>
+            </form>
+        </aside>
+        <main class="container">
+            <div class="main-with-ads">
+                <div class="content-area">
+                    <section class="card">
+                        <h2>Dodaj nową transakcję</h2>
+
+                        <!-- Formularz dodawania transakcji -->
+                        <form hx-post="/new-transaction/add"
+                              hx-target="#form-response"
+                              hx-swap="innerHTML"
+                              class="transaction-form">
+
+                            <input type="hidden" id="returnUrl" name="returnUrl" value="{returnUrl}">
+
+                            <div class="flex-row">
+                                <!-- Pole Tytuł -->
+                                <div class="form-group" style="flex: 2;">
+                                    <label for="title">Tytuł (max 20 znaków)</label>
+                                    <input type="text"
+                                           id="title"
+                                           name="title"
+                                           required
+                                           maxlength="20"
+                                           class="form-input"
+                                           placeholder="np. Zakupy spożywcze">
+                                </div>
+                                
+                                <!-- Pole kwota -->
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="amount">Kwota (zł)</label>
+                                    <input type="text"
+                                           inputmode="decimal"
+                                           pattern="[0-9]*[.,]?[0-9]+"
+                                           id="amount"
+                                           name="amount"
+                                           required
+                                           placeholder="0.00"
+                                           class="form-input"
+                                           oninput="this.value = this.value.replace(/[^0-9.,]/g, '').replace(/,/g, '.')">
+                                </div>
+                            </div>
+
+                            <div class="flex-row">
+                                <!-- Pole kategoria -->
+                                <div class="form-group" style="flex: 1;">
+                                    <label for="category">Kategoria</label>
+
+                                    <div style="display: flex; gap: 5px;">
+                                        <div id="target-container-for-select" style="flex-grow: 1;">
+                                            <select class="form-input" disabled>
+                                                <option>Ładowanie kategorii...</option>
+                                            </select>
+                                        </div>
+                                        <button type="button" class="btn-secondary" onclick="openManageCategories()" style="padding: 0 10px; display: flex; align-items: center; justify-content: center;" title="Zarządzaj kategoriami">
+                                            <i class="fas fa-cog"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Wybor kategorii zwraca Id kategorii. wyciagamy z form categoryId-->
+                                    <div hx-get="/categories/list"
+                                         hx-trigger="load, reload-categories from:body"
+                                         hx-target="#target-container-for-select"
+                                         hx-swap="innerHTML"
+                                         style="display: none;">
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="flex: 1;">
+                                    <label>Data i czas transakcji</label>
+
+                                    <div class="flex-row">
+
+                                        <!-- Pole DATY -->
+                                        <input type="date"
+                                               id="transactionDate"
+                                               name="transactionDate"
+                                               class="form-input"
+                                               required
+                                               style="flex: 2;">
+                                        <!-- Pole GODZINY -->
+                                        <input type="time"
+                                               id="transactionTime"
+                                               name="transactionTime"
+                                               class="form-input"
+                                               required
+                                               style="flex: 1;">
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rodzaj transakcji -->
+                            <div class="form-group">
+                                <label>Rodzaj transakcji</label>
+                                <div class="radio-group" style="display: flex; gap: 20px; align-items: center;">
+                                    <!-- Wydatek (Domyslnie zaznaczony) -->
+                                    <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                        <input type="radio"
+                                               name="transactionType"
+                                               value="0"
+                                               checked>
+                                        Wydatek
+                                    </label>
+                                    <label style="font-weight: normal; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                                        <input type="radio"
+                                               name="transactionType"
+                                               value="1">
+                                        Przychód
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Sekcja Transakcji Okresowej -->
+                            <div class="form-group">
+                                <!-- Kontener Flexbox dla checkboxa i etykiety -->
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+
+                                    <input type="checkbox"
+                                           id="isRecurring"
+                                           name="isRecurring"
+                                           value="true"
+                                           onchange="toggleRecurring(this)"
+                                           style="width: auto; margin: 0; cursor: pointer;"> <!-- width:auto jest ważne, bo .form-input ma width:100% -->
+
+                                    <label for="isRecurring"
+                                           style="margin: 0; cursor: pointer; font-weight: normal; font-size: 1rem;">
+                                        Transakcja okresowa
+                                    </label>
+
+                                </div>
+
+                                <!-- Ukryte pole -->
+                                <div id="recurring-box" style="display: none; margin-left: 25px;">
+                                    <label for="recurringType" style="font-size: 0.9rem;">Powtarzaj:</label>
+                                    <select id="recurringType" name="recurringType" class="form-input" style="margin-top: 5px;">
+                                        <option value="daily">Codziennie</option>
+                                        <option value="weekly">Co tydzień</option>
+                                        <option value="monthly">Co miesiąc</option>
+                                        <option value="quarterly">Co kwartał</option>
+                                        <option value="yearly">Co rok</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Pole opis -->
+                            <div class="form-group">
+                                <label for="description">Opis (opcjonalny)</label>
+                                <input type="text"
+                                       id="description"
+                                       name="description"
+                                       class="form-input">
+                            </div>
+
+                            <!-- Miejsce na komunikaty z serwera -->
+                            <div id="form-response" class="form-response">
+
+                            </div>
+
+                            <div class="form-buttons">
+                                <button type="submit" class="btn-primary">
+                                    Dodaj transakcję
+                                </button>
+                                <a href="#" onclick="cancelTransaction()" class="btn-secondary">
+                                    Anuluj
+                                </a>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Dolna reklama -->
+                    <div class="bottom-ad-area" style="margin-top: 65px;">
+                        <div class="ad-placeholder" style="height: 150px;"><span>Miejsce na reklamę</span></div>
+                    </div>
+                </div>
+
+                <!-- Prawa reklama -->
+                
+            </div>
+
+            <!-- Modale -->
+            <div id="newCategoryModal" class="modal-overlay" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">Nowa kategoria</div>
+                    <div class="form-group">
+                        <label>Nazwa</label>
+                        <input type="text" id="newCatName" class="form-input" placeholder="np. Wakacje">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Opis (opcjonalny)</label>
+                        <input type="text" id="newCatDesc" class="form-input">
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-secondary" onclick="closeModal()">Anuluj</button>
+                        <button type="button" class="btn-primary" onclick="submitNewCategory()">Zapisz</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal zarządzania kategoriami -->
+            <div id="manageCategoriesModal" class="modal-overlay" style="display: none;">
+                <div class="modal-content" style="max-width: 600px; width: 90%;">
+                    <div class="modal-header">Zarządzaj kategoriami</div>
+                    
+                    <div id="categoriesList" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #e3e6f0; border-radius: 5px;">
+                        <!-- Lista ładowana dynamicznie -->
+                        <div style="padding: 20px; text-align: center;">Ładowanie...</div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-primary" onclick="closeManageCategories()">Zamknij</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script>
+            function toggleRecurring(checkbox) {
+                var box = document.getElementById('recurring-box');
+                box.style.display = checkbox.checked ? 'block' : 'none';
+            }
+
+            // --- Zarządzanie kategoriami ---
+            function openManageCategories() {
+                document.getElementById('manageCategoriesModal').style.display = 'flex';
+                loadCategoriesForManager();
+            }
+
+            function closeManageCategories() {
+                document.getElementById('manageCategoriesModal').style.display = 'none';
+                document.body.dispatchEvent(new Event("reload-categories"));
+            }
+
+            async function loadCategoriesForManager() {
+                const listContainer = document.getElementById('categoriesList');
+                listContainer.innerHTML = '<div style="padding: 20px; text-align: center;">Ładowanie...</div>';
+
+                try {
+                    const res = await fetch('/categories/data');
+                    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                    const categories = await res.json();
+                    renderCategoryManagerList(categories);
+                } catch (err) {
+                    console.error('Error loading categories:', err);
+                    listContainer.innerHTML = `<div style="padding: 20px; color: red;">Błąd ładowania danych: ${err.message}</div>`;
+                }
+            }
+
+            function renderCategoryManagerList(categories) {
+                const listContainer = document.getElementById('categoriesList');
+                listContainer.innerHTML = '';
+
+                if (categories.length === 0) {
+                    listContainer.innerHTML = '<div style="padding: 20px; text-align: center;">Brak kategorii</div>';
+                    return;
+                }
+
+                categories.forEach(cat => {
+                    const isSystem = cat.userId === null;
+                    const row = document.createElement('div');
+                    row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;';
+                    row.dataset.id = cat.id;
+
+                    const displayHtml = `
+                        <div style="flex-grow: 1;">
+                            <div style="font-weight: bold;">${cat.name} ${isSystem ? '<span style="font-size: 0.8em; color: #888;">(Systemowa)</span>' : ''}</div>
+                            <div style="font-size: 0.85em; color: #666;">${cat.description || ''}</div>
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            ${!isSystem ? `
+                                <button type="button" class="btn-secondary" onclick="enableEditCategory(${cat.id}, '${cat.name.replace(/'/g, "\'")}', '${(cat.description||'').replace(/'/g, "\'")}')" style="padding: 5px 10px; font-size: 0.8em;"><i class="fas fa-edit"></i></button>
+                                <button type="button" class="btn-secondary" onclick="deleteCategory(${cat.id})" style="padding: 5px 10px; font-size: 0.8em; color: #e74a3b;"><i class="fas fa-trash"></i></button>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    row.innerHTML = displayHtml;
+                    listContainer.appendChild(row);
+                });
+            }
+
+            function enableEditCategory(id, name, desc) {
+                const row = document.querySelector(`#categoriesList div[data-id="${id}"]`);
+                if (!row) return;
+
+                row.innerHTML = `
+                    <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 5px;">
+                        <input type="text" id="edit-name-${id}" class="form-input" value="${name}" placeholder="Nazwa">
+                        <input type="text" id="edit-desc-${id}" class="form-input" value="${desc}" placeholder="Opis">
+                    </div>
+                    <div style="display: flex; gap: 5px; align-items: center; margin-left: 10px;">
+                        <button type="button" class="btn-primary" onclick="saveCategory(${id})" style="padding: 5px 10px; font-size: 0.8em;"><i class="fas fa-save"></i></button>
+                        <button type="button" class="btn-secondary" onclick="loadCategoriesForManager()" style="padding: 5px 10px; font-size: 0.8em;"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+            }
+
+            async function saveCategory(id) {
+                const name = document.getElementById(`edit-name-${id}`).value;
+                const desc = document.getElementById(`edit-desc-${id}`).value;
+
+                if (!name) {
+                    alert('Nazwa jest wymagana');
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`/categories/update/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: name, description: desc })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        loadCategoriesForManager();
+                    } else {
+                        alert('Błąd: ' + data.message);
+                    }
+                } catch (err) {
+                    alert('Błąd połączenia');
+                }
+            }
+
+            async function deleteCategory(id) {
+                if (!confirm('Czy na pewno chcesz usunąć tę kategorię?')) return;
+
+                try {
+                    const res = await fetch(`/categories/delete/${id}`, { method: 'DELETE' });
+                    const data = await res.json();
+                    if (data.success) {
+                        loadCategoriesForManager();
+                    } else {
+                        alert('Błąd: ' + data.message);
+                    }
+                } catch (err) {
+                    alert('Błąd połączenia');
+                }
+            }
+
+            function handleCategoryChange(selectElement) {
+                if (selectElement.value === 'new-category') {
+                    document.getElementById('newCategoryModal').style.display = 'flex';
+                    selectElement.value = '';
+                }
+            }
+
+            function closeModal() {
+                document.getElementById('newCategoryModal').style.display = 'none';
+                document.getElementById('newCatName').value = '';
+                document.getElementById('newCatDesc').value = '';
+            }
+            
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+                return null;
+            }
+
+            function redirectToReturnUrl() {
+                const cookieUrl = getCookie('transaction_return_url');
+                const targetUrl = cookieUrl ? decodeURIComponent(cookieUrl) : '/dashboard';
+                window.location.href = targetUrl;
+            }
+            
+            function cancelTransaction() {
+                redirectToReturnUrl();
+            }
+
+            function submitNewCategory() {
+                const name = document.getElementById('newCatName').value;
+                const desc = document.getElementById('newCatDesc').value;
+                if (!name) {
+                    alert("Nazwa jest wymagana!");
+                    return;
+                }
+
+                fetch('/categories/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name, description: desc })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            closeModal();
+                            document.body.dispatchEvent(new Event("reload-categories"));
+                        } else {
+                            alert("Błąd: " + data.message);
+                        }
+                    })
+                    .catch(err => alert("Błąd połączenia"));
+            }
+
+            document.body.addEventListener('htmx:afterSwap', function (event) {
+                if (event.detail.target.id === 'form-response') {
+                    const response = event.detail.target.innerHTML;
+                    if (response.includes('success')) {
+                        setTimeout(() => {
+                            redirectToReturnUrl();
+                        }, 1000);
+                    }
+                }
+            });
+
+            const now = new Date();
+            const dateField = document.getElementById('transactionDate');
+            dateField.valueAsDate = now;
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('transactionTime').value = `${hours}:${minutes}`;
+        </script>
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if(toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('open');
+                });
+            }
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && 
+                    sidebar.classList.contains('open') && 
+                    !sidebar.contains(e.target) && 
+                    !toggleBtn.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        });
+    </script>
+    </div>
+</body>
+</html>

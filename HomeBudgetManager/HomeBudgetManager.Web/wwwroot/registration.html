@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Budget Manager</title>
+    <link rel="stylesheet" href="/css/registration.css">
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
+<body>
+
+
+    <div class="registration-card" id="auth-container">
+        <div class="registration-header">
+            <h1>Home Budget Manager</h1>
+            <p>Utwórz konto</p>
+        </div>
+
+        <form hx-post="/registration" hx-target="#result-area" hx-swap="innerHTML">
+            <div class="form-group">
+                <label for="username">Użytkownik</label>
+                <input id="username" name="username" type="text" placeholder="admin" class="form-input" />
+            </div>
+
+            <div class="form-group">
+                <label for="email">Adres email</label>
+                <input id="email" name="email" type="email" placeholder="Megawonsz67@gmail.com" class="form-input" />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Hasło</label>
+                <input id="password" name="password" type="password" placeholder="" class="form-input" />
+            </div>
+
+            <button type="submit" class="btn-register">
+                Zarejestruj się
+            </button>
+            <button hx-get="/login" hx-target="#auth-container" hx-swap="innerHTML" class="btn-loginPage">
+                Powrót do logowania
+            </button>
+        </form>
+
+        <div id="result-area"></div>
+    </div>
+
+</body>
+</html>

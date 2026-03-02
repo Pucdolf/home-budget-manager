@@ -1,0 +1,53 @@
+.report-controls {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 0.35rem;
+    border: 1px solid #e3e6f0;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.report-controls .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0;
+}
+
+.report-controls label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #5a5c69;
+    text-transform: uppercase;
+}
+
+.report-controls input[type="date"] {
+    padding: 0.5rem;
+    border: 1px solid #e3e6f0;
+    border-radius: 0.35rem;
+    color: #6e707e;
+}
+
+.btn-generate {
+    padding: 0.75rem 1.5rem;
+    background-color: #4e73df;
+    color: white;
+    border: none;
+    border-radius: 0.35rem;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05rem;
+}
+
+.btn-generate:hover {
+    background-color: #2e59d9;
+    transform: translateY(-1px);
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 0, 0, 0.1);
+}

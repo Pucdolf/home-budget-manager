@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Raporty - HomeBudgetManager</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="/css/raports.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+</head>
+<body>
+    <div class="layout">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <button id="sidebar-toggle" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span class="mobile-logo">Home Budget Manager</span>
+        </div>
+        <aside class="sidebar">
+            <p class="sidebar-title"><i class="fas fa-wallet"></i> Mój budżet</p>
+            <span class="user-name" style="display: block;">Zalogowano jako: {username}</span>
+            <button class="sidebar-link" onclick="window.location.href='/dashboard'"><i class="fas fa-fw fa-tachometer-alt"></i> &nbsp; Pulpit</button>
+            <button class="sidebar-link" onclick="window.location.href='/household'"><i class="fas fa-fw fa-home"></i> &nbsp; Domostwo</button>
+            <button class="sidebar-link" onclick="window.location.href='/calendar'"><i class="fas fa-fw fa-calendar-alt"></i> &nbsp; Kalendarz</button>
+            <button class="sidebar-link" onclick="window.location.href='/charts'"><i class="fas fa-fw fa-chart-pie"></i> &nbsp; Wykresy</button>
+            <button class="sidebar-link active" onclick="window.location.href='/reports'"><i class="fas fa-fw fa-file-alt"></i> &nbsp; Raporty</button>
+            <button class="sidebar-link" onclick="window.location.href='/new-transaction?returnUrl=' + encodeURIComponent(window.location.pathname)"><i class="fas fa-fw fa-exchange-alt"></i> &nbsp; Transakcje</button>
+            {admin_panel_button}
+            <form method="post" action="/logout" style="margin-top: auto; width: 100%;">
+                <button type="submit" class="btn-logout">Wyloguj</button>
+            </form>
+        </aside>
+
+        <main class="container">
+            <section class="card">
+                <h2>Generator Raportów PDF</h2>
+                <p class="card-desc">Wybierz zakres dat i wygeneruj szczegółowy raport PDF dla swojego domostwa.</p>
+
+                <form class="report-controls" method="post" action="/reports/generate">
+                    <div class="form-group" style="display: {household_display}; margin-bottom: 1rem;">
+                        <label>Zakres raportu:</label>
+                        <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem;">
+                            <label style="font-weight: normal; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="radio" name="reportScope" value="individual" checked> Tylko ja
+                            </label>
+                            <label style="font-weight: normal; display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="radio" name="reportScope" value="household"> Domostwo
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="startDate">Od:</label>
+                        <input type="date" id="startDate" name="startDate" value="{startDate}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">Do:</label>
+                        <input type="date" id="endDate" name="endDate" value="{endDate}" required>
+                    </div>
+                    <div class="form-group">
+                    <button type="submit" class="btn-generate">Pobierz Raport PDF</button>
+                    </div>
+                </form>
+            </section>
+            
+            <div class="ads-row">
+                <div class="ad-placeholder"><span>Miejsce na reklamę</span></div>
+                <div class="ad-placeholder"><span>Miejsce na reklamę</span></div>
+            </div>
+        </main>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if(toggleBtn) {
+                toggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('open');
+                });
+            }
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768 && 
+                    sidebar.classList.contains('open') && 
+                    !sidebar.contains(e.target) && 
+                    !toggleBtn.contains(e.target)) {
+                    sidebar.classList.remove('open');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
